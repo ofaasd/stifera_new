@@ -56,7 +56,7 @@ class Mahasiswa extends Model
 	protected $casts = [
 		'jk' => 'int',
 		'agama' => 'int',
-		'tgl_lahir' => 'datetime',
+		'tgl_lahir' => 'date',
 		'status' => 'int',
 		'kelas' => 'bool',
 		'angkatan' => 'int',

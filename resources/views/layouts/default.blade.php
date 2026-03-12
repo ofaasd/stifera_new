@@ -9,8 +9,9 @@
 @include('elements.meta', ['CurrentPage' => $CurrentPage])
 <link rel="shortcut icon" type="image/png" href="{{ config('dz.site_level.favicon') }}">
 
-@include('elements.page-css', ['CurrentPage' => $CurrentPage])
 
+@include('elements.page-css', ['CurrentPage' => $CurrentPage])
+@yield('local-css')
 </head>
 
 <body>

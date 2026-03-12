@@ -36,4 +36,7 @@ class Pegawai extends Model
 		'paswd',
 		'status'
 	];
+	public function biodata(){
+		return $this->hasOne(PegawaiBiodatum::class, 'id_pegawai', 'id');
+	}
 }

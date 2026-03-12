@@ -3,7 +3,7 @@
 
 return [
 	'site_level' => [
-		'site_title' => 'NexaDash Admin Dashboard Bootstrap 5 Template',
+		'site_title' => 'SIAKAD',
 		'favicon' => 'images/favicon.png',
 		'seo' => [
 			'page_title' => 'Dashboard',
@@ -739,19 +739,25 @@ return [
     		]					
 		],
 		'content' =>[
-			'title' => 'content',
+			'title' => 'SIAKAD STIFERA - Admin',
 			'front-menu' => true,
+			'mainwrapperclass' => 'wallet-open',
 			'css' => [
 				'vendor/bootstrap-select/dist/css/bootstrap-select.min.css',
+				'vendor/datatables/css/jquery.dataTables.min.css',
 			],
 			'js' => [
+				'vendor/chart.js/Chart.bundle.min.js',
+				'vendor/apexchart/apexchart.js',
 				'vendor/bootstrap-datepicker-master/js/bootstrap-datepicker.min.js',
 				'vendor/peity/jquery.peity.min.js',
+				'vendor/datatables/js/jquery.dataTables.min.js',
+				'js/plugins-init/datatables.init.js',
 				'js/dashboard/cms.js',
 				'js/custom.js',
 			],
 			'seo' => [
-    			'page_title' => 'Dashboard',
+    			'page_title' => 'SIAKAD STIFERA - Admin',
     			'meta' => [
     				['name' => 'keywords', 'content' => 'NexaDash is a modern admin dashboard template built with Bootstrap 5. Featuring a clean and responsive design, it provides a range of customizable components and tools to efficiently manage and oversee various administrative tasks.'],
     				['name' => 'author', 'content' => 'DexignZone'],

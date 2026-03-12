@@ -109,4 +109,9 @@ class PegawaiBiodatum extends Model
 		'kecamatan',
 		'kelurahan'
 	];
+	public function pegawai()
+    {
+        //relasi dengan table pegawai berdasarkan id_pegawai
+		return $this->belongsTo(Pegawai::class, 'id_pegawai', 'id');
+    }
 }

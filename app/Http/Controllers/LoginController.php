@@ -30,4 +30,18 @@ class LoginController extends Controller
             'email' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');
     }
+    public function logout(Request $request)
+    {
+        // 1. Keluarkan user dari autentikasi Laravel
+        Auth::logout();
+
+        // 2. Batalkan session yang sedang berjalan saat ini
+        $request->session()->invalidate();
+
+        // 3. Generate ulang token CSRF untuk keamanan form berikutnya
+        $request->session()->regenerateToken();
+
+        // 4. Arahkan kembali ke halaman login atau halaman depan
+        return redirect('/login')->with('status', 'Anda berhasil logout.');
+    }
 }
