@@ -13,12 +13,36 @@
 							</a>
 							<ul aria-expanded="false">
 								@foreach($menu->children as $child)
+									@php
+										$childName = strtolower(trim((string) ($child->nama_menu ?? '')));
+										$isPengaturanUjian = $childName === 'pengaturan ujian';
+										$childUrl = $isPengaturanUjian
+											? url('master/pengaturan-ujian')
+											: ($child->url != '#' ? url($child->url) : 'javascript:void(0);');
+									@endphp
 									<li>
-										<a href="{{ $child->url != '#' ? url($child->url) : 'javascript:void(0);' }}">
+										<a href="{{ $childUrl }}">
 											{{ $child->nama_menu }}
 										</a>
 									</li>
 								@endforeach
+								@php
+									$isAkademikMenu = strtolower(trim((string) $menu->nama_menu)) === 'akademik';
+									$hasPengaturanUjian = $menu->children->contains(function ($item) {
+										return trim((string) ($item->url ?? '')) === 'master/pengaturan-ujian';
+									});
+									$hasRombel = $menu->children->contains(function ($item) {
+										$url = trim(strtolower((string) ($item->url ?? '')));
+										$name = trim(strtolower((string) ($item->nama_menu ?? '')));
+
+										return $url === 'master/rombel' || $name === 'rombel';
+									});
+								@endphp
+								@if($isAkademikMenu && !$hasRombel)
+									<li>
+										<a href="{{ url('master/rombel') }}">Rombel</a>
+									</li>
+								@endif
 							</ul>
 						@else
 							{{-- Menu Tunggal (Tanpa Submenu) --}}

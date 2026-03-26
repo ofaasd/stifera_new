@@ -6,7 +6,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
  * Class Pegawai
@@ -20,10 +20,14 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @package App\Models
  */
-class Pegawai extends Model
+class Pegawai extends Authenticatable
 {
 	protected $table = 'pegawai';
 	public $timestamps = false;
+
+	protected $hidden = [
+		'paswd',
+	];
 
 	protected $casts = [
 		'status' => 'int'
@@ -38,5 +42,10 @@ class Pegawai extends Model
 	];
 	public function biodata(){
 		return $this->hasOne(PegawaiBiodatum::class, 'id_pegawai', 'id');
+	}
+
+	public function getAuthPasswordName()
+	{
+		return 'paswd';
 	}
 }

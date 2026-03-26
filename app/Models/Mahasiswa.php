@@ -101,4 +101,9 @@ class Mahasiswa extends Model
 		'log_date',
 		'tipe_mhs'
 	];
+
+	public function dosenWali()
+	{
+		return $this->belongsTo(PegawaiBiodatum::class, 'id_dsn_wali', 'id_pegawai');
+	}
 }

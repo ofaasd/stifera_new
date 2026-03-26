@@ -46,7 +46,7 @@
 									</div>
 								</div>
 								<div class="mb-4">
-									<a href="{{ url('page-forgot-password') }}" class="btn-link text-primary">Forgot
+									<a href="{{ route('pegawai.password.reset.form') }}" class="btn-link text-primary">Forgot
 										Password?</a>
 								</div>
 							</div>
