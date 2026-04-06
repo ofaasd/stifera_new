@@ -5,6 +5,8 @@ return [
 	'site_level' => [
 		'site_title' => 'SIAKAD',
 		'favicon' => 'images/favicon.png',
+		'logo' => 'images/logo/logo.png',
+		'logo_desc' => 'images/logo/logo_desc.png',
 		'seo' => [
 			'page_title' => 'Dashboard',
 			'meta' => [

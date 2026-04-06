@@ -26,6 +26,19 @@ use App\Http\Controllers\admin\PerwalianResetPasswordController;
 use App\Http\Controllers\admin\PengaturanUjianController;
 use App\Http\Controllers\admin\RombelController;
 use App\Http\Controllers\admin\PerwalianController;
+use App\Http\Controllers\admin\PmbSoalController;
+use App\Http\Controllers\admin\MasterRuangController;
+use App\Http\Controllers\admin\MasterWaktuController;
+use App\Http\Controllers\admin\MasterRumpunController;
+use App\Http\Controllers\admin\MasterFakultasController;
+use App\Http\Controllers\admin\MasterProgdiController;
+use App\Http\Controllers\admin\MasterTahunAjaranController;
+use App\Http\Controllers\admin\SettingUserController;
+use App\Http\Controllers\admin\PengumumanController;
+use App\Http\Controllers\admin\AgendaController;
+use App\Http\Controllers\admin\BeritaController;
+use App\Http\Controllers\admin\SlideController;
+use App\Http\Controllers\admin\MasukanController;
 
 Route::get('/', function () {
     if (Auth::guard('admin')->check()) {
@@ -168,14 +181,63 @@ Route::middleware('auth:admin')->group(function () {
     
     //Action Wilayah 
     Route::post('/wilayah/get_kota_kecamatan', [WilayahController::class, 'get_kota_kecamatan']);
+
+    // Alias menu pengumuman lama
+    Route::get('/artikel/post/1', [PengumumanController::class, 'index']);
+
+    // Agenda (kategori = 2)
+    Route::get('/artikel/post/2', [AgendaController::class, 'index'])->name('agenda.index');
+    Route::get('/artikel/post/2/create', [AgendaController::class, 'create'])->name('agenda.create');
+    Route::post('/artikel/post/2', [AgendaController::class, 'store'])->name('agenda.store');
+    Route::get('/artikel/post/2/{id}/edit', [AgendaController::class, 'edit'])->name('agenda.edit');
+    Route::put('/artikel/post/2/{id}', [AgendaController::class, 'update'])->name('agenda.update');
+    Route::delete('/artikel/post/2/{id}', [AgendaController::class, 'destroy'])->name('agenda.destroy');
+
+    // Masukan
+    Route::get('/master/masukan', [MasukanController::class, 'index'])->name('masukan.index');
+    Route::get('/master/masukan/create', [MasukanController::class, 'create'])->name('masukan.create');
+    Route::post('/master/masukan', [MasukanController::class, 'store'])->name('masukan.store');
+    Route::get('/master/masukan/{id}/edit', [MasukanController::class, 'edit'])->name('masukan.edit');
+    Route::put('/master/masukan/{id}', [MasukanController::class, 'update'])->name('masukan.update');
+    Route::delete('/master/masukan/{id}', [MasukanController::class, 'destroy'])->name('masukan.destroy');
+
+    // Slideshow
+    Route::get('/slide', [SlideController::class, 'index'])->name('slide.index');
+    Route::get('/slide/create', [SlideController::class, 'create'])->name('slide.create');
+    Route::post('/slide', [SlideController::class, 'store'])->name('slide.store');
+    Route::get('/slide/{id}/edit', [SlideController::class, 'edit'])->name('slide.edit');
+    Route::put('/slide/{id}', [SlideController::class, 'update'])->name('slide.update');
+    Route::delete('/slide/{id}', [SlideController::class, 'destroy'])->name('slide.destroy');
+
+    // Berita (kategori = 3)
+    Route::get('/artikel/post/3', [BeritaController::class, 'index'])->name('berita.index');
+    Route::get('/artikel/post/3/create', [BeritaController::class, 'create'])->name('berita.create');
+    Route::post('/artikel/post/3', [BeritaController::class, 'store'])->name('berita.store');
+    Route::get('/artikel/post/3/{id}/edit', [BeritaController::class, 'edit'])->name('berita.edit');
+    Route::put('/artikel/post/3/{id}', [BeritaController::class, 'update'])->name('berita.update');
+    Route::delete('/artikel/post/3/{id}', [BeritaController::class, 'destroy'])->name('berita.destroy');
+
+    // Setting User
+    Route::get('/SettingUser/{id}/password', [SettingUserController::class, 'editPassword']);
+    Route::put('/SettingUser/{id}/password', [SettingUserController::class, 'updatePassword']);
+
     //resources
     Route::resource('pegawai', PegawaiController::class);
     Route::resource('mahasiswa', MahasiswaController::class);
     Route::resource('pmb/gelombang', PmbGelombangController::class);
+    Route::resource('pmb/soal', PmbSoalController::class)->except(['show']);
     Route::resource('pmb', PmbController::class);
     Route::resource('master/matakuliah', MatakuliahController::class);
     Route::resource('master/kurikulum', KurikulumController::class);
     Route::resource('master/rombel', RombelController::class)->except(['show']);
+    Route::resource('master/ruang', MasterRuangController::class)->except(['show']);
+    Route::resource('master/waktu', MasterWaktuController::class)->except(['show']);
+    Route::resource('master/rumpun', MasterRumpunController::class)->except(['show']);
+    Route::resource('master/fakultas', MasterFakultasController::class)->except(['show']);
+    Route::resource('master/progdi', MasterProgdiController::class)->except(['show']);
+    Route::resource('master/tahun', MasterTahunAjaranController::class)->except(['show']);
+    Route::resource('SettingUser', SettingUserController::class)->except(['show']);
+    Route::resource('pengumuman', PengumumanController::class)->except(['show']);
     Route::resource('master/jadwal/rombel', RombelController::class)
         ->except(['show'])
         ->names('jadwal.rombel');

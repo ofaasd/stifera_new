@@ -8,6 +8,8 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class TblSoalPmb
@@ -37,4 +39,14 @@ class TblSoalPmb extends Model
 		'by_excel',
 		'created_by'
 	];
+
+	public function pilihanSoal(): HasMany
+	{
+		return $this->hasMany(TblPilihanSoal::class, 'id_soal')->orderBy('id');
+	}
+
+	public function kunciJawaban(): HasOne
+	{
+		return $this->hasOne(TblKunci::class, 'id_soal');
+	}
 }

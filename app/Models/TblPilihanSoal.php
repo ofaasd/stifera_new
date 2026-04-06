@@ -7,6 +7,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class TblPilihanSoal
@@ -32,4 +33,9 @@ class TblPilihanSoal extends Model
 		'huruf',
 		'pilihan'
 	];
+
+	public function soal(): BelongsTo
+	{
+		return $this->belongsTo(TblSoalPmb::class, 'id_soal');
+	}
 }
