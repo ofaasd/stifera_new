@@ -1,7 +1,9 @@
 		<div class="nav-header">
 			<a href="{{ url('index') }}" class="brand-logo">
 				<img class="logo-abbr" src="{{ asset(config('dz.site_level.logo')) }}" alt="" width="30" height="30" align="left">
-				<img class="brand-title" src="{{ asset(config('dz.site_level.logo_desc')) }}" alt="" align="left">
+				<div class="brand-title" style="padding-top:5px;">
+					<P class="text-white" style="font-size:9pt;">ST. FARMASI NUSAPUTERA</P>
+				</div>
 				<!-- <svg class="logo-abbr" width="30" height="33" viewBox="0 0 30 33" fill="none"
 					xmlns="http://www.w3.org/2000/svg">
 					<path fill-rule="evenodd" clip-rule="evenodd"
