@@ -33,6 +33,7 @@ use App\Http\Controllers\admin\MasterRumpunController;
 use App\Http\Controllers\admin\MasterFakultasController;
 use App\Http\Controllers\admin\MasterProgdiController;
 use App\Http\Controllers\admin\MasterTahunAjaranController;
+use App\Http\Controllers\admin\KeuanganMahasiswaController;
 use App\Http\Controllers\admin\SettingUserController;
 use App\Http\Controllers\admin\PengumumanController;
 use App\Http\Controllers\admin\AgendaController;
@@ -112,6 +113,14 @@ Route::middleware('auth:admin')->group(function () {
     //Action KHS Tambahan
     Route::get('/master/khs/list_mhs', [KhsController::class, 'index']);
     Route::get('/master/khs/khs_detail/{id}', [KhsController::class, 'show']);
+
+    // Keuangan Mahasiswa
+    Route::get('/master/keuangan', [KeuanganMahasiswaController::class, 'index']);
+    Route::get('/master/keuangan_mhs', [KeuanganMahasiswaController::class, 'index']);
+    Route::post('/master/keuangan/deteksi', [KeuanganMahasiswaController::class, 'detectCurrentYear']);
+    Route::post('/master/keuangan/generate', [KeuanganMahasiswaController::class, 'generateData']);
+    Route::post('/master/keuangan/reset', [KeuanganMahasiswaController::class, 'resetStatus']);
+    Route::post('/master/keuangan/status', [KeuanganMahasiswaController::class, 'updateStatus']);
 
     //Action KRS Management
     Route::get('/master/krs', [KrsManagementController::class, 'index']);
