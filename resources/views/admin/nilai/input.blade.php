@@ -72,6 +72,13 @@
                                         <a href="{{ url('master/nilai/template') }}" class="btn btn-info">Unduh Format</a>
                                     </form>
 
+                                    @if(!$persentase)
+                                        <div class="alert alert-warning">
+                                            <i class="fa fa-exclamation-triangle me-1"></i>
+                                            Presentase nilai di bawah masih menggunakan nilai default dan belum tersimpan di database. Silakan simpan terlebih dahulu jika ingin memakai presentase ini.
+                                        </div>
+                                    @endif
+
                                     <form action="{{ url('master/nilai/save-persentase') }}" method="POST" class="border-top pt-3" style="max-width: 520px;">
                                         @csrf
                                         <input type="hidden" name="id_jadwal" value="{{ $jadwal->id }}">

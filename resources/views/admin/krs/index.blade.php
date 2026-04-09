@@ -97,6 +97,12 @@
                                         <a href="{{ url('master/krs/download-log/1') }}" class="btn btn-success rounded-pill px-4">Download Log KRS</a>
                                     </div>
 
+                                    @if($krsListReguler->isEmpty())
+                                        <div class="alert alert-warning">
+                                            Belum ada KRS berjalan Reguler.
+                                        </div>
+                                    @endif
+
                                     <div class="table-responsive">
                                         <table id="table-krs-reguler" class="table table-bordered table-hover">
                                             <thead>
@@ -118,7 +124,7 @@
                                                         $taReguler = $tahunReguler->awal . ' - ' . $tahunReguler->akhir . ' (' . $jenisReguler . ')';
                                                     }
                                                 @endphp
-                                                @forelse($krsListReguler as $idx => $row)
+                                                @foreach($krsListReguler as $idx => $row)
                                                     <tr>
                                                         <td>{{ $idx + 1 }}</td>
                                                         <td>{{ $taReguler }}</td>
@@ -134,9 +140,7 @@
                                                             @endif
                                                         </td>
                                                     </tr>
-                                                @empty
-                                                    <tr><td colspan="7" class="text-center">Belum ada KRS berjalan Reguler</td></tr>
-                                                @endforelse
+                                                @endforeach
                                             </tbody>
                                         </table>
                                     </div>
@@ -177,6 +181,12 @@
                                         <a href="{{ url('master/krs/download-log/2') }}" class="btn btn-success rounded-pill px-4">Download Log KRS</a>
                                     </div>
 
+                                    @if($krsListRpl->isEmpty())
+                                        <div class="alert alert-warning">
+                                            Belum ada KRS berjalan RPL.
+                                        </div>
+                                    @endif
+
                                     <div class="table-responsive">
                                         <table id="table-krs-rpl" class="table table-bordered table-hover">
                                             <thead>
@@ -198,7 +208,7 @@
                                                         $taRpl = $tahunRpl->awal . ' - ' . $tahunRpl->akhir . ' (' . $jenisRpl . ')';
                                                     }
                                                 @endphp
-                                                @forelse($krsListRpl as $idx => $row)
+                                                @foreach($krsListRpl as $idx => $row)
                                                     <tr>
                                                         <td>{{ $idx + 1 }}</td>
                                                         <td>{{ $taRpl }}</td>
@@ -214,9 +224,7 @@
                                                             @endif
                                                         </td>
                                                     </tr>
-                                                @empty
-                                                    <tr><td colspan="7" class="text-center">Belum ada KRS berjalan RPL</td></tr>
-                                                @endforelse
+                                                @endforeach
                                             </tbody>
                                         </table>
                                     </div>
@@ -235,17 +243,59 @@
 @section('local-js')
 <script>
     $(document).ready(function () {
-        const dtReguler = $('#table-krs-reguler').DataTable({ responsive: true, pageLength: 10 });
-        const dtRpl = $('#table-krs-rpl').DataTable({ responsive: true, pageLength: 10 });
+        function initKrsTable(selector) {
+            const $table = $(selector);
+
+            if (!$table.length || typeof $.fn.DataTable !== 'function') {
+                return null;
+            }
+
+            if ($.fn.DataTable.isDataTable(selector)) {
+                return $table.DataTable();
+            }
+
+            return $table.DataTable({
+                responsive: true,
+                pageLength: 10,
+                lengthChange: true,
+                searching: true,
+                info: true,
+                paging: true,
+                autoWidth: false,
+                order: [[2, 'asc']],
+                columnDefs: [
+                    { orderable: false, targets: [0, 5, 6] }
+                ],
+                language: {
+                    search: 'Cari:',
+                    lengthMenu: 'Tampilkan _MENU_ data',
+                    info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ data',
+                    infoEmpty: 'Tidak ada data',
+                    zeroRecords: 'Data tidak ditemukan',
+                    paginate: {
+                        next: 'Berikutnya',
+                        previous: 'Sebelumnya'
+                    }
+                }
+            });
+        }
+
+        const dtReguler = initKrsTable('#table-krs-reguler');
+        const dtRpl = initKrsTable('#table-krs-rpl');
 
         $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function () {
-            dtReguler.columns.adjust().draw(false);
-            dtRpl.columns.adjust().draw(false);
+            if (dtReguler) {
+                dtReguler.columns.adjust().draw(false);
+            }
+
+            if (dtRpl) {
+                dtRpl.columns.adjust().draw(false);
+            }
         });
 
         const activeTab = @json($activeTab ?? null);
         if (activeTab) {
-            const tabButton = document.querySelector(utton[data-bs-target="#${activeTab}"]);
+            const tabButton = document.querySelector(`button[data-bs-target="#${activeTab}"]`);
             if (tabButton) {
                 const tab = new bootstrap.Tab(tabButton);
                 tab.show();
