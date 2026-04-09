@@ -63,7 +63,7 @@ class NilaiController extends Controller
             )
             ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
             ->leftJoin('master_tahun_ajaran as mta', 'mta.id', '=', 'mjt.id_tahun')
-            ->leftJoin('master_krs as mk', function ($join) {
+            ->leftJoin('master_krs_temp as mk', function ($join) {
                 $join->on('mk.id_jadwal', '=', 'mjt.id')
                      ->on('mk.id_tahun', '=', 'mjt.id_tahun');
             })
@@ -112,8 +112,8 @@ class NilaiController extends Controller
             ->where('id_jadwal', $id_jadwal)
             ->first();
 
-        // Ambil list mahasiswa dari master_krs + gabung dengan master_nilai yang sudah ada
-        $mahasiswa = DB::table('master_krs as mk')
+        // Ambil list mahasiswa dari master_krs_temp + gabung dengan master_nilai yang sudah ada
+        $mahasiswa = DB::table('master_krs_temp as mk')
             ->select(
                 'mk.nim',
                 'mk.id_jadwal',
@@ -367,7 +367,7 @@ class NilaiController extends Controller
                 continue;
             }
 
-            $exists = DB::table('master_krs')
+            $exists = DB::table('master_krs_temp')
                 ->where('id_jadwal', $idJadwal)
                 ->where('id_tahun', $idTahun)
                 ->where('nim', $nim)
@@ -433,7 +433,7 @@ class NilaiController extends Controller
 
     private function ensureNilaiRows(int $idJadwal, int $idTahun, $idDosen): void
     {
-        $krsRows = DB::table('master_krs')
+        $krsRows = DB::table('master_krs_temp')
             ->where('id_jadwal', $idJadwal)
             ->where('id_tahun', $idTahun)
             ->select('nim')

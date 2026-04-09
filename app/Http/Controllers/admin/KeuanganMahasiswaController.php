@@ -18,23 +18,29 @@ class KeuanganMahasiswaController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        $tahunAktif = MasterTahunAjaran::where('is_aktif', 1)
-            ->orderByDesc('id')
-            ->first();
-
-        $selectedTahunId = (int) $request->query('id_tahun_ajaran', $tahunAktif?->id ?? ($tahunAjaranList->first()->id ?? 0));
+        $selectedTahunId = (int) $request->query('id_tahun_ajaran', $tahunAjaranList->first()->id ?? 0);
         $selectedProdiId = (int) $request->query('id_program_studi', 0);
         $selectedAngkatan = (int) $request->query('angkatan', 0);
+
+        // Get the selected tahun ajaran to know its tipe_mhs
+        $selectedTahun = $tahunAjaranList->firstWhere('id', $selectedTahunId);
+        $selectedTipeMhs = $selectedTahun ? (int) $selectedTahun->tipe_mhs : 0;
 
         $programStudiList = ProgramStudi::query()
             ->orderBy('nama_jurusan')
             ->get(['id', 'nama_jurusan']);
 
-        $angkatanList = Mahasiswa::query()
+        // Only show angkatan of mahasiswa matching the selected tahun ajaran's tipe_mhs
+        $angkatanQuery = Mahasiswa::query()
             ->whereNotNull('angkatan')
             ->distinct()
-            ->orderByDesc('angkatan')
-            ->pluck('angkatan');
+            ->orderByDesc('angkatan');
+
+        if ($selectedTipeMhs > 0) {
+            $angkatanQuery->where('tipe_mhs', $selectedTipeMhs);
+        }
+
+        $angkatanList = $angkatanQuery->pluck('angkatan');
 
         $hasDataForSelectedYear = MasterKeuanganMh::where('id_tahun_ajaran', $selectedTahunId)->exists();
 
@@ -53,6 +59,11 @@ class KeuanganMahasiswaController extends Controller
                 'master_keuangan_mhs.uas',
             ])
             ->orderBy('mahasiswa.nim');
+
+        // Filter by tipe_mhs matching the selected tahun ajaran
+        if ($selectedTipeMhs > 0) {
+            $mahasiswaList->where('mahasiswa.tipe_mhs', $selectedTipeMhs);
+        }
 
         if ($selectedProdiId > 0) {
             $mahasiswaList->where('mahasiswa.id_program_studi', $selectedProdiId);
@@ -73,7 +84,7 @@ class KeuanganMahasiswaController extends Controller
             'CurrentPage' => 'content',
             'tahunAjaranList' => $tahunAjaranList,
             'selectedTahunId' => $selectedTahunId,
-            'tahunAktif' => $tahunAktif,
+            'selectedTahun' => $selectedTahun,
             'programStudiList' => $programStudiList,
             'selectedProdiId' => $selectedProdiId,
             'angkatanList' => $angkatanList,
@@ -134,10 +145,14 @@ class KeuanganMahasiswaController extends Controller
 
         $idTahunAjaran = (int) $validated['id_tahun_ajaran'];
 
+        $tahunAjaran = MasterTahunAjaran::find($idTahunAjaran);
+        $tipeMhs = $tahunAjaran ? (int) $tahunAjaran->tipe_mhs : null;
+
         DB::table('master_keuangan_mhs')->insertUsing(
             ['id_mahasiswa', 'id_tahun_ajaran', 'krs', 'khs', 'uts', 'uas'],
             DB::table('mahasiswa as m')
                 ->selectRaw('m.id as id_mahasiswa, ? as id_tahun_ajaran, 0 as krs, 0 as khs, 0 as uts, 0 as uas', [$idTahunAjaran])
+                ->when($tipeMhs, fn ($q) => $q->where('m.tipe_mhs', $tipeMhs))
                 ->whereNotExists(function ($query) use ($idTahunAjaran) {
                     $query->select(DB::raw(1))
                         ->from('master_keuangan_mhs as km')
@@ -153,25 +168,31 @@ class KeuanganMahasiswaController extends Controller
 
     public function detectCurrentYear()
     {
-        $tahunAktif = MasterTahunAjaran::where('is_aktif', 1)
+        $tahunAktifList = MasterTahunAjaran::where('is_aktif', 1)
             ->orderByDesc('id')
-            ->first();
+            ->get();
 
-        if (!$tahunAktif) {
+        if ($tahunAktifList->isEmpty()) {
             return redirect()
                 ->to(url('master/keuangan'))
                 ->with('error', 'Tahun ajaran aktif tidak ditemukan.');
         }
 
-        $totalMahasiswa = Mahasiswa::count();
-        $totalDataKeuangan = MasterKeuanganMh::where('id_tahun_ajaran', $tahunAktif->id)
-            ->distinct('id_mahasiswa')
-            ->count('id_mahasiswa');
-        $belumTersedia = max(0, $totalMahasiswa - $totalDataKeuangan);
+        $messages = [];
+        foreach ($tahunAktifList as $tahunAktif) {
+            $tipeMhsLabel = $tahunAktif->tipe_mhs == 1 ? 'Reguler' : 'RPL';
+            $totalMahasiswa = Mahasiswa::where('tipe_mhs', $tahunAktif->tipe_mhs)->count();
+            $totalDataKeuangan = MasterKeuanganMh::where('id_tahun_ajaran', $tahunAktif->id)
+                ->distinct('id_mahasiswa')
+                ->count('id_mahasiswa');
+            $belumTersedia = max(0, $totalMahasiswa - $totalDataKeuangan);
+            $messages[] = '[' . $tipeMhsLabel . '] ' . $tahunAktif->awal . '/' . $tahunAktif->akhir
+                . ': Tersedia ' . $totalDataKeuangan . ' dari ' . $totalMahasiswa . ' mhs, Belum: ' . $belumTersedia;
+        }
 
         return redirect()
-            ->to(url('master/keuangan?id_tahun_ajaran=' . $tahunAktif->id))
-            ->with('status', 'Deteksi selesai. Tahun ajaran aktif: ' . $tahunAktif->awal . '/' . $tahunAktif->akhir . '. Data tersedia: ' . $totalDataKeuangan . ' dari ' . $totalMahasiswa . ' mahasiswa. Belum tersedia: ' . $belumTersedia . '.');
+            ->to(url('master/keuangan?id_tahun_ajaran=' . $tahunAktifList->first()->id))
+            ->with('status', 'Deteksi selesai. ' . implode(' | ', $messages) . '.');
     }
 
     public function resetStatus(Request $request)
@@ -182,7 +203,10 @@ class KeuanganMahasiswaController extends Controller
 
         $idTahunAjaran = (int) $validated['id_tahun_ajaran'];
 
-        DB::transaction(function () use ($idTahunAjaran) {
+        $tahunAjaran = MasterTahunAjaran::find($idTahunAjaran);
+        $tipeMhs = $tahunAjaran ? (int) $tahunAjaran->tipe_mhs : null;
+
+        DB::transaction(function () use ($idTahunAjaran, $tipeMhs) {
             MasterKeuanganMh::where('id_tahun_ajaran', $idTahunAjaran)
                 ->update([
                     'krs' => 1,
@@ -195,6 +219,7 @@ class KeuanganMahasiswaController extends Controller
                 ['id_mahasiswa', 'id_tahun_ajaran', 'krs', 'khs', 'uts', 'uas'],
                 DB::table('mahasiswa as m')
                     ->selectRaw('m.id as id_mahasiswa, ? as id_tahun_ajaran, 1 as krs, 0 as khs, 1 as uts, 1 as uas', [$idTahunAjaran])
+                    ->when($tipeMhs, fn ($q) => $q->where('m.tipe_mhs', $tipeMhs))
                     ->whereNotExists(function ($query) use ($idTahunAjaran) {
                         $query->select(DB::raw(1))
                             ->from('master_keuangan_mhs as km')
