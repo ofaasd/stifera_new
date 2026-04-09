@@ -43,10 +43,21 @@
 
 										return $url === 'master/rombel' || $name === 'rombel';
 									});
+									$hasKuesioner = $menu->children->contains(function ($item) {
+										$url = trim(strtolower((string) ($item->url ?? '')));
+										$name = trim(strtolower((string) ($item->nama_menu ?? '')));
+
+										return $url === 'akademik/kuesioner' || $name === 'kuesioner';
+									});
 								@endphp
 								@if($isAkademikMenu && !$hasRombel)
 									<li>
 										<a href="{{ url('master/rombel') }}">Rombel</a>
+									</li>
+								@endif
+								@if($isAkademikMenu && !$hasKuesioner)
+									<li>
+										<a href="{{ url('akademik/kuesioner') }}">Kuesioner</a>
 									</li>
 								@endif
 								@if($isPmbMenu && !$hasSoalPmb)

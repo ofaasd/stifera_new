@@ -8,7 +8,6 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class TblNilaiKuesioner
@@ -22,13 +21,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $nilai
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property string|null $deleted_at
  *
  * @package App\Models
  */
 class TblNilaiKuesioner extends Model
 {
-	use SoftDeletes;
 	protected $table = 'tbl_nilai_kuesioner';
 
 	protected $casts = [

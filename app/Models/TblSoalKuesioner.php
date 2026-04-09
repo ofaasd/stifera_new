@@ -8,7 +8,6 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class TblSoalKuesioner
@@ -20,13 +19,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $category
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property string|null $deleted_at
- *
  * @package App\Models
  */
 class TblSoalKuesioner extends Model
 {
-	use SoftDeletes;
+	public const CATEGORY_OPTIONS = [
+		1 => 'Materi Perkuliahan',
+		2 => 'Kompetensi Professional',
+		3 => 'Interaksi Dosen dan Mahasiswa',
+		4 => 'Kepuasan Sarana Prasarana',
+		5 => 'Kepuasan Pelayanan Tenaga Kependidikan',
+		6 => 'Kepuasan Pelayanan Pengelola (STIFERA)',
+	];
+
 	protected $table = 'tbl_soal_kuesioner';
 
 	protected $casts = [
@@ -40,4 +45,14 @@ class TblSoalKuesioner extends Model
 		'soal',
 		'category'
 	];
+
+	public static function categoryOptions(): array
+	{
+		return self::CATEGORY_OPTIONS;
+	}
+
+	public static function categoryLabel(?int $category): string
+	{
+		return self::CATEGORY_OPTIONS[(int) $category] ?? '-';
+	}
 }

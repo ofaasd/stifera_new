@@ -40,6 +40,7 @@ use App\Http\Controllers\admin\AgendaController;
 use App\Http\Controllers\admin\BeritaController;
 use App\Http\Controllers\admin\SlideController;
 use App\Http\Controllers\admin\MasukanController;
+use App\Http\Controllers\admin\KuesionerController;
 
 Route::get('/', function () {
     if (Auth::guard('admin')->check()) {
@@ -130,6 +131,18 @@ Route::middleware('auth:admin')->group(function () {
     Route::put('/master/krs/edit-krs/{id}', [KrsManagementController::class, 'updateKrs']);
     Route::delete('/master/krs/hapus-krs/{id}', [KrsManagementController::class, 'hapusKrs']);
     Route::post('/master/krs/update-transkrip/{tipe_mhs}', [KrsManagementController::class, 'updateTranskrip']);
+
+    // Kuesioner
+    Route::get('/akademik/kuesioner', [KuesionerController::class, 'index']);
+    Route::get('/akademik/kuesioner/soal/{id_tahun}', [KuesionerController::class, 'soal']);
+    Route::post('/akademik/kuesioner/soal/{id_tahun}', [KuesionerController::class, 'storeSoal']);
+    Route::post('/akademik/kuesioner/soal/{id_tahun}/duplicate', [KuesionerController::class, 'duplicateSoalDariSemesterSebelumnya']);
+    Route::put('/akademik/kuesioner/soal/{id_tahun}/{id}', [KuesionerController::class, 'updateSoal']);
+    Route::delete('/akademik/kuesioner/soal/{id_tahun}/{id}', [KuesionerController::class, 'destroySoal']);
+    Route::get('/akademik/kuesioner/jawaban/{id_tahun}', [KuesionerController::class, 'jawaban']);
+    Route::get('/akademik/kuesioner/rekap/{id_tahun}', [KuesionerController::class, 'rekap']);
+    Route::get('/akademik/kuesioner/rekap/{id_tahun}/export-excel', [KuesionerController::class, 'exportRekapExcel']);
+    Route::get('/akademik/kuesioner/rekap/{id_tahun}/export-pdf', [KuesionerController::class, 'exportRekapPdf']);
 
     // Pengaturan Ujian
     Route::get('/master/pengaturan-ujian', [PengaturanUjianController::class, 'index']);
