@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminLoginController extends Controller
 {
-    public function showLoginForm()
+    public function showLoginPortal()
     {
         if (Auth::guard('admin')->check()) {
             return redirect()->route('dashboard');
@@ -16,6 +16,16 @@ class AdminLoginController extends Controller
         $CurrentPage = 'page-login';
 
         return view('page-login', compact('CurrentPage'));
+    }
+    public function showLoginForm()
+    {
+        if (Auth::guard('admin')->check()) {
+            return redirect()->route('dashboard');
+        }
+
+        $CurrentPage = 'page-login';
+
+        return view('auth.admin-login', compact('CurrentPage'));
     }
 
     public function login(Request $request)

@@ -502,6 +502,64 @@ class PegawaiController extends Controller
         //
     }
 
+    /**
+     * Upload foto pegawai
+     */
+    public function uploadPhoto(Request $request)
+    {
+        try {
+            $request->validate([
+                'foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+                'id_pegawai' => 'required|integer'
+            ]);
+
+            $id_pegawai = $request->input('id_pegawai');
+            
+            // Get pegawai data
+            $pegawai = DB::table('pegawai')->where('id', $id_pegawai)->first();
+            if (!$pegawai) {
+                return response()->json(['status' => 'error', 'message' => 'Pegawai tidak ditemukan'], 404);
+            }
+
+            // Generate nama file berdasarkan NPP
+            $npp = $pegawai->npp;
+            $foto_name = 'pegawai_' . str_replace(' ', '_', $npp) . '_' . time() . '.jpg';
+            
+            // Hapus foto lama jika ada
+            $old_foto = DB::table('pegawai_biodata')
+                ->where('id_pegawai', $id_pegawai)
+                ->value('foto');
+            
+            if ($old_foto && File::exists(public_path('assets/foto_pegawai/' . $old_foto))) {
+                File::delete(public_path('assets/foto_pegawai/' . $old_foto));
+            }
+
+            // Upload foto baru
+            if ($request->hasFile('foto')) {
+                $request->file('foto')->move(public_path('assets/foto_pegawai'), $foto_name);
+                
+                // Update database
+                DB::table('pegawai_biodata')
+                    ->where('id_pegawai', $id_pegawai)
+                    ->update(['foto' => $foto_name]);
+                
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Foto berhasil diupload',
+                    'foto' => $foto_name
+                ]);
+            }
+
+            return response()->json(['status' => 'error', 'message' => 'File tidak ditemukan'], 400);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     //action tambahan 
     public function get_status(Request $request){
         $id = $request->input('id');

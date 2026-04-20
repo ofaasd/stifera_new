@@ -2,8 +2,31 @@
 			<div class="deznav-scroll grid-menu">
 				<ul class="metismenu" id="menu">
 				@foreach($menus as $menu)
+					@php
+						$menuName = strtolower(trim((string) ($menu->nama_menu ?? '')));
+						$isKepegawaianMenu = $menuName === 'kepegawaian';
+						$hasJamKerjaDosen = $menu->children->contains(function ($item) {
+							$url = trim(strtolower((string) ($item->url ?? '')));
+							$name = trim(strtolower((string) ($item->nama_menu ?? '')));
+
+							return $url === 'simpeg/absensi/jam_kerja_master' || $name === 'jam kerja dosen';
+						});
+						$hasSuratIzin = $menu->children->contains(function ($item) {
+							$url = trim(strtolower((string) ($item->url ?? '')));
+							$name = trim(strtolower((string) ($item->nama_menu ?? '')));
+
+							return $url === 'simpeg/suratizin2' || $name === 'surat izin';
+						});
+						$hasMeninggalkanPekerjaan = $menu->children->contains(function ($item) {
+							$url = trim(strtolower((string) ($item->url ?? '')));
+							$name = trim(strtolower((string) ($item->nama_menu ?? '')));
+
+							return $url === 'simpeg/meninggalkanpekerjaan' || $name === 'izin meninggalkan pekerjaan';
+						});
+						$hasSubmenu = $menu->children->count() > 0 || $isKepegawaianMenu;
+					@endphp
 					<li>
-						@if($menu->children->count() > 0)
+						@if($hasSubmenu)
 							{{-- Menu dengan Submenu --}}
 							<a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
 								<div class="menu-icon">
@@ -27,11 +50,11 @@
 									</li>
 								@endforeach
 								@php
-									$isAkademikMenu = strtolower(trim((string) $menu->nama_menu)) === 'akademik';
+									$isAkademikMenu = $menuName === 'akademik';
 									$hasPengaturanUjian = $menu->children->contains(function ($item) {
 										return trim((string) ($item->url ?? '')) === 'master/pengaturan-ujian';
 									});
-									$isPmbMenu = strtolower(trim((string) $menu->nama_menu)) === 'pmb';
+									$isPmbMenu = $menuName === 'pmb';
 									$hasSoalPmb = $menu->children->contains(function ($item) {
 										$url = trim(strtolower((string) ($item->url ?? '')));
 
@@ -65,6 +88,21 @@
 										<a href="{{ url('pmb/soal') }}">Soal PMB</a>
 									</li>
 								@endif
+								@if($isKepegawaianMenu && !$hasJamKerjaDosen)
+									<li>
+										<a href="{{ url('simpeg/absensi/jam_kerja_master') }}">Jam Kerja Dosen</a>
+									</li>
+								@endif
+								@if($isKepegawaianMenu && !$hasSuratIzin)
+									<li>
+										<a href="{{ url('simpeg/SuratIzin2') }}">Surat Izin</a>
+									</li>
+								@endif
+								@if($isKepegawaianMenu && !$hasMeninggalkanPekerjaan)
+									<li>
+										<a href="{{ url('simpeg/MeninggalkanPekerjaan') }}">Izin Meninggalkan Pekerjaan</a>
+									</li>
+								@endif
 							</ul>
 						@else
 							{{-- Menu Tunggal (Tanpa Submenu) --}}
@@ -77,6 +115,34 @@
 						@endif
 					</li>
 				@endforeach
+				
+				{{-- Data Support Menu --}}
+				<li>
+					<a href="/data" aria-expanded="false">
+						<div class="menu-icon">
+							<i class="fa-solid fa-download"></i>
+						</div>
+						<span class="nav-text">Data Support</span>
+					</a>
+				</li>
+
+				{{-- Impersonasi Mahasiswa --}}
+				<li>
+					<a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
+						<div class="menu-icon">
+							<i class="fa fa-user-secret"></i>
+						</div>
+						<span class="nav-text">Impersonasi</span>
+					</a>
+					<ul aria-expanded="false">
+						<li>
+							<a href="{{ url('mahasiswa') }}">Login sebagai Mahasiswa</a>
+						</li>
+						<li>
+							<a href="{{ route('admin.impersonasi.log') }}">Log Impersonasi</a>
+						</li>
+					</ul>
+				</li>
 			</ul>
 				
 				<div class="mode-btn d-flex align-items-center justify-content-between">

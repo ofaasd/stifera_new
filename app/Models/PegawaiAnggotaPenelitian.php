@@ -1,23 +1,9 @@
 <?php
 
-/**
- * Created by Reliese Model.
- */
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Class PegawaiAnggotaPenelitian
- * 
- * @property int $id
- * @property int $jenis_anggota
- * @property string $id_anggota
- * @property int $id_penelitian
- *
- * @package App\Models
- */
 class PegawaiAnggotaPenelitian extends Model
 {
 	protected $table = 'pegawai_anggota_penelitian';
@@ -25,7 +11,8 @@ class PegawaiAnggotaPenelitian extends Model
 
 	protected $casts = [
 		'jenis_anggota' => 'int',
-		'id_penelitian' => 'int'
+		'id_penelitian' => 'int',
+		'id_anggota' => 'int'
 	];
 
 	protected $fillable = [
@@ -33,4 +20,19 @@ class PegawaiAnggotaPenelitian extends Model
 		'id_anggota',
 		'id_penelitian'
 	];
+
+	public function penelitian()
+	{
+		return $this->belongsTo(PegawaiPenelitian::class, 'id_penelitian', 'id');
+	}
+
+	public function pegawai()
+	{
+		return $this->belongsTo(Pegawai::class, 'id_anggota', 'id');
+	}
+
+	public function mahasiswa()
+	{
+		return $this->belongsTo(Mahasiswa::class, 'id_anggota', 'id');
+	}
 }

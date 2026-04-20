@@ -46,4 +46,8 @@ class PegawaiJabatanFungsional extends Model
 		'status',
 		'dokumen'
 	];
+	public function jabatanFungsional()
+	{
+		return $this->belongsTo(JabatanFungsional::class, 'jabatan_fungsional_sekarang', 'id');
+	}
 }

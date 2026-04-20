@@ -42,7 +42,20 @@
                                                         <td>{{ $row->nama }}</td>
                                                         <td>{{ $row->email }}</td>
                                                         <td>{{ $status[$row->status] ?? '' }}</td>
-                                                        <td><a href="{{url('mahasiswa/'.$row->id.'/edit')}}" title="Edit Mahasiswa" class="btn btn-primary"><i class="fe fe-pencil"></i></a>  <a href="{{url('mahasiswa/delete/'.$row->id)}}" onclick="return confirm('Yakin Delete Data Mahasiswa?')" title="Delete Data Mahasiswa" class="btn btn-danger"><i class="fe fe-trash"></i></a></td>
+                                                        <td><a href="{{url('mahasiswa/'.$row->id.'/edit')}}" title="Edit Mahasiswa" class="btn btn-primary btn-sm"><i class="fe fe-pencil"></i></a>  <a href="{{url('mahasiswa/delete/'.$row->id)}}" onclick="return confirm('Yakin Delete Data Mahasiswa?')" title="Delete Data Mahasiswa" class="btn btn-danger btn-sm"><i class="fe fe-trash"></i></a>
+                                                            <form action="{{ route('mahasiswa.reset-password', $row->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Reset password mahasiswa {{ addslashes($row->nama) }} ({{ $row->nim }}) menjadi NIM-nya?')">
+                                                                @csrf
+                                                                <button type="submit" class="btn btn-info btn-sm" title="Reset Password ke NIM">
+                                                                    <i class="fa fa-key"></i>
+                                                                </button>
+                                                            </form>
+                                                            <form action="{{ route('admin.impersonate', $row->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Anda akan masuk sebagai mahasiswa ' + '{{ addslashes($row->nama) }}' + ' ({{ $row->nim }}). Lanjutkan?')">
+                                                                @csrf
+                                                                <button type="submit" class="btn btn-warning btn-sm" title="Akses sebagai Mahasiswa (Impersonasi)">
+                                                                    <i class="fa fa-user-secret"></i>
+                                                                </button>
+                                                            </form>
+                                                        </td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>

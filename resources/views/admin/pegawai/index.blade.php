@@ -23,7 +23,7 @@
 							<div class="cm-content-body form excerpt">
 								<div class="card-body pb-4">
 									<div class="table-responsive">
-										<table class="table">
+                                            <table id="order-table" class="table table-striped table-bordered nowrap">
 											<thead>
                                                 <tr>
                                                     <th>No</th>
@@ -76,4 +76,14 @@
 				</div>
 			</div>
 		</div>
+@endsection
+
+@section('local-js')
+    <script>
+        $(document).ready(function () {
+            $('#order-table').DataTable({
+                responsive: true,
+            });
+        });
+    </script>
 @endsection

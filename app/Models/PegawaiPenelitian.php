@@ -1,38 +1,10 @@
 <?php
 
-/**
- * Created by Reliese Model.
- */
-
 namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Class PegawaiPenelitian
- * 
- * @property int $id
- * @property int $id_pegawai
- * @property string $nomor
- * @property string $judul
- * @property int $id_fakultas
- * @property string $jenis_penelitian
- * @property Carbon $tahun
- * @property string $sumber_dana
- * @property int $dana
- * @property string $no_surat
- * @property string $penyelenggara
- * @property string $ketua
- * @property string $anggota
- * @property string $dokumen
- * @property string $proposal
- * @property string $lap_kemajuan
- * @property string $lap_keuangan
- * @property string $lap_akhir
- *
- * @package App\Models
- */
 class PegawaiPenelitian extends Model
 {
 	protected $table = 'pegawai_penelitian';
@@ -41,6 +13,7 @@ class PegawaiPenelitian extends Model
 	protected $casts = [
 		'id_pegawai' => 'int',
 		'id_fakultas' => 'int',
+		'id_ketua' => 'int',
 		'tahun' => 'datetime',
 		'dana' => 'int'
 	];
@@ -56,12 +29,26 @@ class PegawaiPenelitian extends Model
 		'dana',
 		'no_surat',
 		'penyelenggara',
-		'ketua',
-		'anggota',
+		'id_ketua',
 		'dokumen',
 		'proposal',
 		'lap_kemajuan',
 		'lap_keuangan',
 		'lap_akhir'
 	];
+
+	public function pegawai()
+	{
+		return $this->belongsTo(Pegawai::class, 'id_pegawai', 'id');
+	}
+
+	public function ketua()
+	{
+		return $this->belongsTo(Pegawai::class, 'id_ketua', 'id');
+	}
+
+	public function anggota()
+	{
+		return $this->hasMany(PegawaiAnggotaPenelitian::class, 'id_penelitian', 'id');
+	}
 }

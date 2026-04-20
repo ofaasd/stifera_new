@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Mahasiswa;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class MahasiswaController extends Controller
 {
@@ -86,5 +87,13 @@ class MahasiswaController extends Controller
     public function destroy($id){
         Mahasiswa::where('id', $id)->delete();
         return redirect('mahasiswa')->with('success', 'Data Mahasiswa berhasil dihapus');   
+    }
+
+    public function resetPassword($id){
+        $mahasiswa = Mahasiswa::where('id', $id)->firstOrFail();
+        Mahasiswa::where('id', $id)->update([
+            'paswd' => Hash::make($mahasiswa->nim),
+        ]);
+        return redirect()->back()->with('success', 'Password mahasiswa ' . $mahasiswa->nama . ' (' . $mahasiswa->nim . ') berhasil direset menjadi NIM.');
     }
 }

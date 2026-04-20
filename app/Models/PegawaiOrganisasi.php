@@ -29,8 +29,6 @@ class PegawaiOrganisasi extends Model
 
 	protected $casts = [
 		'id_pegawai' => 'int',
-		'tahun' => 'datetime',
-		'tahun_keluar' => 'datetime',
 		'sekarang' => 'int'
 	];
 

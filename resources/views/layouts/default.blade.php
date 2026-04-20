@@ -60,7 +60,13 @@
 		<!--**********************************
             Sidebar start
         ***********************************-->
+@if(Auth::guard('pegawai')->check())
+@include('elements.sidebar_pegawai')
+@elseif(Auth::guard('mahasiswa')->check())
+@include('elements.sidebar_mahasiswa')
+@else
 @include('elements.sidebar')
+@endif
 		<!--**********************************
             Sidebar end
         ***********************************-->

@@ -7,7 +7,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
  * Class Mahasiswa
@@ -48,10 +48,14 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @package App\Models
  */
-class Mahasiswa extends Model
+class Mahasiswa extends Authenticatable
 {
 	protected $table = 'mahasiswa';
 	public $timestamps = false;
+
+	protected $hidden = [
+		'paswd',
+	];
 
 	protected $casts = [
 		'jk' => 'int',
@@ -105,5 +109,10 @@ class Mahasiswa extends Model
 	public function dosenWali()
 	{
 		return $this->belongsTo(PegawaiBiodatum::class, 'id_dsn_wali', 'id_pegawai');
+	}
+
+	public function getAuthPasswordName()
+	{
+		return 'paswd';
 	}
 }

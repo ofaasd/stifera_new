@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
  * 
  * @property int $id
  * @property int $id_pegawai
- * @property string $unit_kerja
+ * @property int $unit_kerja
  * @property int $id_jabatan_struktural
  * @property string $no_sk_struktural
  * @property Carbon $tanggal_sk_struktural
@@ -34,12 +34,11 @@ class PegawaiJabatanStruktural extends Model
 
 	protected $casts = [
 		'id_pegawai' => 'int',
+		'unit_kerja' => 'int',
 		'id_jabatan_struktural' => 'int',
 		'tanggal_sk_struktural' => 'datetime',
 		'tmt_sk_struktural' => 'datetime',
 		'status' => 'int',
-		'tahun_masuk' => 'datetime',
-		'tahun_keluar' => 'datetime',
 		'sekarang' => 'int'
 	];
 
@@ -56,4 +55,12 @@ class PegawaiJabatanStruktural extends Model
 		'tahun_keluar',
 		'sekarang'
 	];
+	public function unitKerja()
+	{
+		return $this->belongsTo(PegawaiUnitKerja::class, 'unit_kerja', 'id');
+	}
+	public function jabatanStruktural()
+	{
+		return $this->belongsTo(JabatanStruktural::class, 'id_jabatan_struktural', 'id');
+	}
 }

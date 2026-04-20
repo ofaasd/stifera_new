@@ -34,10 +34,10 @@ class IzinMeninggalkanPekerjaan extends Model
 	protected $table = 'izin_meninggalkan_pekerjaan';
 
 	protected $casts = [
-		'tanggal' => 'datetime',
-		'tanggal_selesai' => 'datetime',
-		'waktu_mulai' => 'datetime',
-		'waktu_selesai' => 'datetime',
+		'tanggal' => 'date',
+		'tanggal_selesai' => 'date',
+		'waktu_mulai' => 'time',
+		'waktu_selesai' => 'time',
 		'izin_ka_jenjang' => 'int',
 		'izin_mgr_sdm' => 'int',
 		'id_dosen' => 'int',

@@ -44,8 +44,9 @@
                             <a href="{{ route('admin.login') }}" class="btn-link text-secondary">Login sebagai admin</a>
                         </div>
 
-                        <div class="d-grid">
+                        <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">Login Pegawai</button>
+                            <a href="{{ route('login') }}" class="btn btn-outline-secondary">Kembali ke Login Portal</a>
                         </div>
                     </form>
                 </div>
@@ -55,7 +56,6 @@
                 <div class="pages-left h-100">
                     <div class="login-content">
                         <a href="{{ url('/') }}"><img src="{{ asset('images/logo-full.png') }}" class="mb-3" alt=""></a>
-                        <p>Akses akun pegawai dipisah dari akun admin untuk memudahkan pengelolaan route dan permission.</p>
                     </div>
                     <div class="login-media text-center">
                         <img src="{{ asset('images/login.png') }}" alt="">

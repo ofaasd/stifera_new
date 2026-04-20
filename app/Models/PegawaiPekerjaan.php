@@ -28,8 +28,6 @@ class PegawaiPekerjaan extends Model
 	public $timestamps = false;
 
 	protected $casts = [
-		'tahun_masuk' => 'datetime',
-		'tahun_keluar' => 'datetime',
 		'id_pegawai' => 'int',
 		'sekarang' => 'int'
 	];

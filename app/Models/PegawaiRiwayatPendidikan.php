@@ -33,8 +33,7 @@ class PegawaiRiwayatPendidikan extends Model
 
 	protected $casts = [
 		'id_pegawai' => 'int',
-		'tanggal_ijazah' => 'datetime',
-		'tahun' => 'datetime'
+		'tanggal_ijazah' => 'date',
 	];
 
 	protected $fillable = [

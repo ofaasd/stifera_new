@@ -26,8 +26,8 @@ class JamKerjaMaster extends Model
 	public $timestamps = false;
 
 	protected $casts = [
-		'mulai' => 'datetime',
-		'selesai' => 'datetime',
+		'mulai' => 'date',
+		'selesai' => 'date',
 		'status' => 'int'
 	];
 

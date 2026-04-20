@@ -36,13 +36,13 @@ class SuratIzin extends Model
 
 	protected $casts = [
 		'id_dosen' => 'int',
-		'tgl_surat' => 'datetime',
+		'tgl_surat' => 'date',
 		'dilihat' => 'int',
 		'izin_mgr_sdm' => 'int',
 		'izin_ka_jenjang' => 'int',
 		'id_kategori' => 'int',
-		'tanggal_mulai' => 'datetime',
-		'tanggal_selesai' => 'datetime',
+		'tanggal_mulai' => 'date',
+		'tanggal_selesai' => 'date',
 		'jumlah_hari' => 'int'
 	];
 

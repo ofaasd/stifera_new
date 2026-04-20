@@ -1,4 +1,9 @@
 @extends('layouts.default', ['CurrentPage' => $CurrentPage])
+@php
+    $formAction = $formAction ?? route('pegawai.update', $query->id_pegawai);
+    $backUrl = $backUrl ?? url('pegawai');
+    $isPegawaiSelfService = $isPegawaiSelfService ?? false;
+@endphp
 @section('local-css')
 	<link href="https://cdn.jsdelivr.net/npm/jquery.steps.full@1.1.0/jquery.steps.min.css" rel="stylesheet">
     <style>
@@ -14,12 +19,12 @@
 				<div class="row">
 					<div class="col-xl-12">
                         <div class="mb-4 pb-3">
-							<a href="{{ url('pegawai')}}" class="btn btn-primary"><i class="fa-solid fa-arrow-left me-1"></i> Kembali</a>
+							<a href="{{ $backUrl }}" class="btn btn-primary"><i class="fa-solid fa-arrow-left me-1"></i> Kembali</a>
 						</div>
 						<div class="filter cm-content-box box-primary">
 							<div class="content-title SlideToolHeader">
 								<div class="cpa">
-									<i class="fa-solid fa-file-lines me-1"></i>Tambah {{ $title }}
+									<i class="fa-solid fa-file-lines me-1"></i>{{ $title }}
 								</div>
 								<div class="tools">
 									<a href="javascript:void(0);" class="expand handle"><i
@@ -30,7 +35,7 @@
 								<div class="card-body pb-4">
                                     <div class="row">
                                         <div class="col-sm-12">
-                                            <form action="{{ route('pegawai.update', $query->id_pegawai) }}" method="post" enctype="multipart/form-data">
+                                            <form action="{{ $formAction }}" method="post" enctype="multipart/form-data">
                                                 @csrf 
                                                 @method('PUT')
                                                 <div class="card">
@@ -48,8 +53,10 @@
                                                                 <a href="#" class="btn btn-primary waves-effect" data-toggle="modal" data-target="#ubah_password"><i class="fa fa-key"></i> Ubah Password</a><br /><br />
                                                             @endif
                                                             
-                                                            <a href="{{ url('simpeg/profil/cv/' . $query->id_pegawai) }}" class="btn btn-primary col-md-12"><i class="feather icon-download"></i> CV</a><br /><br />
-                                                            <a href="{{ url('simpeg/profil/cv_excel/' . $query->id_pegawai) }}" class="btn btn-primary col-md-12"><i class="feather icon-download"></i> CV Excel</a>
+                                                            @if(!$isPegawaiSelfService)
+                                                                <a href="{{ url('simpeg/profil/cv/' . $query->id_pegawai) }}" class="btn btn-primary col-md-12"><i class="feather icon-download"></i> CV</a><br /><br />
+                                                                <a href="{{ url('simpeg/profil/cv_excel/' . $query->id_pegawai) }}" class="btn btn-primary col-md-12"><i class="feather icon-download"></i> CV Excel</a>
+                                                            @endif
                                                             
                                                         </div>      
                                                         <div class="col-sm-5">
@@ -389,17 +396,35 @@
                                                     </button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form method="POST" action="{{ url('simpeguser/biodata/ubah_photo') }}" enctype="multipart/form-data">
-                                                        @csrf <input type="hidden" name="id" value="{{ $query->id_pegawai }}">
-                                                        <input type="hidden" name="npp" value="{{ $query->npp }}">
-                                                        <label class="col-sm-12 col-form-label">File Gambar : </label>
-                                                        <div class="col-sm-10">
-                                                            <input type="file" class="form-control" name="foto" value="" >
+                                                    <form id="form_upload_foto" enctype="multipart/form-data">
+                                                        @csrf 
+                                                        <input type="hidden" name="id_pegawai" value="{{ $query->id_pegawai }}">
+                                                        
+                                                        <div class="form-group">
+                                                            <label class="form-label">File Gambar (JPG, PNG - Max 2MB): </label>
+                                                            <input type="file" class="form-control" name="foto" id="input_foto" accept="image/*" required>
+                                                            <small class="form-text text-muted">Format: JPG, PNG | Ukuran maksimal: 2MB</small>
                                                         </div>
-                                                        <div class="col-sm-12 col-form-label">
-                                                            <input type="submit" class="btn btn-primary" value="Simpan">
+
+                                                        <div id="preview_photo" style="margin-top: 15px; display: none;">
+                                                            <label>Preview:</label><br>
+                                                            <img id="img_preview" src="" style="max-width: 200px; border-radius: 5px;">
+                                                        </div>
+
+                                                        <div class="form-group mt-3">
+                                                            <div id="upload_loading" style="display: none;">
+                                                                <div class="spinner-border spinner-border-sm" role="status">
+                                                                    <span class="sr-only">Loading...</span>
+                                                                </div>
+                                                                <span class="ms-2">Mengupload...</span>
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary" id="btn_submit_foto">
+                                                                <i class="fa-solid fa-upload"></i> Simpan
+                                                            </button>
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
                                                         </div>
                                                     </form>
+                                                    <div id="upload_status" style="margin-top: 15px;"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -745,6 +770,85 @@
 		  }
 		});
         $(".js-example-basic-single").select2();
+
+        // ======== UPLOAD FOTO AJAX ========
+        // Preview gambar sebelum upload
+        document.getElementById('input_foto').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('img_preview').src = event.target.result;
+                    document.getElementById('preview_photo').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle upload foto via AJAX
+        document.getElementById('form_upload_foto').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const uploadLoading = document.getElementById('upload_loading');
+            const uploadStatus = document.getElementById('upload_status');
+            const btnSubmit = document.getElementById('btn_submit_foto');
+
+            uploadLoading.style.display = 'block';
+            btnSubmit.disabled = true;
+            uploadStatus.innerHTML = '';
+
+            fetch("{{ route('pegawai.upload.photo') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                uploadLoading.style.display = 'none';
+                btnSubmit.disabled = false;
+
+                if (data.status === 'success') {
+                    // Tampilkan alert sukses
+                    uploadStatus.innerHTML = `
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fa-solid fa-check-circle"></i> ${data.message}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    `;
+                    
+                    // Refresh foto di halaman
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    uploadStatus.innerHTML = `
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fa-solid fa-exclamation-circle"></i> ${data.message}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                uploadLoading.style.display = 'none';
+                btnSubmit.disabled = false;
+                uploadStatus.innerHTML = `
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fa-solid fa-exclamation-circle"></i> Error: ${error.message}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                `;
+            });
+        });
 	});
 </script>
 @endsection

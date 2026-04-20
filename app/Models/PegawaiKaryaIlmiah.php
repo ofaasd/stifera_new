@@ -34,7 +34,6 @@ class PegawaiKaryaIlmiah extends Model
 		'id_pegawai' => 'int',
 		'volume' => 'int',
 		'nomor' => 'int',
-		'tahun' => 'datetime'
 	];
 
 	protected $fillable = [

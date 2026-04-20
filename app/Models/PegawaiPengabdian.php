@@ -31,7 +31,6 @@ class PegawaiPengabdian extends Model
 
 	protected $casts = [
 		'id_pegawai' => 'int',
-		'tahun' => 'datetime',
 		'ketua' => 'int'
 	];
 

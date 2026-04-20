@@ -48,6 +48,10 @@ return [
             'driver' => 'session',
             'provider' => 'pegawai',
         ],
+        'mahasiswa' => [
+            'driver' => 'session',
+            'provider' => 'mahasiswa',
+        ],
     ],
 
     /*
@@ -75,6 +79,10 @@ return [
         'pegawai' => [
             'driver' => 'eloquent',
             'model' => App\Models\Pegawai::class,
+        ],
+        'mahasiswa' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Mahasiswa::class,
         ],
 
         // 'users' => [

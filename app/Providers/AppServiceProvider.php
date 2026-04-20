@@ -22,15 +22,21 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
-            View::composer('elements.sidebar', function ($view) {
-            // Ambil menu tingkat atas (parent = 0) beserta anak-anaknya
-            $menus = Menu::with('children')
-                ->where('parent', 0)
-                ->where('aktif', 1)
-                ->orderBy('urut', 'asc')
-                ->get();
+        View::composer('elements.sidebar', function ($view) {
+            try {
+                // Ambil menu tingkat atas (parent = 0) beserta anak-anaknya
+                $menus = Menu::with('children')
+                    ->where('parent', 0)
+                    ->where('aktif', 1)
+                    ->orderBy('urut', 'asc')
+                    ->get();
 
-            $view->with('menus', $menus);
+                $view->with('menus', $menus);
+            } catch (\Exception $e) {
+                // Jika ada error, set menus kosong
+                \Log::error('Menu loading error: ' . $e->getMessage());
+                $view->with('menus', collect());
+            }
         });
     }
 }
