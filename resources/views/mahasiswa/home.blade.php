@@ -91,7 +91,7 @@
                                             <td>{{ $ruangClean !== '' ? $ruangClean : '-' }}</td>
                                             <td>{{ trim((string) ($row->nama_dosen ?? '-')) }}</td>
                                             <td>
-                                                @if((int) ($row->status_krs ?? 0) === 1)
+                                                @if((int) ($row->is_publish ?? 0) === 1)
                                                     <span class="badge bg-success">Disetujui</span>
                                                 @else
                                                     <span class="badge bg-warning text-dark">Belum Disetujui</span>
