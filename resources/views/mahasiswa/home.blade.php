@@ -92,9 +92,9 @@
                                             <td>{{ trim((string) ($row->nama_dosen ?? '-')) }}</td>
                                             <td>
                                                 @if((int) ($row->is_publish ?? 0) === 1)
-                                                    <span class="badge bg-success">Publish</span>
+                                                    <span class="badge bg-success">Valid</span>
                                                 @else
-                                                    <span class="badge bg-warning text-dark">Draft</span>
+                                                    <span class="badge bg-warning text-dark">Belum Validasi</span>
                                                 @endif
                                             </td>
                                         </tr>
