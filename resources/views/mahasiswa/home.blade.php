@@ -1,5 +1,21 @@
 @extends('layouts.default', ['CurrentPage' => $CurrentPage])
 
+@section('local-css')
+<style>
+    .table-responsive .table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .table-responsive .table th,
+    .table-responsive .table td {
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+</style>
+@endsection
+
 @section('content')
 {{-- Banner Impersonasi --}}
 @if(session('impersonasi_admin') || session('impersonasi_notice'))

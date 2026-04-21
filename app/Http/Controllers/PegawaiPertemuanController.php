@@ -132,6 +132,27 @@ class PegawaiPertemuanController extends Controller
             'tanggal.*' => 'nullable|date',
         ]);
 
+        $tanggalTerisi = collect($validated['tanggal'] ?? [])
+            ->filter(fn ($tgl) => !empty($tgl))
+            ->map(fn ($tgl) => (string) $tgl)
+            ->values();
+
+        $duplikatTanggal = $tanggalTerisi
+            ->countBy()
+            ->filter(fn ($jumlah) => $jumlah > 1)
+            ->keys()
+            ->values();
+
+        if ($duplikatTanggal->isNotEmpty()) {
+            $tanggalList = $duplikatTanggal
+                ->map(fn ($tgl) => Carbon::parse($tgl)->format('d/m/Y'))
+                ->implode(', ');
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Tanggal pertemuan tidak boleh sama dalam satu jadwal. Duplikat: ' . $tanggalList . '.');
+        }
+
         DB::transaction(function () use ($validated, $jadwal) {
             for ($i = 1; $i <= 16; $i++) {
                 $tanggal = $validated['tanggal'][$i] ?? null;

@@ -134,18 +134,24 @@
                                                     </td>
                                                     <td>
                                                         @if($pRow)
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-warning btn-generate-kode"
-                                                                data-nomor="{{ $nomor }}"
-                                                                data-jadwal="{{ $jadwal->id }}"
-                                                                data-has-kode="{{ !empty($kode) ? '1' : '0' }}"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#modalGenerateKode">
-                                                                <i class="fa fa-key me-1"></i> Generate Kode
-                                                            </button>
+                                                            <div class="d-flex gap-1 flex-wrap">
+                                                                <button type="button"
+                                                                    class="btn btn-sm btn-warning btn-generate-kode"
+                                                                    data-nomor="{{ $nomor }}"
+                                                                    data-jadwal="{{ $jadwal->id }}"
+                                                                    data-has-kode="{{ !empty($kode) ? '1' : '0' }}"
+                                                                    data-bs-toggle="modal"
+                                                                    data-bs-target="#modalGenerateKode">
+                                                                    <i class="fa fa-key me-1"></i> Generate Kode
+                                                                </button>
+                                                                <a href="{{ url('dosen/presensi/input/' . $pRow->id) }}" class="btn btn-sm btn-success" title="Input Presensi">
+                                                                    <i class="fa fa-pencil"></i>
+                                                                </a>
+                                                            </div>
                                                         @else
                                                             <span class="text-muted small">Isi tanggal dahulu</span>
                                                         @endif
+                                                        
                                                     </td>
                                                 </tr>
                                             @endforeach

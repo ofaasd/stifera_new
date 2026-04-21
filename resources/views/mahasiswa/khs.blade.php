@@ -5,6 +5,18 @@
     .khs-card {
         height: auto !important;
     }
+
+    .table-responsive .table {
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .table-responsive .table th,
+    .table-responsive .table td {
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
 </style>
 @endsection
 
