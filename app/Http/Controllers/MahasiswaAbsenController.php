@@ -44,14 +44,11 @@ class MahasiswaAbsenController extends Controller
         $kode = strtoupper(trim($request->input('kode_kelas')));
         $nim  = (string) ($mahasiswa->nim ?? '');
         $now  = Carbon::now();
-        $today = $now->toDateString();
 
         // Find a pertemuan matching the code that:
-        // - tgl_pertemuan = today
         // - kunci_kehadiran = 0
         // - expired_kode > now
         $pertemuan = DB::table('master_pertemuan')
-            ->whereDate('tgl_pertemuan', $today)
             ->where('kunci_kehadiran', 0)
             ->where('kode_kelas', $kode)
             ->where('expired_kode', '>', $now)
@@ -75,11 +72,11 @@ class MahasiswaAbsenController extends Controller
                 ->with('error', 'Anda tidak terdaftar pada mata kuliah ini.');
         }
 
-        // Check not already marked Hadir for today's pertemuan
+        // Check not already marked Hadir for this active pertemuan date
         $existing = DB::table('master_presensi')
             ->where('nim', $nim)
             ->where('id_jadwal', $pertemuan->id_jadwal)
-            ->whereDate('tgl_pertemuan', $today)
+            ->whereDate('tgl_pertemuan', $pertemuan->tgl_pertemuan)
             ->first();
 
         if ($existing && (int) $existing->status === 1) {
@@ -197,13 +194,11 @@ class MahasiswaAbsenController extends Controller
                 ->with('error', 'Kode absen telah expired.');
         }
 
-        $today = Carbon::now()->toDateString();
-
         // Check not already hadir
         $existing = DB::table('master_presensi')
             ->where('nim', $nim)
             ->where('id_jadwal', $pertemuan->id_jadwal)
-            ->whereDate('tgl_pertemuan', $today)
+            ->whereDate('tgl_pertemuan', $pertemuan->tgl_pertemuan)
             ->first();
 
         if ($existing && (int) $existing->status === 1) {

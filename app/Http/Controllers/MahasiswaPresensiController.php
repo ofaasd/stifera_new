@@ -113,7 +113,7 @@ class MahasiswaPresensiController extends Controller
     }
 
     /**
-     * Returns array keyed by id_jadwal => active pertemuan row (today, unlocked, code not expired).
+     * Returns array keyed by id_jadwal => active pertemuan row (unlocked, code not expired).
      */
     private function getActivePertemuanMap(array $idJadwalList): array
     {
@@ -121,12 +121,10 @@ class MahasiswaPresensiController extends Controller
             return [];
         }
 
-        $today = now()->toDateString();
         $now = now();
 
         $rows = DB::table('master_pertemuan')
             ->whereIn('id_jadwal', $idJadwalList)
-            ->whereDate('tgl_pertemuan', $today)
             ->where('kunci_kehadiran', 0)
             ->whereNotNull('kode_kelas')
             ->where('kode_kelas', '<>', '')
@@ -147,16 +145,20 @@ class MahasiswaPresensiController extends Controller
     private function buildPresensiData($krsList, array $pertemuanMap, array $presensiMap, array $activePertemuanMap): array
     {
         $result = [];
-        $today = now()->toDateString();
 
         foreach ($krsList as $krs) {
             $idJadwal   = (int) $krs->id_jadwal;
             $pertemuanList = $pertemuanMap[$idJadwal] ?? [];
             $activePertemuan = $activePertemuanMap[$idJadwal] ?? null;
 
-            $todayKey = $idJadwal . '_' . $today;
-            $todayPresensi = $presensiMap[$todayKey] ?? null;
-            $sudahHadirHariIni = $todayPresensi && (int) $todayPresensi->status === 1;
+            $activeTgl = $activePertemuan
+                ? (is_string($activePertemuan->tgl_pertemuan)
+                    ? $activePertemuan->tgl_pertemuan
+                    : (string) $activePertemuan->tgl_pertemuan)
+                : null;
+            $activeKey = $activeTgl ? ($idJadwal . '_' . $activeTgl) : null;
+            $activePresensi = $activeKey ? ($presensiMap[$activeKey] ?? null) : null;
+            $sudahHadirPertemuanAktif = $activePresensi && (int) $activePresensi->status === 1;
 
             $totalPertemuan = count($pertemuanList);
             $hadir = 0;
@@ -201,8 +203,8 @@ class MahasiswaPresensiController extends Controller
                 'persen_hadir'     => $persenHadir,
                 'pertemuan'        => $pertemuanDetails,
                 'active_pertemuan' => $activePertemuan,
-                'sudah_hadir_hari_ini' => $sudahHadirHariIni,
-                'can_absen'        => $activePertemuan !== null && !$sudahHadirHariIni,
+                'sudah_hadir_hari_ini' => $sudahHadirPertemuanAktif,
+                'can_absen'        => $activePertemuan !== null && !$sudahHadirPertemuanAktif,
             ];
         }
 
