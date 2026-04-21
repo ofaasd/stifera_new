@@ -71,70 +71,86 @@
                             <form method="POST" action="{{ url('master/pengaturan-ujian/detail/' . $jadwal->id) }}">
                                 @csrf
 
+                                @php
+                                    $tp = strtolower(trim((string) ($jadwal->tp ?? '')));
+                                    $showTeori = $tp !== 'p';
+                                    $showPraktik = $tp !== 't';
+                                @endphp
+
                                 <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Tanggal UTS Teori</label>
-                                        <input type="date" name="tanggal_uts_t" class="form-control" value="{{ old('tanggal_uts_t', !empty($pengaturan?->tanggal_uts_t) ? \Carbon\Carbon::parse($pengaturan->tanggal_uts_t)->format('Y-m-d') : '') }}">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Jam UTS Teori</label>
-                                        <select name="id_jam_uts_t" class="form-control">
-                                            <option value="">-- Pilih Jam --</option>
-                                            @foreach($jamList as $jam)
-                                                <option value="{{ $jam->id }}" {{ (string) old('id_jam_uts_t', $pengaturan->id_jam_uts_t ?? '') === (string) $jam->id ? 'selected' : '' }}>
-                                                    {{ $jam->nama_sesi }} ({{ \Carbon\Carbon::parse($jam->mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jam->selesai)->format('H:i') }})
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                    @if($showTeori)
+                                        <div class="col-12">
+                                            <div class="fw-semibold text-primary mt-1">Jadwal Ujian Teori</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Tanggal UTS Teori</label>
+                                            <input type="date" name="tanggal_uts_t" class="form-control" value="{{ old('tanggal_uts_t', !empty($pengaturan?->tanggal_uts_t) ? \Carbon\Carbon::parse($pengaturan->tanggal_uts_t)->format('Y-m-d') : '') }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Jam UTS Teori</label>
+                                            <select name="id_jam_uts_t" class="form-control">
+                                                <option value="">-- Pilih Jam --</option>
+                                                @foreach($jamList as $jam)
+                                                    <option value="{{ $jam->id }}" {{ (string) old('id_jam_uts_t', $pengaturan->id_jam_uts_t ?? '') === (string) $jam->id ? 'selected' : '' }}>
+                                                        {{ $jam->nama_sesi }} ({{ \Carbon\Carbon::parse($jam->mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jam->selesai)->format('H:i') }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
 
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Tanggal UAS Teori</label>
-                                        <input type="date" name="tanggal_uas_t" class="form-control" value="{{ old('tanggal_uas_t', !empty($pengaturan?->tanggal_uas_t) ? \Carbon\Carbon::parse($pengaturan->tanggal_uas_t)->format('Y-m-d') : '') }}">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Jam UAS Teori</label>
-                                        <select name="id_jam_uas_t" class="form-control">
-                                            <option value="">-- Pilih Jam --</option>
-                                            @foreach($jamList as $jam)
-                                                <option value="{{ $jam->id }}" {{ (string) old('id_jam_uas_t', $pengaturan->id_jam_uas_t ?? '') === (string) $jam->id ? 'selected' : '' }}>
-                                                    {{ $jam->nama_sesi }} ({{ \Carbon\Carbon::parse($jam->mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jam->selesai)->format('H:i') }})
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Tanggal UAS Teori</label>
+                                            <input type="date" name="tanggal_uas_t" class="form-control" value="{{ old('tanggal_uas_t', !empty($pengaturan?->tanggal_uas_t) ? \Carbon\Carbon::parse($pengaturan->tanggal_uas_t)->format('Y-m-d') : '') }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Jam UAS Teori</label>
+                                            <select name="id_jam_uas_t" class="form-control">
+                                                <option value="">-- Pilih Jam --</option>
+                                                @foreach($jamList as $jam)
+                                                    <option value="{{ $jam->id }}" {{ (string) old('id_jam_uas_t', $pengaturan->id_jam_uas_t ?? '') === (string) $jam->id ? 'selected' : '' }}>
+                                                        {{ $jam->nama_sesi }} ({{ \Carbon\Carbon::parse($jam->mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jam->selesai)->format('H:i') }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    @endif
 
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Tanggal UTS Praktik</label>
-                                        <input type="date" name="tanggal_uts_p" class="form-control" value="{{ old('tanggal_uts_p', !empty($pengaturan?->tanggal_uts_p) ? \Carbon\Carbon::parse($pengaturan->tanggal_uts_p)->format('Y-m-d') : '') }}">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Jam UTS Praktik</label>
-                                        <select name="id_jam_uts_p" class="form-control">
-                                            <option value="">-- Pilih Jam --</option>
-                                            @foreach($jamList as $jam)
-                                                <option value="{{ $jam->id }}" {{ (string) old('id_jam_uts_p', $pengaturan->id_jam_uts_p ?? '') === (string) $jam->id ? 'selected' : '' }}>
-                                                    {{ $jam->nama_sesi }} ({{ \Carbon\Carbon::parse($jam->mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jam->selesai)->format('H:i') }})
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                    @if($showPraktik)
+                                        <div class="col-12">
+                                            <div class="fw-semibold text-primary mt-2">Jadwal Ujian Praktik</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Tanggal UTS Praktik</label>
+                                            <input type="date" name="tanggal_uts_p" class="form-control" value="{{ old('tanggal_uts_p', !empty($pengaturan?->tanggal_uts_p) ? \Carbon\Carbon::parse($pengaturan->tanggal_uts_p)->format('Y-m-d') : '') }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Jam UTS Praktik</label>
+                                            <select name="id_jam_uts_p" class="form-control">
+                                                <option value="">-- Pilih Jam --</option>
+                                                @foreach($jamList as $jam)
+                                                    <option value="{{ $jam->id }}" {{ (string) old('id_jam_uts_p', $pengaturan->id_jam_uts_p ?? '') === (string) $jam->id ? 'selected' : '' }}>
+                                                        {{ $jam->nama_sesi }} ({{ \Carbon\Carbon::parse($jam->mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jam->selesai)->format('H:i') }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
 
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Tanggal UAS Praktik</label>
-                                        <input type="date" name="tanggal_uas_p" class="form-control" value="{{ old('tanggal_uas_p', !empty($pengaturan?->tanggal_uas_p) ? \Carbon\Carbon::parse($pengaturan->tanggal_uas_p)->format('Y-m-d') : '') }}">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">Jam UAS Praktik</label>
-                                        <select name="id_jam_uas_p" class="form-control">
-                                            <option value="">-- Pilih Jam --</option>
-                                            @foreach($jamList as $jam)
-                                                <option value="{{ $jam->id }}" {{ (string) old('id_jam_uas_p', $pengaturan->id_jam_uas_p ?? '') === (string) $jam->id ? 'selected' : '' }}>
-                                                    {{ $jam->nama_sesi }} ({{ \Carbon\Carbon::parse($jam->mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jam->selesai)->format('H:i') }})
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Tanggal UAS Praktik</label>
+                                            <input type="date" name="tanggal_uas_p" class="form-control" value="{{ old('tanggal_uas_p', !empty($pengaturan?->tanggal_uas_p) ? \Carbon\Carbon::parse($pengaturan->tanggal_uas_p)->format('Y-m-d') : '') }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Jam UAS Praktik</label>
+                                            <select name="id_jam_uas_p" class="form-control">
+                                                <option value="">-- Pilih Jam --</option>
+                                                @foreach($jamList as $jam)
+                                                    <option value="{{ $jam->id }}" {{ (string) old('id_jam_uas_p', $pengaturan->id_jam_uas_p ?? '') === (string) $jam->id ? 'selected' : '' }}>
+                                                        {{ $jam->nama_sesi }} ({{ \Carbon\Carbon::parse($jam->mulai)->format('H:i') }} - {{ \Carbon\Carbon::parse($jam->selesai)->format('H:i') }})
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    @endif
                                 </div>
 
                                 <div class="mt-4">

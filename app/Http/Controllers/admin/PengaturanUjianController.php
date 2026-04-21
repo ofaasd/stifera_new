@@ -43,6 +43,7 @@ class PengaturanUjianController extends Controller
                 'mjt.*',
                 'mmk.nama_mata_kuliah',
                 'mmk.jumlah_sks',
+                'mmk.tp',
                 'mta.awal',
                 'mta.akhir',
                 'mta.jenis',

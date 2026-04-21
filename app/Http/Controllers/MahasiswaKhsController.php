@@ -29,7 +29,7 @@ class MahasiswaKhsController extends Controller
         }
 
         $ipsSemesterIni = (float) ($statAktif['ips'] ?? 0.0);
-        $ipkMahasiswa = $this->calculateIpk($mahasiswa->nim);
+        $ipkMahasiswa = $this->calculateIpk($mahasiswa->nim, $tahunAktif ? (int) $tahunAktif->id : null);
         $ipsPerSemester = $this->buildIpsPerSemesterSeries($mahasiswa->nim, (int) ($mahasiswa->tipe_mhs ?? 0));
 
         $riwayatTahun = collect();
@@ -101,7 +101,7 @@ class MahasiswaKhsController extends Controller
         ];
     }
 
-    private function calculateIpk(string $nim): float
+    private function calculateIpk(string $nim, ?int $excludeIdTahun = null): float
     {
         $tahunIds = DB::table('master_nilai')
             ->where('nim', $nim)
@@ -113,9 +113,19 @@ class MahasiswaKhsController extends Controller
         $totalPoint = 0.0;
 
         foreach ($tahunIds as $idTahun) {
+            if ($excludeIdTahun !== null && (int) $idTahun === $excludeIdTahun) {
+                continue;
+            }
+
             $rows = $this->getKhsRows($nim, (int) $idTahun);
 
             foreach ($rows as $row) {
+                $hasNilai = (trim((string) ($row->nhuruf ?? '')) !== '')
+                    || ($row->nakhir !== null && $row->nakhir !== '');
+                if (!$hasNilai) {
+                    continue;
+                }
+
                 $sks = (int) ($row->jumlah_sks ?? 0);
                 $nilaiHuruf = $this->resolveNilaiHuruf($row->nhuruf ?? null, $row->nakhir ?? null);
                 $point = (float) (function_exists('nbobot') ? nbobot($nilaiHuruf) : 0.0);
@@ -134,42 +144,14 @@ class MahasiswaKhsController extends Controller
 
     private function getKhsRows(string $nim, int $idTahun): Collection
     {
-        $rowsTemp = DB::table('master_nilai as mn')
-            ->leftJoin('master_jadwal_temp as mjt', function ($join) use ($idTahun) {
-                $join->on('mjt.id', '=', 'mn.id_jadwal')
-                    ->where('mjt.id_tahun', '=', $idTahun);
-            })
-            ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
-            ->leftJoin('pegawai_biodata as pb', 'pb.id', '=', 'mjt.id_dosen')
-            ->select(
-                'mn.id',
-                'mn.id_tahun',
-                'mn.id_jadwal',
-                'mn.nim',
-                'mn.ntugas',
-                'mn.nuts',
-                'mn.nuas',
-                'mn.nakhir',
-                'mn.nhuruf',
-                'mn.publish_tugas',
-                'mn.publish_uts',
-                'mn.publish_uas',
-                'mn.validasi_tugas',
-                'mn.validasi_uts',
-                'mn.validasi_uas',
-                'mjt.kode_mata_kuliah',
-                'mmk.nama_mata_kuliah',
-                'mmk.jumlah_sks',
-                DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen")
-            )
-            ->where('mn.nim', $nim)
-            ->where('mn.id_tahun', $idTahun)
-            ->whereNotNull('mjt.id')
-            ->orderBy('mn.id')
-            ->get();
+        $rowsFromKrsTemp = $this->getKhsRowsFromKrsTable('master_krs_temp', $nim, $idTahun);
+        if ($rowsFromKrsTemp->isNotEmpty()) {
+            return $rowsFromKrsTemp;
+        }
 
-        if ($rowsTemp->isNotEmpty()) {
-            return $rowsTemp;
+        $rowsFromKrsHistory = $this->getKhsRowsFromKrsTable('master_krs', $nim, $idTahun);
+        if ($rowsFromKrsHistory->isNotEmpty()) {
+            return $rowsFromKrsHistory;
         }
 
         return DB::table('master_nilai as mn')
@@ -203,6 +185,43 @@ class MahasiswaKhsController extends Controller
             ->where('mn.nim', $nim)
             ->where('mn.id_tahun', $idTahun)
             ->orderBy('mn.id')
+            ->get();
+    }
+
+    private function getKhsRowsFromKrsTable(string $tableName, string $nim, int $idTahun): Collection
+    {
+        return DB::table($tableName . ' as mk')
+            ->leftJoin('master_nilai as mn', function ($join) {
+                $join->on('mn.nim', '=', 'mk.nim')
+                    ->on('mn.id_tahun', '=', 'mk.id_tahun')
+                    ->on('mn.id_jadwal', '=', 'mk.id_jadwal');
+            })
+            ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mk.mata_kuliah')
+            ->leftJoin('pegawai_biodata as pb', 'pb.id', '=', 'mk.id_dosen')
+            ->select(
+                'mn.id',
+                'mk.id_tahun',
+                'mk.id_jadwal',
+                'mk.nim',
+                'mn.ntugas',
+                'mn.nuts',
+                'mn.nuas',
+                'mn.nakhir',
+                'mn.nhuruf',
+                'mn.publish_tugas',
+                'mn.publish_uts',
+                'mn.publish_uas',
+                'mn.validasi_tugas',
+                'mn.validasi_uts',
+                'mn.validasi_uas',
+                'mk.mata_kuliah as kode_mata_kuliah',
+                'mmk.nama_mata_kuliah',
+                DB::raw('COALESCE(mmk.jumlah_sks, mk.sks, 0) as jumlah_sks'),
+                DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen")
+            )
+            ->where('mk.nim', $nim)
+            ->where('mk.id_tahun', $idTahun)
+            ->orderBy('mk.id')
             ->get();
     }
 
@@ -269,6 +288,12 @@ class MahasiswaKhsController extends Controller
         $totalPoint = 0.0;
 
         foreach ($rows as $row) {
+            $hasNilai = (trim((string) ($row->nhuruf ?? '')) !== '')
+                || ($row->nakhir !== null && $row->nakhir !== '');
+            if (!$hasNilai) {
+                continue;
+            }
+
             $sks = (int) ($row->jumlah_sks ?? 0);
             $totalSks += $sks;
 
