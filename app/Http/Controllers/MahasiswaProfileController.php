@@ -17,6 +17,15 @@ class MahasiswaProfileController extends Controller
             return redirect()->route('mahasiswa.login');
         }
 
+        $dosenWali = null;
+        if (!empty($mahasiswa->id_dsn_wali)) {
+            $dosenWali = DB::table('pegawai_biodata as pb')
+                ->leftJoin('pegawai as p', 'p.id', '=', 'pb.id_pegawai')
+                ->select('pb.nama_lengkap', 'pb.nidn', 'p.npp')
+                ->where('pb.id_pegawai', (int) $mahasiswa->id_dsn_wali)
+                ->first();
+        }
+
         $selectedProvinsi = (string) old('provinsi', (string) ($mahasiswa->provinsi ?? ''));
         $selectedKota = (string) old('kokab', (string) ($mahasiswa->kokab ?? ''));
         $selectedKecamatan = (string) old('kecamatan', (string) ($mahasiswa->kecamatan ?? ''));
@@ -69,6 +78,7 @@ class MahasiswaProfileController extends Controller
             'title' => 'Profile Mahasiswa',
             'CurrentPage' => 'content',
             'mahasiswa' => $mahasiswa,
+            'dosenWali' => $dosenWali,
             'provinsiList' => $provinsiList,
             'kotaList' => $kotaList,
             'kecamatanList' => $kecamatanList,

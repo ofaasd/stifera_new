@@ -48,7 +48,7 @@
                                                     </td>
                                                     <td>
                                                         <a href="{{ url('dosen/presensi/input/' . $a->id) }}" class="btn btn-sm btn-success" title="Input Presensi">
-                                                            <i class="fa fa-pencil"></i> Input Presensi
+                                                            <i class="fa fa-pencil"></i> 
                                                         </a>
                                                     </td>
                                                 </tr>

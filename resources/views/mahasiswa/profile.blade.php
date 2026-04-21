@@ -90,6 +90,17 @@
                                 @endif
 
                                 <div class="small text-muted mb-3">NIM: {{ $mahasiswa->nim ?? '-' }}</div>
+                                <div class="small text-muted mb-3 text-start">
+                                    <div>Dosen Wali:</div>
+                                    <div class="fw-semibold text-dark">{{ $dosenWali->nama_lengkap ?? '-' }}</div>
+                                    @if(!empty($dosenWali) && (!empty($dosenWali->nidn) || !empty($dosenWali->npp)))
+                                        <div>
+                                            @if(!empty($dosenWali->nidn)) NIDN: {{ $dosenWali->nidn }} @endif
+                                            @if(!empty($dosenWali->nidn) && !empty($dosenWali->npp)) | @endif
+                                            @if(!empty($dosenWali->npp)) NPP: {{ $dosenWali->npp }} @endif
+                                        </div>
+                                    @endif
+                                </div>
 
                                 <form action="{{ route('mahasiswa.profile.upload-photo') }}" method="POST" enctype="multipart/form-data">
                                     @csrf

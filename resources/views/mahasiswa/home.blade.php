@@ -23,18 +23,89 @@
 <div class="content-body">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-xl-9 col-lg-10 col-md-12">
+            <div class="col-xl-6 col-lg-6 col-md-12">
                 <div class="card shadow-sm border-0">
-                    <div class="card-body p-4 p-lg-5 text-center">
-                        <img src="{{ asset('images/logo-full.png') }}" class="mb-4" style="max-height: 52px;" alt="">
+                    <div class="card-body p-4 p-lg-5">
                         <h3 class="mb-2">Selamat datang, {{ $mahasiswa->nama ?? $mahasiswa->nim }}</h3>
-                        <p class="text-muted mb-4">Anda berhasil login sebagai mahasiswa.</p>
+                        <p class="text-muted mb-3">Anda berhasil login sebagai mahasiswa.</p>
+                        <span class="badge bg-primary px-3 py-2">NIM: {{ $mahasiswa->nim }}</span>
+                    </div>
+                </div>
+            </div>
 
-                        <div class="mb-3">
-                            <span class="badge bg-primary px-3 py-2">NIM: {{ $mahasiswa->nim }}</span>
+            <div class="col-xl-3 col-lg-3 col-md-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4 d-flex flex-column justify-content-center">
+                        <span class="text-black d-block mb-2">IPS</span>
+                        <h2 class="mb-0">{{ number_format((float) ($ips ?? 0), 2) }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-lg-3 col-md-6">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4 d-flex flex-column justify-content-center">
+                        <span class="text-black d-block mb-2">IPK</span>
+                        <h2 class="mb-0">{{ number_format((float) ($ipk ?? 0), 2) }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 mt-2">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Kartu Rencana Studi (KRS)</h5>
+                            <span class="badge bg-primary">Total SKS: {{ $totalSksKrs ?? 0 }}</span>
                         </div>
 
-                        <p class="text-muted mb-0">Silakan pilih menu di sidebar untuk mengakses fitur mahasiswa.</p>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60px;">No</th>
+                                        <th>Kode MK</th>
+                                        <th>Nama Mata Kuliah</th>
+                                        <th style="width: 80px;">SKS</th>
+                                        <th>Hari</th>
+                                        <th>Sesi</th>
+                                        <th>Ruang</th>
+                                        <th>Dosen</th>
+                                        <th style="width: 110px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse(($krsRows ?? collect()) as $idx => $row)
+                                        @php
+                                            $ruangRaw = (string) ($row->ruang ?? '');
+                                            $ruangDecoded = urldecode($ruangRaw);
+                                            $ruangClean = preg_replace('/\s+/', ' ', trim($ruangDecoded));
+                                        @endphp
+                                        <tr>
+                                            <td>{{ $idx + 1 }}</td>
+                                            <td>{{ $row->mata_kuliah ?? '-' }}</td>
+                                            <td>{{ $row->nama_mata_kuliah ?? $row->mata_kuliah ?? '-' }}</td>
+                                            <td>{{ (int) ($row->sks ?? 0) }}</td>
+                                            <td>{{ $row->hari ?? '-' }}</td>
+                                            <td>{{ $row->sesi ?? '-' }}</td>
+                                            <td>{{ $ruangClean !== '' ? $ruangClean : '-' }}</td>
+                                            <td>{{ trim((string) ($row->nama_dosen ?? '-')) }}</td>
+                                            <td>
+                                                @if((int) ($row->is_publish ?? 0) === 1)
+                                                    <span class="badge bg-success">Publish</span>
+                                                @else
+                                                    <span class="badge bg-warning text-dark">Draft</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="9" class="text-center text-muted">Belum ada data KRS untuk mahasiswa ini.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

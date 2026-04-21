@@ -121,9 +121,52 @@ Route::middleware('auth:pegawai')->group(function () {
     Route::get('/pegawai/home', function () {
         $pegawai = Auth::guard('pegawai')->user();
 
+        // Count mahasiswa perwalian
+        $mahasiswaPerwalianCount = DB::table('mahasiswa')
+            ->where('id_dsn_wali', (int) $pegawai->id)
+            ->where('status', 1)
+            ->count();
+
+        // Get pegawai biodata untuk KRM
+        $biodataId = DB::table('pegawai_biodata')
+            ->select('id')
+            ->where('id_pegawai', (int) $pegawai->id)
+            ->value('id');
+
+        $krmList = collect();
+        if ($biodataId) {
+            $krmList = DB::table('master_jadwal_temp as mjt')
+                ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
+                ->where(function ($q) use ($biodataId) {
+                    $q->where('mjt.id_dosen', $biodataId)
+                      ->orWhere('mjt.id_dosen2', $biodataId);
+                })
+                ->select(
+                    'mjt.id',
+                    'mjt.kode_mata_kuliah',
+                    'mmk.nama_mata_kuliah',
+                    'mmk.jumlah_sks as sks',
+                    'mjt.hari',
+                    'mjt.sesi',
+                    'mjt.ruang',
+                    'mjt.rps'
+                )
+                ->orderBy('mjt.kode_mata_kuliah')
+                ->get();
+        }
+
+        // Get dosenInfo untuk tampilan
+        $dosenInfo = DB::table('pegawai_biodata')
+            ->select('nama_lengkap', 'nidn')
+            ->where('id_pegawai', (int) $pegawai->id)
+            ->first();
+
         return view('pegawai.home', [
             'CurrentPage' => 'content',
             'pegawai' => $pegawai,
+            'mahasiswaPerwalianCount' => $mahasiswaPerwalianCount,
+            'krmList' => $krmList,
+            'dosenInfo' => $dosenInfo,
         ]);
     })->name('pegawai.home');
 
@@ -135,6 +178,7 @@ Route::middleware('auth:pegawai')->group(function () {
     Route::get('/pegawai/biodata/cv-excel', [PegawaiBiodataController::class, 'downloadCvExcel'])->name('pegawai.biodata.cv-excel');
     Route::get('/akademik/perwalian/dosen', [PegawaiPerwalianController::class, 'index'])->name('pegawai.perwalian.index');
     Route::post('/akademik/perwalian/dosen/verifikasi-krs', [PegawaiPerwalianController::class, 'verifikasiKrs'])->name('pegawai.perwalian.verifikasi-krs');
+    Route::get('/akademik/perwalian/dosen/get-krs', [PegawaiPerwalianController::class, 'getKrs'])->name('pegawai.perwalian.get-krs');
 
     Route::get('/dosen/ujian', [PegawaiNilaiController::class, 'index'])->name('pegawai.nilai.index');
     Route::get('/dosen/ujian/input/{id_jadwal}', [PegawaiNilaiController::class, 'input'])->name('pegawai.nilai.input');
@@ -245,9 +289,117 @@ Route::middleware('auth:mahasiswa')->group(function () {
     Route::get('/mahasiswa/home', function () {
         $mahasiswa = Auth::guard('mahasiswa')->user();
 
+        $tipeMhs = (int) ($mahasiswa->tipe_mhs ?? 0);
+        $tahunAktif = DB::table('master_tahun_ajaran')
+            ->where('is_aktif', 1)
+            ->where('tipe_mhs', $tipeMhs)
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$tahunAktif) {
+            $tahunAktif = DB::table('master_tahun_ajaran')
+                ->where('tipe_mhs', $tipeMhs)
+                ->orderByDesc('id')
+                ->first();
+        }
+
+        $idTahunKrs = (int) ($tahunAktif->id ?? 0);
+        if ($idTahunKrs <= 0) {
+            $idTahunKrs = (int) DB::table('master_krs_temp')
+                ->where('nim', $mahasiswa->nim)
+                ->orderByDesc('id_tahun')
+                ->value('id_tahun');
+        }
+
+        $krsRows = collect();
+        if ($idTahunKrs > 0) {
+            $krsRows = DB::table('master_krs_temp as mkt')
+                ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mkt.mata_kuliah')
+                ->leftJoin('pegawai_biodata as pb', 'pb.id', '=', 'mkt.id_dosen')
+                ->select(
+                    'mkt.id',
+                    'mkt.mata_kuliah',
+                    'mkt.sks',
+                    'mkt.hari',
+                    'mkt.sesi',
+                    'mkt.ruang',
+                    'mkt.is_publish',
+                    'mmk.nama_mata_kuliah',
+                    DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen")
+                )
+                ->where('mkt.nim', $mahasiswa->nim)
+                ->where('mkt.id_tahun', $idTahunKrs)
+                ->orderBy('mkt.id')
+                ->get();
+        }
+
+        $nilaiRowsAll = DB::table('master_nilai as mn')
+            ->leftJoin('master_jadwal_temp as mjt', function ($join) {
+                $join->on('mjt.id', '=', 'mn.id_jadwal')
+                    ->on('mjt.id_tahun', '=', 'mn.id_tahun');
+            })
+            ->leftJoin('master_jadwal as mj', function ($join) {
+                $join->on('mj.id_jadwal', '=', 'mn.id_jadwal')
+                    ->on('mj.id_tahun', '=', 'mn.id_tahun');
+            })
+            ->leftJoin('master_mata_kuliah as mmk_t', 'mmk_t.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
+            ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mj.kode_mata_kuliah')
+            ->select(
+                'mn.id_tahun',
+                'mn.nhuruf',
+                'mn.nakhir',
+                DB::raw('COALESCE(mmk_t.jumlah_sks, mmk.jumlah_sks, 0) as jumlah_sks')
+            )
+            ->where('mn.nim', $mahasiswa->nim)
+            ->get();
+
+        $calculateIp = function ($rows): float {
+            $totalSks = 0;
+            $totalPoint = 0.0;
+
+            foreach ($rows as $row) {
+                $sks = (int) ($row->jumlah_sks ?? 0);
+                if ($sks <= 0) {
+                    continue;
+                }
+
+                $nilaiHuruf = strtoupper(trim((string) ($row->nhuruf ?? '')));
+                if ($nilaiHuruf === '' && $row->nakhir !== null && $row->nakhir !== '' && function_exists('nmutu')) {
+                    $nilaiHuruf = (string) nmutu((float) $row->nakhir);
+                }
+
+                $totalSks += $sks;
+                $totalPoint += ((float) (function_exists('nbobot') ? nbobot($nilaiHuruf) : 0.0) * $sks);
+            }
+
+            return $totalSks > 0 ? ($totalPoint / $totalSks) : 0.0;
+        };
+
+        $ips = 0.0;
+        if ($idTahunKrs > 0) {
+            $ipsRekap = DB::table('rekap_ips')
+                ->where('id_mhs', $mahasiswa->nim)
+                ->where('id_ta', $idTahunKrs)
+                ->orderByDesc('id')
+                ->value('ips');
+
+            if ($ipsRekap !== null && $ipsRekap !== '') {
+                $ips = (float) $ipsRekap;
+            } else {
+                $nilaiRowsSemester = $nilaiRowsAll->where('id_tahun', $idTahunKrs)->values();
+                $ips = $calculateIp($nilaiRowsSemester);
+            }
+        }
+
+        $ipk = $calculateIp($nilaiRowsAll);
+
         return view('mahasiswa.home', [
             'CurrentPage' => 'page-login',
             'mahasiswa' => $mahasiswa,
+            'ips' => $ips,
+            'ipk' => $ipk,
+            'krsRows' => $krsRows,
+            'totalSksKrs' => (int) $krsRows->sum('sks'),
         ]);
     })->name('mahasiswa.home');
 

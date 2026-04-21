@@ -14,11 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->redirectGuestsTo(function (Request $request) {
-            if ($request->is('mhs/*') || $request->is('mahasiswa/*')) {
+            if ($request->routeIs('mahasiswa.*') || $request->is('mhs') || $request->is('mhs/*') || $request->is('mahasiswa') || $request->is('mahasiswa/*')) {
                 return route('mahasiswa.login');
             }
 
-            if ($request->is('pegawai/*') || $request->is('dosen/*') || $request->is('akademik/*')) {
+            if ($request->routeIs('pegawai.*') || $request->is('pegawai') || $request->is('pegawai/*') || $request->is('dosen') || $request->is('dosen/*') || $request->is('akademik') || $request->is('akademik/*')) {
                 return route('pegawai.login');
             }
 
@@ -31,11 +31,20 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json(['message' => $e->getMessage()], 401);
             }
 
-            if ($request->is('mhs/*') || $request->is('mahasiswa/*')) {
+            $guards = $e->guards();
+            if (in_array('mahasiswa', $guards, true)) {
                 return redirect()->guest(route('mahasiswa.login'));
             }
 
-            if ($request->is('pegawai/*') || $request->is('dosen/*') || $request->is('akademik/*')) {
+            if (in_array('pegawai', $guards, true)) {
+                return redirect()->guest(route('pegawai.login'));
+            }
+
+            if ($request->routeIs('mahasiswa.*') || $request->is('mhs') || $request->is('mhs/*') || $request->is('mahasiswa') || $request->is('mahasiswa/*')) {
+                return redirect()->guest(route('mahasiswa.login'));
+            }
+
+            if ($request->routeIs('pegawai.*') || $request->is('pegawai') || $request->is('pegawai/*') || $request->is('dosen') || $request->is('dosen/*') || $request->is('akademik') || $request->is('akademik/*')) {
                 return redirect()->guest(route('pegawai.login'));
             }
 

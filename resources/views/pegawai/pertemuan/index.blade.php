@@ -59,8 +59,8 @@
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <a href="{{ url('dosen/pertemuan/' . $row->id) }}" class="btn btn-success btn-sm">
-                                                        <i class="fa-solid fa-calendar-check me-1"></i> Set Pertemuan
+                                                    <a href="{{ url('dosen/pertemuan/' . $row->id) }}" class="btn btn-success btn-sm" title="Set Pertemuan">
+                                                        <i class="fa-solid fa-calendar-check me-1"></i> 
                                                     </a>
                                                 </td>
                                             </tr>

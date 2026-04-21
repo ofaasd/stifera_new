@@ -84,17 +84,31 @@
                                                     @endif
                                                 </td>
                                                 <td class="text-center">
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-sm btn-primary btn-verifikasi-krs"
-                                                        data-nim="{{ $mhs->nim }}"
-                                                        data-nama="{{ $mhs->nama }}"
-                                                        data-status="{{ $mhs->status_krs }}"
-                                                        data-bs-toggle="modal"
-                                                        data-bs-target="#modalVerifikasiKrs"
-                                                    >
-                                                        <i class="fa-solid fa-clipboard-check me-1"></i> Verifikasi KRS
-                                                    </button>
+                                                    <div class="btn-group" role="group">
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-sm btn-info btn-lihat-krs"
+                                                            data-nim="{{ $mhs->nim }}"
+                                                            data-nama="{{ $mhs->nama }}"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#modalLihatKrs"
+                                                            title="Lihat KRS"
+                                                        >
+                                                            <i class="fa-solid fa-list me-1"></i> 
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-sm btn-primary btn-verifikasi-krs"
+                                                            data-nim="{{ $mhs->nim }}"
+                                                            data-nama="{{ $mhs->nama }}"
+                                                            data-status="{{ $mhs->status_krs }}"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#modalVerifikasiKrs"
+                                                            title="Verifikasi KRS"
+                                                        >
+                                                            <i class="fa-solid fa-clipboard-check me-1"></i> 
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @empty
@@ -108,6 +122,32 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal Lihat KRS --}}
+<div class="modal fade" id="modalLihatKrs" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fa-solid fa-list me-2"></i>Daftar KRS</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">Mahasiswa: <strong id="modal-lihat-nama-mhs">-</strong></p>
+                <p class="mb-3">NIM: <code id="modal-lihat-nim-mhs">-</code></p>
+                <div id="krs-table-container" style="max-height: 400px; overflow-y: auto;">
+                    <div class="text-center py-4">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
             </div>
         </div>
     </div>
@@ -159,6 +199,42 @@
         });
 
         // Isi modal dengan data baris yang diklik
+        $(document).on('click', '.btn-lihat-krs', function () {
+            var nim  = $(this).data('nim');
+            var nama = $(this).data('nama');
+            $('#modal-lihat-nim-mhs').text(nim);
+            $('#modal-lihat-nama-mhs').text(nama);
+            
+            // Fetch KRS data
+            $.ajax({
+                url: '{{ route("pegawai.perwalian.get-krs") }}',
+                type: 'GET',
+                dataType: 'json',
+                data: { nim: nim },
+                success: function (res) {
+                    if (res.result == 1 && res.data.length > 0) {
+                        var html = '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Kode MK</th><th>Nama Mata Kuliah</th><th>SKS</th><th>Status</th></tr></thead><tbody>';
+                        var totalSks = 0;
+                        res.data.forEach(function (row) {
+                            var statusBadge = row.is_publish == 1 ? '<span class="badge bg-success">Disetujui</span>' : '<span class="badge bg-warning">Belum Disetujui</span>';
+                            var kodeMk = row.mata_kuliah ? row.mata_kuliah : '-';
+                            var namaMk = row.nama_mata_kuliah ? row.nama_mata_kuliah : kodeMk;
+                            var sks = (row.sks !== null && row.sks !== undefined && row.sks !== '') ? parseFloat(row.sks) : 0;
+                            totalSks += sks;
+                            html += '<tr><td>' + kodeMk + '</td><td>' + namaMk + '</td><td class="text-center">' + sks + '</td><td>' + statusBadge + '</td></tr>';
+                        });
+                        html += '</tbody><tfoot><tr><th colspan="2" class="text-end">Total SKS</th><th class="text-center">' + totalSks + '</th><th></th></tr></tfoot></table>';
+                        $('#krs-table-container').html(html);
+                    } else {
+                        $('#krs-table-container').html('<div class="alert alert-info">Belum ada KRS yang diambil mahasiswa ini.</div>');
+                    }
+                },
+                error: function () {
+                    $('#krs-table-container').html('<div class="alert alert-danger">Terjadi kesalahan saat memuat data KRS.</div>');
+                }
+            });
+        });
+
         $(document).on('click', '.btn-verifikasi-krs', function () {
             var nim   = $(this).data('nim');
             var nama  = $(this).data('nama');

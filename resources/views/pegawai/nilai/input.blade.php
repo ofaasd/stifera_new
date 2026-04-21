@@ -55,7 +55,7 @@
                     @endif
 
                     {{-- Kartu Info Jadwal + Kontrol --}}
-                    <div class="card mb-4">
+                    <div class="card mb-4" style="height: auto;">
                         <div class="card-body">
                             <div class="row mb-3">
                                 <div class="col-md-6">

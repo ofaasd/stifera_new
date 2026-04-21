@@ -45,10 +45,10 @@
                                                     <td>{{ $a->hari . ', ' . $a->sesi . '  ' . $a->ruang }}</td>
                                                     <td>
                                                         <a href="{{ url('dosen/pertemuan/' . $a->id) }}" class="btn btn-sm btn-primary" title="Set Pertemuan">
-                                                            <i class="fa fa-calendar"></i> Set Pertemuan
+                                                            <i class="fa fa-calendar"></i> 
                                                         </a>
                                                         <a href="{{ url('dosen/presensi/tanggal/' . $a->id) }}" class="btn btn-sm btn-success" title="Set Presensi">
-                                                            <i class="fa fa-check-square"></i> Set Presensi
+                                                            <i class="fa fa-check-square"></i> 
                                                         </a>
                                                     </td>
                                                 </tr>
