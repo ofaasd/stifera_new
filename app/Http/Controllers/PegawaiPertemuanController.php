@@ -181,7 +181,7 @@ class PegawaiPertemuanController extends Controller
 
         $validated = $request->validate([
             'id_pertemuan' => 'required|integer|min:1|max:16',
-            'durasi'       => 'required|in:5,10,15',
+            'durasi'       => 'required|in:5,10,15,30',
         ]);
 
         $pertemuan = MasterPertemuan::where('id_jadwal', (int) $idJadwal)

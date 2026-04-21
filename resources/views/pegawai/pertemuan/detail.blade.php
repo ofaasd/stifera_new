@@ -194,6 +194,7 @@
                         <button type="button" class="btn btn-outline-primary btn-durasi" data-durasi="5">5 Menit</button>
                         <button type="button" class="btn btn-outline-primary btn-durasi" data-durasi="10">10 Menit</button>
                         <button type="button" class="btn btn-outline-primary btn-durasi" data-durasi="15">15 Menit</button>
+                        <button type="button" class="btn btn-outline-primary btn-durasi" data-durasi="30">30 Menit</button>
                     </div>
                     <input type="hidden" id="selected-durasi" value="">
                 </div>

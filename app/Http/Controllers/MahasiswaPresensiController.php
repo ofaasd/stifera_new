@@ -61,7 +61,7 @@ class MahasiswaPresensiController extends Controller
             ->join('master_mata_kuliah as mmk', 'mjt.kode_mata_kuliah', '=', 'mmk.kode_mata_kuliah')
             ->leftJoin('pegawai_biodata as pb', 'mjt.id_dosen', '=', 'pb.id')
             ->where('mkt.nim', $nim)
-            ->when($idTahun, fn ($q) => $q->where('mjt.id_tahun', $idTahun))
+            ->when($idTahun, fn ($q) => $q->where('mkt.id_tahun', $idTahun))
             ->orderBy('mmk.nama_mata_kuliah')
             ->get();
     }
