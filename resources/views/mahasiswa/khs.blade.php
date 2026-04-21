@@ -277,11 +277,7 @@
             });
         }
 
-        $('.table-mhs-khs-history').DataTable({
-            responsive: true,
-            pageLength: 10,
-            ordering: false
-        });
+        
     });
 </script>
 @endsection

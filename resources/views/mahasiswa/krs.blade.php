@@ -181,12 +181,6 @@
 
 @section('local-js')
 <script>
-    $(document).ready(function () {
-        $('#table-mhs-krs').DataTable({
-            responsive: true,
-            pageLength: 25,
-            ordering: false
-        });
-    });
+    
 </script>
 @endsection
