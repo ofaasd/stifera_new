@@ -67,7 +67,7 @@ class MahasiswaPresensiController extends Controller
     }
 
     /**
-     * Returns array keyed by id_jadwal, value = Collection of pertemuan rows ordered by tgl_pertemuan.
+     * Returns array keyed by id_jadwal, value = Collection of pertemuan rows ordered by id_pertemuan.
      */
     private function getPertemuanMap(array $idJadwalList): array
     {
@@ -77,7 +77,7 @@ class MahasiswaPresensiController extends Controller
 
         $rows = DB::table('master_pertemuan')
             ->whereIn('id_jadwal', $idJadwalList)
-            ->orderBy('tgl_pertemuan')
+            ->orderBy('id_pertemuan')
             ->get();
 
         $map = [];
@@ -182,7 +182,7 @@ class MahasiswaPresensiController extends Controller
                 }
 
                 $pertemuanDetails[] = [
-                    'pertemuan_ke' => $idx + 1,
+                    'pertemuan_ke' => (int) ($pertemuan->id_pertemuan ?? ($idx + 1)),
                     'tanggal'      => $pertemuan->tgl_pertemuan,
                     'status'       => $status,
                 ];

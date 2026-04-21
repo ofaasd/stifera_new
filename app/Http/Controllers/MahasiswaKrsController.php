@@ -19,11 +19,18 @@ class MahasiswaKrsController extends Controller
         $tahunAktif = $this->getTahunAktifByTipe((int) ($mahasiswa->tipe_mhs ?? 0));
 
         $isKrsDiizinkan = false;
+        $isKrsDisetujuiWali = false;
         if ($tahunAktif) {
             $isKrsDiizinkan = DB::table('master_keuangan_mhs')
                 ->where('id_mahasiswa', (int) $mahasiswa->id)
                 ->where('id_tahun_ajaran', (int) $tahunAktif->id)
                 ->where('krs', 1)
+                ->exists();
+
+            $isKrsDisetujuiWali = DB::table('master_krs_temp')
+                ->where('nim', $mahasiswa->nim)
+                ->where('id_tahun', (int) $tahunAktif->id)
+                ->where('is_publish', 1)
                 ->exists();
         }
 
@@ -45,6 +52,7 @@ class MahasiswaKrsController extends Controller
             'mahasiswa' => $mahasiswa,
             'tahunAktif' => $tahunAktif,
             'isKrsDiizinkan' => $isKrsDiizinkan,
+            'isKrsDisetujuiWali' => $isKrsDisetujuiWali,
             'krsRows' => $krsRows,
             'jadwalTersedia' => $jadwalTersedia,
             'totalSks' => (int) $krsRows->sum('sks'),
@@ -80,6 +88,16 @@ class MahasiswaKrsController extends Controller
 
         if (!$isKrsDiizinkan) {
             return redirect()->to(url('mhs/krs'))->with('error', 'Input KRS belum diizinkan oleh admin keuangan.');
+        }
+
+        $isKrsDisetujuiWali = DB::table('master_krs_temp')
+            ->where('nim', $mahasiswa->nim)
+            ->where('id_tahun', (int) $tahunAktif->id)
+            ->where('is_publish', 1)
+            ->exists();
+
+        if ($isKrsDisetujuiWali) {
+            return redirect()->to(url('mhs/krs'))->with('error', 'KRS Anda sudah disetujui dosen wali, sehingga tidak dapat menambah mata kuliah lagi.');
         }
 
         $idJadwal = (int) $request->input('id_jadwal');

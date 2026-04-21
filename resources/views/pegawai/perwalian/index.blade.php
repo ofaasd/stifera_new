@@ -213,17 +213,17 @@
                 data: { nim: nim },
                 success: function (res) {
                     if (res.result == 1 && res.data.length > 0) {
-                        var html = '<table class="table table-sm table-bordered mb-0"><thead><tr><th>Kode MK</th><th>Nama Mata Kuliah</th><th>SKS</th><th>Status</th></tr></thead><tbody>';
+                        var html = '<table class="table table-sm table-bordered mb-0"><thead><tr><th style="width:60px" class="text-center">No</th><th>Kode MK</th><th>Nama Mata Kuliah</th><th>SKS</th><th>Status</th></tr></thead><tbody>';
                         var totalSks = 0;
-                        res.data.forEach(function (row) {
+                        res.data.forEach(function (row, idx) {
                             var statusBadge = row.is_publish == 1 ? '<span class="badge bg-success">Disetujui</span>' : '<span class="badge bg-warning">Belum Disetujui</span>';
                             var kodeMk = row.mata_kuliah ? row.mata_kuliah : '-';
                             var namaMk = row.nama_mata_kuliah ? row.nama_mata_kuliah : kodeMk;
                             var sks = (row.sks !== null && row.sks !== undefined && row.sks !== '') ? parseFloat(row.sks) : 0;
                             totalSks += sks;
-                            html += '<tr><td>' + kodeMk + '</td><td>' + namaMk + '</td><td class="text-center">' + sks + '</td><td>' + statusBadge + '</td></tr>';
+                            html += '<tr><td class="text-center">' + (idx + 1) + '</td><td>' + kodeMk + '</td><td>' + namaMk + '</td><td class="text-center">' + sks + '</td><td>' + statusBadge + '</td></tr>';
                         });
-                        html += '</tbody><tfoot><tr><th colspan="2" class="text-end">Total SKS</th><th class="text-center">' + totalSks + '</th><th></th></tr></tfoot></table>';
+                        html += '</tbody><tfoot><tr><th colspan="3" class="text-end">Total SKS</th><th class="text-center">' + totalSks + '</th><th></th></tr></tfoot></table>';
                         $('#krs-table-container').html(html);
                     } else {
                         $('#krs-table-container').html('<div class="alert alert-info">Belum ada KRS yang diambil mahasiswa ini.</div>');

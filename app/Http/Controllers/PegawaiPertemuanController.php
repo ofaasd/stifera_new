@@ -198,7 +198,7 @@ class PegawaiPertemuanController extends Controller
         if ($isRegenerate && !$isConfirmedRegenerate) {
             return response()->json([
                 'success' => false,
-                'message' => 'Generate ulang membutuhkan konfirmasi karena semua mahasiswa akan di-set tidak hadir (status 0).',
+                'message' => 'Generate ulang membutuhkan konfirmasi.',
             ], 422);
         }
 
@@ -206,30 +206,34 @@ class PegawaiPertemuanController extends Controller
         $expiredKode = Carbon::now()->addMinutes((int) $validated['durasi']);
         $pesertaCount = 0;
 
-        DB::transaction(function () use ($pertemuan, $kode, $expiredKode, $idJadwal, &$pesertaCount) {
+        DB::transaction(function () use ($pertemuan, $kode, $expiredKode, $idJadwal, $isRegenerate, &$pesertaCount) {
             $pertemuan->kode_kelas   = $kode;
             $pertemuan->expired_kode = $expiredKode;
             $pertemuan->save();
 
-            $nimList = DB::table('master_krs_temp')
-                ->where('id_jadwal', (int) $idJadwal)
-                ->pluck('nim');
+            // Saat regenerate, hanya perbarui kode & waktu expired saja.
+            // Status presensi mahasiswa tidak diubah.
+            if (!$isRegenerate) {
+                $nimList = DB::table('master_krs_temp')
+                    ->where('id_jadwal', (int) $idJadwal)
+                    ->pluck('nim');
 
-            $pesertaCount = $nimList->count();
+                $pesertaCount = $nimList->count();
 
-            foreach ($nimList as $nim) {
-                DB::table('master_presensi')->updateOrInsert(
-                    [
-                        'nim'           => (string) $nim,
-                        'id_jadwal'     => (int) $idJadwal,
-                        'tgl_pertemuan' => $pertemuan->tgl_pertemuan,
-                    ],
-                    [
-                        'status'   => 0,
-                        'ttd'      => null,
-                        'log_date' => Carbon::now(),
-                    ]
-                );
+                foreach ($nimList as $nim) {
+                    DB::table('master_presensi')->updateOrInsert(
+                        [
+                            'nim'           => (string) $nim,
+                            'id_jadwal'     => (int) $idJadwal,
+                            'tgl_pertemuan' => $pertemuan->tgl_pertemuan,
+                        ],
+                        [
+                            'status'   => 0,
+                            'ttd'      => null,
+                            'log_date' => Carbon::now(),
+                        ]
+                    );
+                }
             }
         });
 

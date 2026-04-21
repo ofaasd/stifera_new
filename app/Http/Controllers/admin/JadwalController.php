@@ -239,6 +239,7 @@ class JadwalController extends Controller
             'hari' => 'required|string',
             'sesi' => 'required|string',
             'ruang' => 'required|string',
+            'kuota_diambil' => 'nullable|integer|min:0',
             'status' => 'required|in:0,1',
         ]);
 
@@ -260,7 +261,7 @@ class JadwalController extends Controller
             'rombel' => $jadwal->rombel,
             'tipe_mhs' => (int) $jadwal->tipe_mhs,
             'status' => (int) $request->status,
-            'kuota_diambil' => (int) ($jadwal->kuota_diambil ?? 0),
+            'kuota_diambil' => (int) $request->input('kuota_diambil', (int) ($jadwal->kuota_diambil ?? 0)),
             'rps' => $jadwal->rps,
             'kp' => $jadwal->kp,
         ]];
@@ -276,6 +277,7 @@ class JadwalController extends Controller
             'hari' => $request->hari,
             'sesi' => $request->sesi,
             'ruang' => $request->ruang,
+            'kuota_diambil' => (int) $request->input('kuota_diambil', (int) ($jadwal->kuota_diambil ?? 0)),
             'status' => (int) $request->status,
         ]);
 
@@ -520,6 +522,7 @@ class JadwalController extends Controller
                 $hari = $r['hari'] ?? null;
                 $sesi = $r['sesi'] ?? null;
                 $ruang = $r['ruang'] ?? null;
+                $kuotaDiambil = isset($r['kuota_diambil']) ? max(0, (int) $r['kuota_diambil']) : null;
                 $status = isset($r['status']) ? (int) $r['status'] : 0;
 
                 if (empty($idDosen) || empty($hari) || empty($sesi) || empty($ruang)) {
@@ -548,7 +551,7 @@ class JadwalController extends Controller
                     'rombel' => $rombel,
                     'tipe_mhs' => $tipeMhs,
                     'status' => $status,
-                    'kuota_diambil' => $existing?->kuota_diambil ?? 0,
+                    'kuota_diambil' => $kuotaDiambil ?? (int) ($existing?->kuota_diambil ?? 0),
                     'rps' => $existing?->rps,
                     'kp' => $existing?->kp,
                 ];

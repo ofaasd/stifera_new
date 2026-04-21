@@ -78,7 +78,7 @@
                             <div class="alert alert-warning mb-0">
                                 Data tahun ajaran untuk tipe mahasiswa Anda belum tersedia.
                             </div>
-                        @elseif($isKrsDiizinkan)
+                        @elseif($isKrsDiizinkan && !$isKrsDisetujuiWali)
                             <div class="alert alert-success">
                                 <i class="fa fa-check-circle me-1"></i>
                                 Anda diizinkan admin untuk melakukan input KRS semester berjalan.
@@ -115,6 +115,11 @@
                             @if($jadwalTersedia->isEmpty())
                                 <p class="text-muted small mt-2 mb-0">Tidak ada jadwal baru yang dapat diambil untuk saat ini.</p>
                             @endif
+                        @elseif($isKrsDisetujuiWali)
+                            <div class="alert alert-info mb-0">
+                                <i class="fa fa-lock me-1"></i>
+                                KRS Anda sudah disetujui dosen wali. Penambahan KRS dinonaktifkan.
+                            </div>
                         @else
                             <div class="alert alert-warning mb-0">
                                 <i class="fa fa-lock me-1"></i>

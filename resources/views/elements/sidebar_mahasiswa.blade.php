@@ -13,6 +13,7 @@
                     <span class="nav-text">Dashboard</span>
                 </a>
             </li>
+            
 
             <li>
                 <a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
@@ -28,10 +29,16 @@
                     <li><a href="{{ url('mhs/daftar_nilai') }}">Daftar Nilai</a></li>
                     <li><a href="{{ url('mhs/matakuliah') }}">Mata kuliah</a></li>
                     <li><a href="{{ url('mhs/keuangan') }}">Keuangan</a></li>
-                    <li><a href="{{ url('mhs/presensi') }}">Presensi</a></li>
                 </ul>
             </li>
-
+            <li>
+                <a href="{{ url('mhs/presensi') }}" aria-expanded="false">
+                    <div class="menu-icon">
+                        <i class="fa fa-key"></i>
+                    </div>
+                    <span class="nav-text">Presensi</span>
+                </a>
+            </li>
             <li>
                 <a class="has-arrow" href="javascript:void(0);" aria-expanded="false">
                     <div class="menu-icon">

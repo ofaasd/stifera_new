@@ -179,12 +179,12 @@
             <div class="modal-body">
                 <p class="text-muted small mb-3">Pilih durasi berlaku kode. Kode baru akan digenerate secara otomatis (6 karakter acak).</p>
                 <div id="regenerate-warning" class="alert alert-warning d-none" role="alert">
-                    <div class="fw-semibold mb-1">Peringatan Generate Ulang</div>
-                    <div class="small mb-2">Kode sudah pernah dibuat. Jika Anda generate ulang, seluruh mahasiswa pada pertemuan ini akan di-set ulang menjadi <strong>tidak hadir (status 0)</strong> dan tanda tangan akan direset.</div>
+                    <div class="fw-semibold mb-1">Konfirmasi Generate Ulang</div>
+                    <div class="small mb-2">Kode sudah pernah dibuat. Generate ulang hanya akan memperbarui kode dan waktu expired. <strong>Status presensi mahasiswa tidak akan berubah.</strong></div>
                     <div class="form-check mb-0">
                         <input class="form-check-input" type="checkbox" id="confirm-regenerate">
                         <label class="form-check-label small" for="confirm-regenerate">
-                            Saya memahami risiko reset presensi dan tetap ingin generate ulang.
+                            Saya ingin generate ulang kode untuk pertemuan ini.
                         </label>
                     </div>
                 </div>

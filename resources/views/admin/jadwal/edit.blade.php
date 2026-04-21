@@ -91,6 +91,17 @@
                                         </select>
                                     </div>
                                     <div class="col-md-3">
+                                        <label class="form-label">Kuota</label>
+                                        <input
+                                            type="number"
+                                            name="kuota_diambil"
+                                            class="form-control"
+                                            min="0"
+                                            value="{{ old('kuota_diambil', (int) ($jadwal->kuota_diambil ?? 0)) }}"
+                                            placeholder="0"
+                                        >
+                                    </div>
+                                    <div class="col-md-3">
                                         <label class="form-label">Status</label>
                                         <select name="status" class="form-control" required>
                                             <option value="0" {{ (string) old('status', $jadwal->status) === '0' ? 'selected' : '' }}>TUTUP</option>

@@ -148,6 +148,18 @@
                                                 </div>
 
                                                 <div class="col-md-1">
+                                                    <label>Kuota:</label>
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        name="rows[{{ $sectionKey }}][{{ $rombel }}][kuota_diambil]"
+                                                        class="form-control"
+                                                        value="{{ old('rows.' . $sectionKey . '.' . $rombel . '.kuota_diambil', (int) ($ex->kuota_diambil ?? 0)) }}"
+                                                        placeholder="0"
+                                                    >
+                                                </div>
+
+                                                <div class="col-md-1">
                                                     <label>Status:</label>
                                                     <select name="rows[{{ $sectionKey }}][{{ $rombel }}][status]" class="form-control">
                                                         <option value="0" {{ (string)old('rows.' . $sectionKey . '.' . $rombel . '.status', $ex->status ?? '0') === '0' ? 'selected' : '' }}>TUTUP</option>
