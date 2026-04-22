@@ -135,7 +135,7 @@
                                                         <td>
                                                             @if($tahunReguler)
                                                                 <a href="{{ url('master/krs/detail/' . $tahunReguler->id . '/' . $row->nim) }}" class="btn btn-primary btn-sm" title="Detail KRS">
-                                                                    <i class="fa fa-eye"></i> Detail
+                                                                    <i class="fa fa-eye"></i> 
                                                                 </a>
                                                             @endif
                                                         </td>

@@ -86,6 +86,37 @@ return [
     			]
     		]
 		],
+		'dashboard' => [
+			'title' => 'Dashboard',			
+			'mainwrapperclass' => '',
+			'sidebar-add-icon' => false,
+			'css' => [
+				'vendor/datatables/css/jquery.dataTables.min.css',
+			],
+			'js' => [
+				'vendor/chart.js/Chart.bundle.min.js',
+				'vendor/apexchart/apexchart.js',
+				'js/custom.js',
+			],
+			'seo' => [
+    			'page_title' => 'Dashboard',
+    			'meta' => [
+    				['name' => 'keywords', 'content' => 'NexaDash is a modern admin dashboard template built with Bootstrap 5. Featuring a clean and responsive design, it provides a range of customizable components and tools to efficiently manage and oversee various administrative tasks.'],
+    				['name' => 'author', 'content' => 'DexignZone'],
+    				['name' => 'robots', 'content' => 'index, follow'],
+    				['name' => 'viewport', 'content' => 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, minimal-ui, viewport-fit=cover'],
+    				['name' => 'description', 'content' => 'NexaDash Bootstrap 5 template, admin dashboard design, modern admin panel, responsive admin template, Bootstrap 5 admin components, administrative task management, customizable dashboard design, NexaDash features, Bootstrap admin template, user-friendly admin interface'],
+    				['property' => 'og:title', 'content' => 'NexaDash Admin Dashboard Bootstrap 5 Template'],
+    				['property' => 'og:description', 'content' => 'NexaDash Bootstrap 5 template, admin dashboard design, modern admin panel, responsive admin template, Bootstrap 5 admin components, administrative task management, customizable dashboard design, NexaDash features, Bootstrap admin template, user-friendly admin interface'],
+    				['property' => 'og:image', 'content' => 'https://nexadash.dexignzone.com/xhtml/social-image.png'],
+    				['name' => 'format-detection', 'content' => 'telephone=no'],
+    				['name' => 'twitter:title', 'content' => 'NexaDash Admin Dashboard Bootstrap 5 Template'],
+    				['name' => 'twitter:description', 'content' => 'NexaDash Bootstrap 5 template, admin dashboard design, modern admin panel, responsive admin template, Bootstrap 5 admin components, administrative task management, customizable dashboard design, NexaDash features, Bootstrap admin template, user-friendly admin interface'],
+    				['name' => 'twitter:image', 'content' => 'https://nexadash.dexignzone.com/xhtml/social-image.png'],
+    				['name' => 'twitter:card', 'content' => 'summary_large_image'],
+    			]
+    		]
+		],
 		'add-blog' => [
 			'title' => 'Add Blog',
 			'front-menu' => true,

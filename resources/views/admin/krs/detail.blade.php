@@ -36,6 +36,9 @@
                                 <a href="{{ url('master/krs') }}" class="btn btn-secondary">
                                     <i class="fa fa-arrow-left"></i> Kembali
                                 </a>
+                                <a href="{{ url('master/krs/download/' . $idTahun . '/' . ($mahasiswa->nim ?? '')) }}" class="btn btn-primary ms-2">
+                                    <i class="fa fa-download"></i> Download KRS
+                                </a>
                             </div>
 
                             {{-- Info Mahasiswa --}}
@@ -91,6 +94,11 @@
                                     </thead>
                                     <tbody>
                                         @forelse($krsRows as $idx => $row)
+                                            @php
+                                                $ruangRaw = (string) ($row->ruang ?? '');
+                                                $ruangDecoded = urldecode($ruangRaw);
+                                                $ruangClean = preg_replace('/\s+/', ' ', trim($ruangDecoded));
+                                            @endphp
                                             <tr>
                                                 <td>{{ $idx + 1 }}</td>
                                                 <td>{{ $row->mata_kuliah ?? '-' }}</td>
@@ -98,7 +106,7 @@
                                                 <td>{{ $row->sks ?? '-' }}</td>
                                                 <td>{{ $row->hari ?? '-' }}</td>
                                                 <td>{{ $row->sesi ?? '-' }}</td>
-                                                <td>{{ $row->ruang ?? '-' }}</td>
+                                                <td>{{ $ruangClean !== '' ? $ruangClean : '-' }}</td>
                                                 <td>{{ trim($row->nama_dosen ?? '-') }}</td>
                                                 <td>
                                                     @if((int)($row->ada_nilai ?? 0) === 1)

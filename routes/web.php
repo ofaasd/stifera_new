@@ -411,6 +411,8 @@ Route::middleware('auth:mahasiswa')->group(function () {
     Route::post('/mhs/krs', [MahasiswaKrsController::class, 'store'])->name('mahasiswa.krs.store');
     Route::get('/mhs/krs/download', [MahasiswaKrsController::class, 'download'])->name('mahasiswa.krs.download');
     Route::get('/mhs/khs', [MahasiswaKhsController::class, 'index'])->name('mahasiswa.khs.index');
+    Route::get('/mhs/khs/download', [MahasiswaKhsController::class, 'downloadKhs'])->name('mahasiswa.khs.download');
+    Route::get('/mhs/khs/download/{idTahun}', [MahasiswaKhsController::class, 'downloadKhs'])->name('mahasiswa.khs.download-year');
     Route::get('/mhs/ujian', [MahasiswaUjianController::class, 'index'])->name('mahasiswa.ujian.index');
     Route::get('/mhs/ujian/download/uts', [MahasiswaUjianController::class, 'downloadUts'])->name('mahasiswa.ujian.download.uts');
     Route::get('/mhs/ujian/download/uas', [MahasiswaUjianController::class, 'downloadUas'])->name('mahasiswa.ujian.download.uas');
@@ -466,6 +468,8 @@ Route::middleware('auth:admin')->group(function () {
     //Action KHS Tambahan
     Route::get('/master/khs/list_mhs', [KhsController::class, 'index']);
     Route::get('/master/khs/khs_detail/{id}', [KhsController::class, 'show']);
+    Route::get('/master/khs/cetak_khs', [KhsController::class, 'cetak_khs']);
+    Route::get('/master/khs/cetak_khs_history/{id_tahun_nim}', [KhsController::class, 'cetak_khs_history']);
 
     // Keuangan Mahasiswa
     Route::get('/master/keuangan', [KeuanganMahasiswaController::class, 'index']);
@@ -479,6 +483,7 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/master/krs', [KrsManagementController::class, 'index']);
     Route::get('/master/krs/download-log/{tipe_mhs}', [KrsManagementController::class, 'downloadLog']);
     Route::get('/master/krs/detail/{id_tahun}/{nim}', [KrsManagementController::class, 'showDetail']);
+    Route::get('/master/krs/download/{id_tahun}/{nim}', [KrsManagementController::class, 'downloadPdf']);
     Route::get('/master/krs/edit-krs/{id}', [KrsManagementController::class, 'editKrs']);
     Route::put('/master/krs/edit-krs/{id}', [KrsManagementController::class, 'updateKrs']);
     Route::delete('/master/krs/hapus-krs/{id}', [KrsManagementController::class, 'hapusKrs']);
@@ -510,6 +515,8 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/master/pengaturan-ujian', [PengaturanUjianController::class, 'index']);
     Route::get('/master/pengaturan-ujian/detail/{id_jadwal}', [PengaturanUjianController::class, 'detail']);
     Route::post('/master/pengaturan-ujian/detail/{id_jadwal}', [PengaturanUjianController::class, 'save']);
+    Route::get('/master/pengaturan-ujian/kursi/{id_jadwal}', [PengaturanUjianController::class, 'kursi']);
+    Route::post('/master/pengaturan-ujian/kursi/{id_jadwal}', [PengaturanUjianController::class, 'saveKursi']);
 
     //Action Presensi 
     Route::get('/master/presensi', [PresensiController::class, 'index']);

@@ -23,12 +23,13 @@ class PegawaiController extends Controller
         $title = 'Pegawai';
         $CurrentPage = 'content';
         $pegawai = PegawaiBiodatum::query()
-            ->select('p.*', 'b.*', 'j.nama as nama_jenis', 'p.id as pid', 
+            ->select('p.*', 'b.*', 'j.nama as nama_jenis', 'prodi.nama_jurusan as nama_homebase', 'p.id as pid', 
             \DB::raw('(SELECT jabatan_fungsional_sekarang FROM pegawai_jabatan_fungsional WHERE id_pegawai = p.id ORDER BY id DESC LIMIT 1) as jabatan_fungsional_sekarang'))
             ->from('pegawai as p')
             ->leftJoin('pegawai_biodata as b', 'b.id_pegawai', '=', 'p.id')
             ->leftJoin('pegawai_posisi as ps', 'ps.kode', '=', 'b.kd_posisi_pegawai')
             ->leftJoin('pegawai_jenis as j', 'j.id', '=', 'ps.id_jenis_pegawai')
+            ->leftJoin('program_studi as prodi', 'prodi.id', '=', 'b.id_progdi')
             ->where('p.status', '=',  1) 
             ->orderBy('p.nama', 'asc')
             ->groupBy('p.id')

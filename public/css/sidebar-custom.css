@@ -1,0 +1,78 @@
+/* Custom Sidebar Styling - Applied to all pages */
+
+:root {
+	--sidebar-bg: #1d69d6;
+}
+
+/* Ubah warna teks menu sidebar menjadi putih */
+.deznav .metismenu > li > a {
+	color: #ffffff;
+}
+
+/* Ubah warna icon menu sidebar menjadi putih */
+.deznav .metismenu > li > a i {
+	color: #ffffff;
+}
+
+/* Ubah warna SVG icon menu sidebar menjadi putih */
+.deznav .metismenu > li > a g [fill] {
+	fill: #ffffff;
+}
+
+/* Ubah warna icon pada hover */
+.deznav .metismenu > li:hover > a,
+.deznav .metismenu > li:focus > a {
+	color: #ffffff;
+}
+
+.deznav .metismenu > li:hover > a g [fill],
+.deznav .metismenu > li:focus > a g [fill] {
+	fill: #ffffff;
+}
+
+/* Ubah warna text active menu */
+.deznav .metismenu > li.mm-active > a {
+	color: #ffffff;
+}
+
+.deznav .metismenu > li.mm-active > a i {
+	color: #ffffff;
+}
+
+.deznav .metismenu > li.mm-active > a .menu-icon svg path {
+	fill: #ffffff;
+}
+
+.deznav .metismenu > li.mm-active > a g [fill] {
+	fill: #ffffff;
+}
+
+/* Ubah warna teks submenu menjadi putih */
+.deznav .metismenu > li ul > li > a {
+	color: #ffffff;
+}
+
+/* Ubah warna submenu pada hover */
+.deznav .metismenu > li ul > li > a:hover {
+	color: #ffffff;
+}
+
+/* Ubah warna submenu active */
+.deznav .metismenu > li ul > li.mm-active > a {
+	color: #ffffff;
+}
+
+/* Ubah warna icon submenu */
+.deznav .metismenu > li ul > li > a i {
+	color: #ffffff;
+}
+
+/* Ubah warna SVG icon submenu */
+.deznav .metismenu > li ul > li > a g [fill] {
+	fill: #ffffff;
+}
+
+/* Ubah warna path SVG submenu active */
+.deznav .metismenu > li ul > li.mm-active > a svg path {
+	fill: #ffffff;
+}

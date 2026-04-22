@@ -7,6 +7,7 @@ use App\Models\MasterKr;
 use App\Models\MasterKrsTemp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Mpdf\Mpdf;
 
 class KrsManagementController extends Controller
 {
@@ -235,6 +236,68 @@ class KrsManagementController extends Controller
         return view('admin.krs.detail', $data);
     }
 
+    public function downloadPdf(string $id_tahun, string $nim)
+    {
+        $idTahun = (int) $id_tahun;
+        $nimClean = trim($nim);
+
+        $mahasiswa = DB::table('mahasiswa')->where('nim', $nimClean)->first();
+        if (!$mahasiswa) {
+            return redirect('master/krs')->with('error', 'Mahasiswa tidak ditemukan.');
+        }
+
+        $tahun = DB::table('master_tahun_ajaran')->where('id', $idTahun)->first();
+        if (!$tahun) {
+            return redirect('master/krs')->with('error', 'Tahun ajaran tidak ditemukan.');
+        }
+
+        $krsRows = DB::table('master_krs_temp as mkt')
+            ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mkt.mata_kuliah')
+            ->select(
+                'mkt.*',
+                'mkt.mata_kuliah as kode_mata_kuliah',
+                'mmk.nama_mata_kuliah'
+            )
+            ->where('mkt.nim', $nimClean)
+            ->where('mkt.id_tahun', $idTahun)
+            ->orderBy('mkt.id')
+            ->get();
+
+        if ($krsRows->isEmpty()) {
+            return redirect('master/krs/detail/' . $idTahun . '/' . $nimClean)
+                ->with('error', 'Data KRS belum tersedia untuk diunduh.');
+        }
+
+        $mahasiswaProfil = $this->getMahasiswaProfil((int) ($mahasiswa->id ?? 0));
+        $ipsTerakhir = 0.0;
+        $batasSks = function_exists('sksbatas') ? (int) sksbatas($ipsTerakhir) : 24;
+
+        $html = view('mahasiswa.krs_pdf', [
+            'mahasiswa' => $mahasiswa,
+            'mahasiswaProfil' => $mahasiswaProfil,
+            'tahunAktif' => $tahun,
+            'jenisTA' => $this->formatJenisSemester((int) ($tahun->jenis ?? 0)),
+            'krsRows' => $krsRows,
+            'totalSks' => (int) $krsRows->sum('sks'),
+            'ipsTerakhir' => $ipsTerakhir,
+            'batasSks' => $batasSks,
+        ])->render();
+
+        $mpdf = new Mpdf([
+            'format' => 'A4',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
+
+        $mpdf->WriteHTML($html);
+        $filename = 'admin_krs_' . ($mahasiswa->nim ?? 'mahasiswa') . '_' . $idTahun . '.pdf';
+
+        return response($mpdf->Output($filename, 'D'))
+            ->header('Content-Type', 'application/pdf');
+    }
+
     public function hapusKrs(Request $request, string $id)
     {
         $krs = DB::table('master_krs_temp')->where('id', (int) $id)->first();
@@ -457,6 +520,23 @@ class KrsManagementController extends Controller
     {
         $escaped = str_replace('"', '""', $value);
         return '"' . $escaped . '"';
+    }
+
+    private function getMahasiswaProfil(int $idMahasiswa): ?object
+    {
+        return DB::table('mahasiswa as m')
+            ->leftJoin('program_studi as ps', 'ps.id', '=', 'm.id_program_studi')
+            ->leftJoin('master_program_studi as mps', 'mps.id', '=', 'm.id_program_studi')
+            ->leftJoin('pegawai_biodata as pbw', 'pbw.id_pegawai', '=', 'm.id_dsn_wali')
+            ->select(
+                'm.id',
+                'm.nim',
+                'm.nama',
+                DB::raw("COALESCE(NULLIF(CONCAT(COALESCE(ps.jenjang,''), ' / ', COALESCE(ps.nama_jurusan,'')), ' / '), mps.nama_jurusan, '-') as nama_program_studi"),
+                DB::raw("CONCAT(COALESCE(pbw.gelar_depan,''), ' ', COALESCE(pbw.nama_lengkap,''), ' ', COALESCE(pbw.gelar_belakang,'')) as dosen_wali")
+            )
+            ->where('m.id', $idMahasiswa)
+            ->first();
     }
 
     private function buildDebugSql(string $label, $query, ?string $aggregate = null): array

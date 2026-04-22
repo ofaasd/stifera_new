@@ -6,7 +6,7 @@
     <style>
         body {
             font-family: serif;
-            font-size: 12px;
+            font-size: 10px;
             color: #000;
         }
         .sheet {
@@ -15,7 +15,7 @@
         }
         .title {
             text-align: center;
-            font-size: 28px;
+            font-size: 20px;
             font-weight: bold;
             border: 1px solid #222;
             margin-bottom: 8px;
@@ -29,26 +29,26 @@
         .head-table td {
             vertical-align: top;
             padding: 2px 4px;
-            font-size: 11px;
+            font-size: 9px;
         }
         .logo-wrap {
-            width: 90px;
+            width: 70px;
             text-align: center;
         }
         .logo {
-            width: 78px;
-            height: 78px;
+            width: 54px;
+            height: 54px;
             object-fit: contain;
         }
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 10px;
+            font-size: 8px;
         }
         .data-table th,
         .data-table td {
             border: 1px solid #222;
-            padding: 2px 3px;
+            padding: 1px 2px;
         }
         .data-table thead th {
             text-align: center;
@@ -62,27 +62,25 @@
         }
         .footer td {
             vertical-align: top;
-            font-size: 12px;
+            font-size: 10px;
             padding: 2px 4px;
         }
     </style>
 </head>
 <body>
     <div class="sheet">
-        <div class="title">KARTU UJIAN {{ strtoupper($jenisKartu) }}</div>
-
         <table class="head-table">
             <tr>
-                <td class="logo-wrap" rowspan="4">
-                    @php $logoPath = public_path('images/logo-full.png'); @endphp
-                    @if(file_exists($logoPath))
-                        <img class="logo" src="{{ $logoPath }}" alt="Logo">
-                    @endif
+                <td class="logo-wrap" rowspan="5">
+                    <img class="logo" src="{{ asset(config('dz.site_level.logo')) }}" alt="Logo" width="30" height="30" align="left">
                 </td>
-                <td width="34%">NIM</td>
-                <td width="30%">: {{ $mahasiswa->nim ?? '-' }}</td>
-                <td width="20%">Semester</td>
-                <td>: {{ $jenisTA ?? '-' }}</td>
+                <td colspan="4" class="title">KARTU UJIAN {{ strtoupper($jenisKartu) }}</td>
+            </tr>
+            <tr>
+                <td width="26%">NIM</td>
+                <td width="28%">: {{ $mahasiswa->nim ?? '-' }}</td>
+                <td width="16%">Semester</td>
+                <td width="30%">: {{ $jenisTA ?? '-' }}</td>
             </tr>
             <tr>
                 <td>Nama</td>
@@ -107,18 +105,18 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th rowspan="2" style="width: 35px;">No</th>
-                    <th rowspan="2" style="width: 90px;">Kode</th>
+                    <th rowspan="2" style="width: 26px;">No</th>
+                    <th rowspan="2" style="width: 68px;">Kode</th>
                     <th rowspan="2">Matakuliah</th>
-                    <th rowspan="2" style="width: 45px;">SKS</th>
-                    <th rowspan="2" style="width: 55px;">Ruang</th>
-                    <th rowspan="2" style="width: 85px;">No. Kursi</th>
-                    <th colspan="2" style="width: 180px;">Tanggal Ujian {{ strtoupper($jenisKartu) }}</th>
-                    <th rowspan="2" style="width: 60px;">Paraf</th>
+                    <th rowspan="2" style="width: 32px;">SKS</th>
+                    <th rowspan="2" style="width: 38px;">Ruang</th>
+                    <th rowspan="2" style="width: 50px;">No. Kursi</th>
+                    <th colspan="2" style="width: 125px;">Tanggal Ujian {{ strtoupper($jenisKartu) }}</th>
+                    <th rowspan="2" style="width: 34px;">Paraf</th>
                 </tr>
                 <tr>
-                    <th style="width: 85px;">Tanggal</th>
-                    <th style="width: 95px;">Waktu</th>
+                    <th style="width: 60px;">Tanggal</th>
+                    <th style="width: 65px;">Waktu</th>
                 </tr>
             </thead>
             <tbody>
@@ -156,7 +154,7 @@
 
         <table class="footer">
             <tr>
-                <td width="50%">Dosen Wali</td>
+                <td width="50%"><center>Dosen Wali</center></td>
                 <td width="50%" class="center">Semarang, {{ now()->translatedFormat('d M Y') }}</td>
             </tr>
             <tr>
@@ -164,8 +162,8 @@
                 <td class="center">Kepala Tata Usaha</td>
             </tr>
             <tr>
-                <td>{{ trim((string) ($mahasiswaProfil->dosen_wali ?? '-')) }}</td>
-                <td class="center">{{ trim((string) ($mahasiswaProfil->nama_fakultas ?? '-')) }}</td>
+                <td><center>{{ trim((string) ($mahasiswaProfil->dosen_wali ?? '-')) }}</center></td>
+                <td class="center">FAKULTAS {{ trim((string) ($mahasiswaProfil->nama_fakultas ?? '-')) }}</td>
             </tr>
         </table>
     </div>

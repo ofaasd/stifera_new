@@ -29,7 +29,8 @@
                                                     <th>No</th>
                                                     <th>NIP - NIDN</th>
                                                     <th>Nama Pegawai</th>
-                                                    <th>Status Homebase</th>
+                                                    <th>Status</th>
+                                                    <th>Homebase</th>
                                                     <th>Jabatan Fungsional</th>
                                                     <!-- <th>Alamat</th>
                                                     <th>Email</th>
@@ -44,7 +45,12 @@
                                                     <td><?php echo $no++ ?></td>
                                                     <td><?php echo $a->pegawai->npp ?? '' ?> - <?php echo  $a->nidn ?></td>
                                                     <td><?php echo  $a->nama_lengkap?></td>
-                                                    <td><?php echo  $a->nama_jenis ?></td>
+                                                    <td>
+                                                        <?php echo  $a->nama_jenis ?>
+                                                    </th>
+                                                    <th>
+                                                        <small><?php echo  $a->nama_homebase ?? '-' ?></small>
+                                                    </td>
                                                     <td><?php echo  $list_jabfung[$a->jabatan_fungsional_sekarang] ?? '' ?> </td>
                                                     <!-- <td><?php echo  $a->alamat ?></td>
                                                     <td><?php echo  $a->email1 ?> <br /> <?php echo  $a->email2?></td>

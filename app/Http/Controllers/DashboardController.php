@@ -12,7 +12,7 @@ class DashboardController extends Controller
 {
     //
     public function index() {
-        $CurrentPage = 'medical';
+        $CurrentPage = 'dashboard';
         $var = [];
         //hitung jumlah mahasiswa 
         $var['jumlah_mahasiswa'] = Mahasiswa::where('status',1)->count();

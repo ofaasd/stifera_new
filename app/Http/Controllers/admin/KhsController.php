@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Mahasiswa;
 use Illuminate\Support\Facades\DB;
+use Mpdf\Mpdf;
 
 class KhsController extends Controller
 {
@@ -167,5 +168,251 @@ class KhsController extends Controller
                     ->get();
         }
         return view('admin.khs.detail', $query);
+    }
+
+    public function cetak_khs()
+    {
+        $nim = (string) session('nim', '');
+        if ($nim === '') {
+            return redirect('master/khs/list_mhs')->with('error', 'Session mahasiswa tidak ditemukan. Buka detail KHS mahasiswa terlebih dahulu.');
+        }
+
+        $mahasiswa = DB::table('mahasiswa')->where('nim', $nim)->first();
+        if (!$mahasiswa) {
+            return redirect('master/khs/list_mhs')->with('error', 'Mahasiswa tidak ditemukan.');
+        }
+
+        $tahun = DB::table('master_tahun_ajaran')
+            ->where('is_aktif', 1)
+            ->where('tipe_mhs', (int) ($mahasiswa->tipe_mhs ?? 0))
+            ->first();
+
+        if (!$tahun) {
+            return redirect()->back()->with('error', 'Tahun ajaran aktif tidak ditemukan.');
+        }
+
+        return $this->downloadPdfByTahunNim((int) $tahun->id, $nim);
+    }
+
+    public function cetak_khs_history(string $id_tahun_nim)
+    {
+        $parts = explode('-', $id_tahun_nim, 2);
+        $idTahun = (int) ($parts[0] ?? 0);
+        $nim = trim((string) ($parts[1] ?? ''));
+
+        if ($idTahun <= 0 || $nim === '') {
+            return redirect()->back()->with('error', 'Parameter download KHS tidak valid.');
+        }
+
+        return $this->downloadPdfByTahunNim($idTahun, $nim);
+    }
+
+    private function downloadPdfByTahunNim(int $idTahun, string $nim)
+    {
+        $mahasiswa = DB::table('mahasiswa')->where('nim', $nim)->first();
+        if (!$mahasiswa) {
+            return redirect('master/khs/list_mhs')->with('error', 'Mahasiswa tidak ditemukan.');
+        }
+
+        $tahun = DB::table('master_tahun_ajaran')->where('id', $idTahun)->first();
+        if (!$tahun) {
+            return redirect()->back()->with('error', 'Tahun ajaran tidak ditemukan.');
+        }
+
+        $khsRows = $this->getKhsRowsByTahun($nim, $idTahun);
+        if ($khsRows->isEmpty()) {
+            return redirect()->back()->with('error', 'Data KHS belum tersedia untuk diunduh.');
+        }
+
+        $statAktif = $this->calculateStat($khsRows);
+        $ipkMahasiswa = $this->calculateIpk($nim, $idTahun);
+        $mahasiswaProfil = $this->getMahasiswaProfil((int) ($mahasiswa->id ?? 0));
+        $pembantuKetuaAkademik = $this->getPembantuKetuaAkademik();
+
+        $html = view('mahasiswa.khs_pdf', [
+            'mahasiswa' => $mahasiswa,
+            'mahasiswaProfil' => $mahasiswaProfil,
+            'tahunAktif' => $tahun,
+            'jenisTA' => $this->formatJenisSemester((int) ($tahun->jenis ?? 0)),
+            'khsRows' => $khsRows,
+            'statAktif' => $statAktif,
+            'ipkMahasiswa' => $ipkMahasiswa,
+            'pembantuKetuaAkademik' => $pembantuKetuaAkademik,
+        ])->render();
+
+        $mpdf = new Mpdf([
+            'format' => 'A4',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
+
+        $mpdf->WriteHTML($html);
+        $filename = 'admin_khs_' . $nim . '_' . $idTahun . '.pdf';
+
+        return response($mpdf->Output($filename, 'D'))
+            ->header('Content-Type', 'application/pdf');
+    }
+
+    private function getKhsRowsByTahun(string $nim, int $idTahun)
+    {
+        $jadwalTable = $this->resolveJadwalTable($idTahun);
+        $jadwalJoinKey = $jadwalTable === 'master_jadwal_temp' ? 'id' : 'id_jadwal';
+
+        return DB::table('master_nilai as mn')
+            ->leftJoin($jadwalTable . ' as mj', function ($join) use ($idTahun, $jadwalJoinKey) {
+                $join->on('mj.' . $jadwalJoinKey, '=', 'mn.id_jadwal')
+                    ->where('mj.id_tahun', '=', $idTahun);
+            })
+            ->leftJoin('pegawai_biodata as pb', 'pb.id', '=', 'mj.id_dosen')
+            ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mj.kode_mata_kuliah')
+            ->select(
+                'mn.*',
+                DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen"),
+                'mmk.kode_mata_kuliah',
+                'mmk.nama_mata_kuliah as mata_kuliah',
+                'mmk.jumlah_sks'
+            )
+            ->where('mn.nim', $nim)
+            ->where('mn.id_tahun', $idTahun)
+            ->orderBy('mn.id')
+            ->get();
+    }
+
+    private function resolveJadwalTable(int $idTahun): string
+    {
+        $tahunAjaran = DB::table('master_tahun_ajaran')
+            ->select('is_aktif')
+            ->where('id', $idTahun)
+            ->first();
+
+        return (int) ($tahunAjaran->is_aktif ?? 0) === 1 ? 'master_jadwal_temp' : 'master_jadwal';
+    }
+
+    private function calculateStat($rows): array
+    {
+        $totalSks = 0;
+        $totalPoint = 0.0;
+
+        foreach ($rows as $row) {
+            $hasNilai = (trim((string) ($row->nhuruf ?? '')) !== '')
+                || ($row->nakhir !== null && $row->nakhir !== '');
+            if (!$hasNilai) {
+                continue;
+            }
+
+            $sks = (int) ($row->jumlah_sks ?? 0);
+            $totalSks += $sks;
+
+            $nilaiHuruf = $this->resolveNilaiHuruf($row->nhuruf ?? null, $row->nakhir ?? null);
+            $point = (float) (function_exists('nbobot') ? nbobot($nilaiHuruf) : 0.0);
+            $totalPoint += ($point * $sks);
+        }
+
+        return [
+            'total_sks' => $totalSks,
+            'ips' => $totalSks > 0 ? ($totalPoint / $totalSks) : 0.0,
+        ];
+    }
+
+    private function calculateIpk(string $nim, ?int $excludeIdTahun = null): float
+    {
+        $tahunIds = DB::table('master_nilai')
+            ->where('nim', $nim)
+            ->whereNotNull('id_tahun')
+            ->distinct()
+            ->pluck('id_tahun');
+
+        $totalSks = 0;
+        $totalPoint = 0.0;
+
+        foreach ($tahunIds as $idTahun) {
+            if ($excludeIdTahun !== null && (int) $idTahun === $excludeIdTahun) {
+                continue;
+            }
+
+            $rows = $this->getKhsRowsByTahun($nim, (int) $idTahun);
+            foreach ($rows as $row) {
+                $hasNilai = (trim((string) ($row->nhuruf ?? '')) !== '')
+                    || ($row->nakhir !== null && $row->nakhir !== '');
+                if (!$hasNilai) {
+                    continue;
+                }
+
+                $sks = (int) ($row->jumlah_sks ?? 0);
+                $nilaiHuruf = $this->resolveNilaiHuruf($row->nhuruf ?? null, $row->nakhir ?? null);
+                $point = (float) (function_exists('nbobot') ? nbobot($nilaiHuruf) : 0.0);
+
+                $totalSks += $sks;
+                $totalPoint += ($point * $sks);
+            }
+        }
+
+        return $totalSks > 0 ? ($totalPoint / $totalSks) : 0.0;
+    }
+
+    private function resolveNilaiHuruf(?string $nilaiHuruf, $nilaiAkhir = null): string
+    {
+        $huruf = strtoupper(trim((string) ($nilaiHuruf ?? '')));
+        if ($huruf !== '') {
+            return $huruf;
+        }
+
+        if ($nilaiAkhir !== null && $nilaiAkhir !== '' && function_exists('nmutu')) {
+            return (string) nmutu((float) $nilaiAkhir);
+        }
+
+        return 'E';
+    }
+
+    private function formatJenisSemester(int $jenis): string
+    {
+        if ($jenis === 1) {
+            return 'Ganjil';
+        }
+        if ($jenis === 2) {
+            return 'Genap';
+        }
+        if ($jenis === 3) {
+            return 'Antara Ganjil Genap';
+        }
+        if ($jenis === 4) {
+            return 'Antara Genap Ganjil';
+        }
+
+        return '-';
+    }
+
+    private function getMahasiswaProfil(int $idMahasiswa): ?object
+    {
+        return DB::table('mahasiswa as m')
+            ->leftJoin('program_studi as ps', 'ps.id', '=', 'm.id_program_studi')
+            ->leftJoin('master_program_studi as mps', 'mps.id', '=', 'm.id_program_studi')
+            ->leftJoin('pegawai_biodata as pbw', 'pbw.id_pegawai', '=', 'm.id_dsn_wali')
+            ->select(
+                'm.id',
+                'm.nim',
+                'm.nama',
+                DB::raw("COALESCE(NULLIF(CONCAT(COALESCE(ps.jenjang,''), ' / ', COALESCE(ps.nama_jurusan,'')), ' / '), mps.nama_jurusan, '-') as nama_program_studi"),
+                DB::raw("CONCAT(COALESCE(pbw.gelar_depan,''), ' ', COALESCE(pbw.nama_lengkap,''), ' ', COALESCE(pbw.gelar_belakang,'')) as dosen_wali")
+            )
+            ->where('m.id', $idMahasiswa)
+            ->first();
+    }
+
+    private function getPembantuKetuaAkademik(): ?string
+    {
+        $row = DB::table('struktur_pegawai2 as sp2')
+            ->leftJoin('pegawai as p', 'p.npp', '=', 'sp2.pembantu_1')
+            ->leftJoin('pegawai_biodata as pb', 'pb.id_pegawai', '=', 'p.id')
+            ->select(
+                DB::raw("TRIM(CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap, p.nama, ''), ' ', COALESCE(pb.gelar_belakang,''))) as nama_gelar")
+            )
+            ->where('sp2.id', 1)
+            ->first();
+
+        $nama = trim((string) ($row->nama_gelar ?? ''));
+        return $nama !== '' ? $nama : null;
     }
 }

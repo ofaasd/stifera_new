@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Mpdf\Mpdf;
 
 class MahasiswaKhsController extends Controller
 {
@@ -50,6 +51,7 @@ class MahasiswaKhsController extends Controller
                     'tahun' => $ta,
                     'rows' => $rows,
                     'stat' => $this->calculateStat($rows),
+                    'debug' => $this->getKhsDebugQueries($mahasiswa->nim, (int) $ta->id),
                 ];
             }
         }
@@ -67,6 +69,98 @@ class MahasiswaKhsController extends Controller
             'riwayatKhs' => $riwayatKhs,
             'jenisTA' => $this->formatJenisSemester((int) ($tahunAktif->jenis ?? 0)),
         ]);
+    }
+
+    public function downloadKhs(?int $idTahun = null)
+    {
+        $mahasiswa = Auth::guard('mahasiswa')->user();
+        if (!$mahasiswa) {
+            abort(403);
+        }
+
+        $tahunTarget = $idTahun !== null
+            ? $this->getTahunByIdAndTipe($idTahun, (int) ($mahasiswa->tipe_mhs ?? 0))
+            : $this->getTahunAktifByTipe((int) ($mahasiswa->tipe_mhs ?? 0));
+
+        if (!$tahunTarget) {
+            return redirect()->route('mahasiswa.khs.index')->with('error', 'Tahun ajaran tidak ditemukan.');
+        }
+
+        $khsRows = $this->getKhsRows($mahasiswa->nim, (int) $tahunTarget->id);
+        if ($khsRows->isEmpty()) {
+            return redirect()->route('mahasiswa.khs.index')->with('error', 'Data KHS belum tersedia untuk diunduh.');
+        }
+
+        $statAktif = $this->calculateStat($khsRows);
+        $ipkMahasiswa = $this->calculateIpk($mahasiswa->nim, (int) $tahunTarget->id);
+        $mahasiswaProfil = $this->getMahasiswaProfil((int) ($mahasiswa->id ?? 0));
+        $pembantuKetuaAkademik = $this->getPembantuKetuaAkademik();
+
+        $html = view('mahasiswa.khs_pdf', [
+            'mahasiswa' => $mahasiswa,
+            'mahasiswaProfil' => $mahasiswaProfil,
+            'tahunAktif' => $tahunTarget,
+            'jenisTA' => $this->formatJenisSemester((int) ($tahunTarget->jenis ?? 0)),
+            'khsRows' => $khsRows,
+            'statAktif' => $statAktif,
+            'ipkMahasiswa' => $ipkMahasiswa,
+            'pembantuKetuaAkademik' => $pembantuKetuaAkademik,
+        ])->render();
+
+        $mpdf = new Mpdf([
+            'format' => 'A4',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
+
+        $mpdf->WriteHTML($html);
+        $filename = 'khs_' . ($mahasiswa->nim ?? 'mahasiswa') . '_' . ($tahunTarget->id ?? 'tahun') . '.pdf';
+
+        return response($mpdf->Output($filename, 'D'))
+            ->header('Content-Type', 'application/pdf');
+    }
+
+    private function getMahasiswaProfil(int $idMahasiswa): ?object
+    {
+        return DB::table('mahasiswa as m')
+            ->leftJoin('program_studi as ps', 'ps.id', '=', 'm.id_program_studi')
+            ->leftJoin('master_program_studi as mps', 'mps.id', '=', 'm.id_program_studi')
+            ->leftJoin('pegawai_biodata as pbw', 'pbw.id_pegawai', '=', 'm.id_dsn_wali')
+            ->select(
+                'm.id',
+                'm.nim',
+                'm.nama',
+                DB::raw("COALESCE(NULLIF(CONCAT(COALESCE(ps.jenjang,''), ' / ', COALESCE(ps.nama_jurusan,'')), ' / '), mps.nama_jurusan, '-') as nama_program_studi"),
+                DB::raw("CONCAT(COALESCE(pbw.gelar_depan,''), ' ', COALESCE(pbw.nama_lengkap,''), ' ', COALESCE(pbw.gelar_belakang,'')) as dosen_wali")
+            )
+            ->where('m.id', $idMahasiswa)
+            ->first();
+    }
+
+    private function getTahunByIdAndTipe(int $idTahun, int $tipeMhs): ?object
+    {
+        return DB::table('master_tahun_ajaran')
+            ->where('id', $idTahun)
+            ->where('tipe_mhs', $tipeMhs)
+            ->first();
+    }
+
+    private function getPembantuKetuaAkademik(): ?string
+    {
+        $row = DB::table('struktur_pegawai2 as sp2')
+            ->leftJoin('pegawai as p', 'p.npp', '=', 'sp2.pembantu_1')
+            ->leftJoin('pegawai_biodata as pb', 'pb.id_pegawai', '=', 'p.id')
+            ->select(
+                DB::raw("TRIM(CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap, p.nama, ''), ' ', COALESCE(pb.gelar_belakang,''))) as nama_gelar")
+            )
+            ->where('sp2.id', 1)
+            ->first();
+
+        $nama = trim((string) ($row->nama_gelar ?? ''));
+
+        return $nama !== '' ? $nama : null;
     }
 
     private function buildIpsPerSemesterSeries(string $nim, int $tipeMhs): array
@@ -144,19 +238,32 @@ class MahasiswaKhsController extends Controller
 
     private function getKhsRows(string $nim, int $idTahun): Collection
     {
-        $rowsFromKrsTemp = $this->getKhsRowsFromKrsTable('master_krs_temp', $nim, $idTahun);
+        $rowsFromKrsTemp = $this->buildKhsRowsFromKrsTableQuery('master_krs_temp', $nim, $idTahun)->get();
         if ($rowsFromKrsTemp->isNotEmpty()) {
             return $rowsFromKrsTemp;
         }
 
-        $rowsFromKrsHistory = $this->getKhsRowsFromKrsTable('master_krs', $nim, $idTahun);
+        $rowsFromKrsHistory = $this->buildKhsRowsFromKrsTableQuery('master_krs', $nim, $idTahun)->get();
         if ($rowsFromKrsHistory->isNotEmpty()) {
             return $rowsFromKrsHistory;
         }
 
+        return $this->buildKhsRowsFallbackQuery($nim, $idTahun)->get();
+    }
+
+    private function getKhsRowsFromKrsTable(string $tableName, string $nim, int $idTahun): Collection
+    {
+        return $this->buildKhsRowsFromKrsTableQuery($tableName, $nim, $idTahun)->get();
+    }
+
+    private function buildKhsRowsFallbackQuery(string $nim, int $idTahun)
+    {
+        $jadwalTable = $this->resolveJadwalTable($idTahun);
+        $jadwalJoinKey = $this->resolveJadwalJoinKey($jadwalTable);
+
         return DB::table('master_nilai as mn')
-            ->leftJoin('master_jadwal as mj', function ($join) use ($idTahun) {
-                $join->on('mj.id_jadwal', '=', 'mn.id_jadwal')
+            ->leftJoin($jadwalTable . ' as mj', function ($join) use ($idTahun, $jadwalJoinKey) {
+                $join->on('mj.' . $jadwalJoinKey, '=', 'mn.id_jadwal')
                     ->where('mj.id_tahun', '=', $idTahun);
             })
             ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mj.kode_mata_kuliah')
@@ -177,26 +284,32 @@ class MahasiswaKhsController extends Controller
                 'mn.validasi_tugas',
                 'mn.validasi_uts',
                 'mn.validasi_uas',
-                'mj.kode_mata_kuliah',
+                'mmk.kode_mata_kuliah',
                 'mmk.nama_mata_kuliah',
                 'mmk.jumlah_sks',
                 DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen")
             )
             ->where('mn.nim', $nim)
             ->where('mn.id_tahun', $idTahun)
-            ->orderBy('mn.id')
-            ->get();
+            ->orderBy('mn.id');
     }
 
-    private function getKhsRowsFromKrsTable(string $tableName, string $nim, int $idTahun): Collection
+    private function buildKhsRowsFromKrsTableQuery(string $tableName, string $nim, int $idTahun)
     {
+        $jadwalTable = $this->resolveJadwalTable($idTahun);
+        $jadwalJoinKey = $this->resolveJadwalJoinKey($jadwalTable);
+
         return DB::table($tableName . ' as mk')
             ->leftJoin('master_nilai as mn', function ($join) {
                 $join->on('mn.nim', '=', 'mk.nim')
                     ->on('mn.id_tahun', '=', 'mk.id_tahun')
                     ->on('mn.id_jadwal', '=', 'mk.id_jadwal');
             })
-            ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mk.mata_kuliah')
+            ->leftJoin($jadwalTable . ' as mj', function ($join) use ($idTahun, $jadwalJoinKey) {
+                $join->on('mj.' . $jadwalJoinKey, '=', 'mk.id_jadwal')
+                    ->where('mj.id_tahun', '=', $idTahun);
+            })
+            ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mj.kode_mata_kuliah')
             ->leftJoin('pegawai_biodata as pb', 'pb.id', '=', 'mk.id_dosen')
             ->select(
                 'mn.id',
@@ -214,15 +327,66 @@ class MahasiswaKhsController extends Controller
                 'mn.validasi_tugas',
                 'mn.validasi_uts',
                 'mn.validasi_uas',
-                'mk.mata_kuliah as kode_mata_kuliah',
+                'mmk.kode_mata_kuliah',
                 'mmk.nama_mata_kuliah',
                 DB::raw('COALESCE(mmk.jumlah_sks, mk.sks, 0) as jumlah_sks'),
                 DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen")
             )
             ->where('mk.nim', $nim)
             ->where('mk.id_tahun', $idTahun)
-            ->orderBy('mk.id')
-            ->get();
+            ->orderBy('mk.id');
+    }
+
+    private function getKhsDebugQueries(string $nim, int $idTahun): array
+    {
+        $tempQuery = $this->buildKhsRowsFromKrsTableQuery('master_krs_temp', $nim, $idTahun);
+        $historyQuery = $this->buildKhsRowsFromKrsTableQuery('master_krs', $nim, $idTahun);
+        $fallbackQuery = $this->buildKhsRowsFallbackQuery($nim, $idTahun);
+
+        $tempExists = $tempQuery->exists();
+        $historyExists = !$tempExists && $historyQuery->exists();
+
+        return [
+            'selected_source' => $tempExists ? 'master_krs_temp' : ($historyExists ? 'master_krs' : 'master_nilai'),
+            'master_krs_temp' => $this->interpolateQuery($tempQuery),
+            'master_krs' => $this->interpolateQuery($historyQuery),
+            'master_nilai' => $this->interpolateQuery($fallbackQuery),
+        ];
+    }
+
+    private function resolveJadwalTable(int $idTahun): string
+    {
+        $tahunAjaran = DB::table('master_tahun_ajaran')
+            ->select('is_aktif')
+            ->where('id', $idTahun)
+            ->first();
+
+        return (int) ($tahunAjaran->is_aktif ?? 0) === 1 ? 'master_jadwal_temp' : 'master_jadwal';
+    }
+
+    private function resolveJadwalJoinKey(string $jadwalTable): string
+    {
+        return $jadwalTable === 'master_jadwal_temp' ? 'id' : 'id_jadwal';
+    }
+
+    private function interpolateQuery($query): string
+    {
+        $sql = $query->toSql();
+        $bindings = $query->getBindings();
+
+        foreach ($bindings as $binding) {
+            if ($binding === null) {
+                $replacement = 'null';
+            } elseif (is_numeric($binding)) {
+                $replacement = (string) $binding;
+            } else {
+                $replacement = "'" . str_replace("'", "''", (string) $binding) . "'";
+            }
+
+            $sql = preg_replace('/\?/', $replacement, $sql, 1);
+        }
+
+        return $sql;
     }
 
     private function getRiwayatTahunAjaran(string $nim, int $tipeMhs, int $angkatanMahasiswa, int $idTahunAktif, int $tahunAwalAktif): Collection

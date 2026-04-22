@@ -150,15 +150,10 @@ class MahasiswaPresensiController extends Controller
             $idJadwal   = (int) $krs->id_jadwal;
             $pertemuanList = $pertemuanMap[$idJadwal] ?? [];
             $activePertemuan = $activePertemuanMap[$idJadwal] ?? null;
-
-            $activeTgl = $activePertemuan
-                ? (is_string($activePertemuan->tgl_pertemuan)
-                    ? $activePertemuan->tgl_pertemuan
-                    : (string) $activePertemuan->tgl_pertemuan)
-                : null;
-            $activeKey = $activeTgl ? ($idJadwal . '_' . $activeTgl) : null;
-            $activePresensi = $activeKey ? ($presensiMap[$activeKey] ?? null) : null;
-            $sudahHadirPertemuanAktif = $activePresensi && (int) $activePresensi->status === 1;
+            $todayKey = $idJadwal . '_' . now()->toDateString();
+            $todayPresensi = $presensiMap[$todayKey] ?? null;
+            $sudahHadirHariIni = $todayPresensi && (int) $todayPresensi->status === 1;
+            $masihAdaSesiAbsenDibuka = $activePertemuan !== null;
 
             $totalPertemuan = count($pertemuanList);
             $hadir = 0;
@@ -203,8 +198,8 @@ class MahasiswaPresensiController extends Controller
                 'persen_hadir'     => $persenHadir,
                 'pertemuan'        => $pertemuanDetails,
                 'active_pertemuan' => $activePertemuan,
-                'sudah_hadir_hari_ini' => $sudahHadirPertemuanAktif,
-                'can_absen'        => $activePertemuan !== null && !$sudahHadirPertemuanAktif,
+                'sudah_hadir_hari_ini' => !$masihAdaSesiAbsenDibuka && $sudahHadirHariIni,
+                'can_absen'        => $masihAdaSesiAbsenDibuka,
             ];
         }
 

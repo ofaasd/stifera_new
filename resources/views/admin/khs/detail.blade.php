@@ -24,7 +24,9 @@
 								<div class="card-body pb-4">
                                     <b>
                                         {{ $ta }} <font color="green">(Aktif)</font> 
-                                        <a href="{{ url('master/khs/cetak_khs') }}">Download KHS</a>
+                                        <a href="{{ url('master/khs/cetak_khs') }}" class="btn btn-sm btn-primary ms-2">
+                                            <i class="fa fa-download me-1"></i>Download KHS
+                                        </a>
                                     </b>
                                     
                                     <div class="dt-responsive table-responsive">
@@ -150,7 +152,9 @@
                                         
                                         <b>
                                             {{ $h->awal }} - {{ $h->akhir }} {{ $jenis }} 
-                                            <a href="{{ url('master/khs/cetak_khs_history/' . $ta_id . '-' . $nim_session) }}">Download KHS</a>
+                                            <a href="{{ url('master/khs/cetak_khs_history/' . $ta_id . '-' . $nim_session) }}" class="btn btn-sm btn-outline-primary ms-2">
+                                                <i class="fa fa-download me-1"></i>Download KHS
+                                            </a>
                                         </b>
                                         
                                         <div class="dt-responsive table-responsive">
@@ -241,7 +245,9 @@
                                         
                                         <b>
                                             {{ $h->awal }} - {{ $h->akhir }} {{ $jenis }} 
-                                            <a href="{{ url('master/khs/cetak_khs_history/' . $ta_id . '-' . $nim_session) }}">Download KHS</a>
+                                            <a href="{{ url('master/khs/cetak_khs_history/' . $ta_id . '-' . $nim_session) }}" class="btn btn-sm btn-outline-primary ms-2">
+                                                <i class="fa fa-download me-1"></i>Download KHS
+                                            </a>
                                         </b>
                                         
                                         <div class="dt-responsive table-responsive">

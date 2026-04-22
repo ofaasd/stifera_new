@@ -104,9 +104,9 @@ class MahasiswaUjianController extends Controller
             'ujianRows' => $ujianRows,
             'jenisKartu' => $jenis,
         ])->render();
-
+        
         $mpdf = new Mpdf([
-            'format' => 'A4-L',
+            'format' => 'A4',
             'margin_left' => 8,
             'margin_right' => 8,
             'margin_top' => 8,

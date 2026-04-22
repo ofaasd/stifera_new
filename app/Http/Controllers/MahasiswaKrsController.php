@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Mpdf\Mpdf;
 
 class MahasiswaKrsController extends Controller
 {
@@ -167,7 +167,7 @@ class MahasiswaKrsController extends Controller
         return redirect()->to(url('mhs/krs'))->with('status', 'Input KRS berhasil disimpan.');
     }
 
-    public function download(): StreamedResponse
+    public function download()
     {
         $mahasiswa = Auth::guard('mahasiswa')->user();
         if (!$mahasiswa) {
@@ -181,42 +181,55 @@ class MahasiswaKrsController extends Controller
 
         $krsRows = $this->getKrsRows($mahasiswa->nim, (int) $tahunAktif->id);
 
-        $filename = 'krs_' . $mahasiswa->nim . '_' . now()->format('Ymd_His') . '.csv';
+        if ($krsRows->isEmpty()) {
+            return redirect()->route('mahasiswa.krs.index')->with('error', 'Data KRS belum tersedia untuk diunduh.');
+        }
 
-        $headers = [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
+        $ipsTerakhir = $this->getIpsTerakhir($mahasiswa->nim, (int) $tahunAktif->id);
+        $batasSks = function_exists('sksbatas') ? (int) sksbatas($ipsTerakhir) : 24;
+        $mahasiswaProfil = $this->getMahasiswaProfil((int) ($mahasiswa->id ?? 0));
 
-        return response()->stream(function () use ($krsRows, $mahasiswa, $tahunAktif) {
-            $output = fopen('php://output', 'w');
+        $html = view('mahasiswa.krs_pdf', [
+            'mahasiswa' => $mahasiswa,
+            'mahasiswaProfil' => $mahasiswaProfil,
+            'tahunAktif' => $tahunAktif,
+            'jenisTA' => $this->formatJenisSemester((int) ($tahunAktif->jenis ?? 0)),
+            'krsRows' => $krsRows,
+            'totalSks' => (int) $krsRows->sum('sks'),
+            'ipsTerakhir' => $ipsTerakhir,
+            'batasSks' => $batasSks,
+        ])->render();
 
-            fputcsv($output, ['NIM', $mahasiswa->nim]);
-            fputcsv($output, ['Nama', (string) ($mahasiswa->nama ?? '-')]);
-            fputcsv($output, ['Tahun Ajaran', ($tahunAktif->awal ?? '-') . '/' . ($tahunAktif->akhir ?? '-')]);
-            fputcsv($output, []);
-            fputcsv($output, ['No', 'Kode MK', 'Nama Mata Kuliah', 'SKS', 'Hari', 'Sesi', 'Ruang', 'Dosen']);
+        $mpdf = new Mpdf([
+            'format' => 'A4',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
 
-            $no = 1;
-            foreach ($krsRows as $row) {
-                fputcsv($output, [
-                    $no,
-                    (string) ($row->mata_kuliah ?? '-'),
-                    (string) ($row->nama_mata_kuliah ?? $row->mata_kuliah ?? '-'),
-                    (int) ($row->sks ?? 0),
-                    (string) ($row->hari ?? '-'),
-                    (string) ($row->sesi ?? '-'),
-                    (string) ($row->ruang ?? '-'),
-                    trim((string) ($row->nama_dosen ?? '-')),
-                ]);
-                $no++;
-            }
+        $mpdf->WriteHTML($html);
+        $filename = 'krs_' . ($mahasiswa->nim ?? 'mahasiswa') . '.pdf';
 
-            fputcsv($output, []);
-            fputcsv($output, ['Total SKS', (int) $krsRows->sum('sks')]);
+        return response($mpdf->Output($filename, 'D'))
+            ->header('Content-Type', 'application/pdf');
+    }
 
-            fclose($output);
-        }, 200, $headers);
+    private function getMahasiswaProfil(int $idMahasiswa): ?object
+    {
+        return DB::table('mahasiswa as m')
+            ->leftJoin('program_studi as ps', 'ps.id', '=', 'm.id_program_studi')
+            ->leftJoin('master_program_studi as mps', 'mps.id', '=', 'm.id_program_studi')
+            ->leftJoin('pegawai_biodata as pbw', 'pbw.id_pegawai', '=', 'm.id_dsn_wali')
+            ->select(
+                'm.id',
+                'm.nim',
+                'm.nama',
+                DB::raw("COALESCE(NULLIF(CONCAT(COALESCE(ps.jenjang,''), ' / ', COALESCE(ps.nama_jurusan,'')), ' / '), mps.nama_jurusan, '-') as nama_program_studi"),
+                DB::raw("CONCAT(COALESCE(pbw.gelar_depan,''), ' ', COALESCE(pbw.nama_lengkap,''), ' ', COALESCE(pbw.gelar_belakang,'')) as dosen_wali")
+            )
+            ->where('m.id', $idMahasiswa)
+            ->first();
     }
 
     private function getTahunAktifByTipe(int $tipeMhs): ?object
@@ -239,18 +252,31 @@ class MahasiswaKrsController extends Controller
 
     private function getKrsRows(string $nim, int $idTahun)
     {
-        return DB::table('master_krs_temp as mkt')
-            ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mkt.mata_kuliah')
+        //cek id_tahun aktif atau tidak
+        $tahun = DB::table('master_tahun_ajaran')
+            ->where('id', $idTahun)
+            ->first();
+        if($tahun->is_aktif == 1){
+            //gunakan jadwal temp
+            return DB::table('master_krs_temp as mkt')
+            ->leftJoin('master_jadwal_temp as mjt', function ($join) use ($idTahun) {
+                $join->on('mjt.id', '=', 'mkt.id_jadwal')
+                    ->where('mjt.id_tahun', '=', $idTahun);
+            })
+            ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
             ->leftJoin('pegawai_biodata as pb', 'pb.id', '=', 'mkt.id_dosen')
             ->select(
                 'mkt.*',
                 'mmk.nama_mata_kuliah',
+                'mjt.kode_mata_kuliah',
                 DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen")
             )
             ->where('mkt.nim', $nim)
             ->where('mkt.id_tahun', $idTahun)
             ->orderBy('mkt.id')
             ->get();
+        }
+        
     }
 
     private function getJadwalTersedia(string $nim, int $idTahun, int $tipeMhs)

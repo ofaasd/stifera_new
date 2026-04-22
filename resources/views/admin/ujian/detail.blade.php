@@ -22,6 +22,9 @@
                     <a href="{{ url('master/pengaturan-ujian') }}" class="btn btn-secondary" title="Kembali ke list">
                         <i class="fa fa-arrow-left"></i>
                     </a>
+                    <a href="{{ url('master/pengaturan-ujian/kursi/' . $jadwal->id) }}" class="btn btn-info ms-2" title="Atur nomor kursi ujian">
+                        <i class="fa fa-chair"></i> Atur No Kursi
+                    </a>
                 </div>
 
                 <div class="filter cm-content-box box-primary">

@@ -27,26 +27,36 @@
             <div class="col-xl-12">
                 <div class="card khs-card border-0 shadow-sm mb-4">
                     <div class="card-body">
-                        <h4 class="mb-1">Kartu Hasil Studi (KHS)</h4>
-                        <p class="text-muted mb-2">Menampilkan KHS aktif dan riwayat KHS untuk akun mahasiswa yang sedang login.</p>
-                        <div class="small text-muted">
-                            <div>NIM: <span class="fw-semibold">{{ $mahasiswa->nim ?? '-' }}</span></div>
-                            <div>Nama: <span class="fw-semibold">{{ $mahasiswa->nama ?? '-' }}</span></div>
+                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
                             <div>
-                                Tahun Ajaran Aktif:
-                                <span class="fw-semibold">
-                                    @if($tahunAktif)
-                                        {{ ($tahunAktif->awal ?? '-') . '/' . ($tahunAktif->akhir ?? '-') }}
-                                        @if(!empty($jenisTA)) ({{ $jenisTA }}) @endif
-                                    @else
-                                        -
-                                    @endif
-                                </span>
+                                <h4 class="mb-1">Kartu Hasil Studi (KHS)</h4>
+                                <p class="text-muted mb-2">Menampilkan KHS aktif dan riwayat KHS untuk akun mahasiswa yang sedang login.</p>
+                                <div class="small text-muted">
+                                    <div>NIM: <span class="fw-semibold">{{ $mahasiswa->nim ?? '-' }}</span></div>
+                                    <div>Nama: <span class="fw-semibold">{{ $mahasiswa->nama ?? '-' }}</span></div>
+                                    <div>
+                                        Tahun Ajaran Aktif:
+                                        <span class="fw-semibold">
+                                            @if($tahunAktif)
+                                                {{ ($tahunAktif->awal ?? '-') . '/' . ($tahunAktif->akhir ?? '-') }}
+                                                @if(!empty($jenisTA)) ({{ $jenisTA }}) @endif
+                                            @else
+                                                -
+                                            @endif
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <span class="badge bg-success me-1">IPS Semester Ini: {{ number_format((float) ($ipsSemesterIni ?? 0), 2) }}</span>
+                                    <span class="badge bg-info text-dark">IPK: {{ number_format((float) ($ipkMahasiswa ?? 0), 2) }}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="mt-3">
-                            <span class="badge bg-success me-1">IPS Semester Ini: {{ number_format((float) ($ipsSemesterIni ?? 0), 2) }}</span>
-                            <span class="badge bg-info text-dark">IPK: {{ number_format((float) ($ipkMahasiswa ?? 0), 2) }}</span>
+
+                            <div>
+                                <a href="{{ route('mahasiswa.khs.download') }}" class="btn btn-primary {{ empty($khsAktif) ? 'disabled' : '' }}" @if(empty($khsAktif)) aria-disabled="true" @endif>
+                                    <i class="fa fa-download me-1"></i>Cetak KHS PDF
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -173,9 +183,12 @@
                             <div class="border rounded p-3 mb-4">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h6 class="mb-0">{{ ($ta->awal ?? '-') . '/' . ($ta->akhir ?? '-') }} ({{ $jenis }})</h6>
-                                    <div class="text-end">
-                                        <span class="badge bg-primary me-1">Total SKS: {{ $history['stat']['total_sks'] ?? 0 }}</span>
+                                    <div class="d-flex flex-wrap align-items-center justify-content-end gap-2">
+                                        <span class="badge bg-primary">Total SKS: {{ $history['stat']['total_sks'] ?? 0 }}</span>
                                         <span class="badge bg-success">IPS: {{ number_format((float) ($history['stat']['ips'] ?? 0), 2) }}</span>
+                                        <a href="{{ route('mahasiswa.khs.download-year', ['idTahun' => $ta->id]) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fa fa-download me-1"></i>Download KHS
+                                        </a>
                                     </div>
                                 </div>
 
@@ -230,6 +243,23 @@
                                         </tbody>
                                     </table>
                                 </div>
+
+                                @if(!empty($history['debug']))
+                                    <div class="mt-3">
+                                        <details>
+                                            <summary class="fw-semibold">Debug SQL KHS</summary>
+                                            <div class="small text-muted mt-2 mb-2">
+                                                Source terpakai: <span class="fw-semibold">{{ $history['debug']['selected_source'] ?? '-' }}</span>
+                                            </div>
+                                            <label class="form-label small mb-1">Query master_krs_temp</label>
+                                            <textarea class="form-control form-control-sm mb-2" rows="5" readonly>{{ $history['debug']['master_krs_temp'] ?? '' }}</textarea>
+                                            <label class="form-label small mb-1">Query master_krs</label>
+                                            <textarea class="form-control form-control-sm mb-2" rows="5" readonly>{{ $history['debug']['master_krs'] ?? '' }}</textarea>
+                                            <label class="form-label small mb-1">Query master_nilai fallback</label>
+                                            <textarea class="form-control form-control-sm" rows="5" readonly>{{ $history['debug']['master_nilai'] ?? '' }}</textarea>
+                                        </details>
+                                    </div>
+                                @endif
                             </div>
                         @empty
                             <div class="alert alert-light border text-muted mb-0">
