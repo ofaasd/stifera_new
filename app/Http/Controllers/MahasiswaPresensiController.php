@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Mpdf\Mpdf;
 
 class MahasiswaPresensiController extends Controller
 {
@@ -204,5 +205,88 @@ class MahasiswaPresensiController extends Controller
         }
 
         return $result;
+    }
+
+    public function exportPdf()
+    {
+        $mahasiswa = Auth::guard('mahasiswa')->user();
+        if (!$mahasiswa) {
+            return redirect()->route('mahasiswa.login');
+        }
+
+        $nim = (string) ($mahasiswa->nim ?? '');
+
+        $tahunAktif = DB::table('master_tahun_ajaran')
+            ->where('is_aktif', 1)
+            ->where('tipe_mhs', $mahasiswa->tipe_mhs ?? 1)
+            ->first();
+
+        $krsList = $this->getKrsMahasiswa($nim, $tahunAktif?->id ?? null);
+
+        if ($krsList->isEmpty()) {
+            return redirect()->route('mahasiswa.presensi.index')
+                ->with('error', 'Tidak ada data presensi untuk diekspor.');
+        }
+
+        // Collect all id_jadwal to batch-load pertemuan & presensi
+        $idJadwalList = $krsList->pluck('id_jadwal')->unique()->toArray();
+
+        $pertemuanMap = $this->getPertemuanMap($idJadwalList);
+        $presensiMap  = $this->getPresensiMap($nim, $idJadwalList);
+
+        // Get all pertemuan data for PDF
+        $allPertemuan = [];
+        foreach ($pertemuanMap as $jadwalPertemuan) {
+            $allPertemuan = array_merge($allPertemuan, $jadwalPertemuan);
+        }
+
+        // Get presensi details for each student-course combination
+        $presensiDetails = [];
+        foreach ($krsList as $krs) {
+            $idJadwal = (int) $krs->id_jadwal;
+            $pertemuanList = $pertemuanMap[$idJadwal] ?? [];
+
+            foreach ($pertemuanList as $pertemuan) {
+                $tgl = is_string($pertemuan->tgl_pertemuan)
+                    ? $pertemuan->tgl_pertemuan
+                    : (string) $pertemuan->tgl_pertemuan;
+
+                $key = $idJadwal . '_' . $tgl;
+                $presensi = $presensiMap[$key] ?? null;
+
+                $presensiDetails[] = [
+                    'nim' => $nim,
+                    'kode_mk' => $krs->kode_mata_kuliah,
+                    'nama_mk' => $krs->nama_mata_kuliah,
+                    'pertemuan_ke' => (int) ($pertemuan->id_pertemuan ?? 0),
+                    'tanggal' => $tgl,
+                    'status' => $presensi ? (int) $presensi->status : null,
+                    'ttd' => $presensi ? ($presensi->ttd ?? null) : null,
+                ];
+            }
+        }
+
+        $html = view('mahasiswa.absensi_pdf', [
+            'mahasiswa' => $mahasiswa,
+            'tahunAktif' => $tahunAktif,
+            'krsList' => $krsList,
+            'pertemuanMap' => $pertemuanMap,
+            'presensiMap' => $presensiMap,
+            'presensiDetails' => $presensiDetails,
+        ])->render();
+
+        $mpdf = new Mpdf([
+            'format' => 'A4-L', // Landscape orientation
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
+
+        $mpdf->WriteHTML($html);
+        $filename = 'absensi_' . ($mahasiswa->nim ?? 'mahasiswa') . '_' . now()->format('Ymd_His') . '.pdf';
+
+        return response($mpdf->Output($filename, 'D'))
+            ->header('Content-Type', 'application/pdf');
     }
 }

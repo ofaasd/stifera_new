@@ -6,6 +6,10 @@
         height: auto !important;
     }
 
+    .dosen-column {
+        text-align: left;
+    }
+
     .table-responsive .table {
         width: 100%;
         table-layout: fixed;
@@ -105,12 +109,13 @@
                                         @foreach($jadwalTersedia as $jadwal)
                                             @php
                                                 $kuotaPenuh = (int) ($jadwal->kuota_diambil ?? 0) > 0 && (int) ($jadwal->total_diambil ?? 0) >= (int) ($jadwal->kuota_diambil ?? 0);
+                                                $ruangJadwal = !empty($jadwal->ruang) ? urldecode((string) $jadwal->ruang) : '-';
                                             @endphp
                                             <option value="{{ $jadwal->id }}" {{ $kuotaPenuh ? 'disabled' : '' }}>
                                                 {{ $jadwal->kode_mata_kuliah }} - {{ $jadwal->nama_mata_kuliah ?? '-' }}
                                                 | {{ (int) ($jadwal->jumlah_sks ?? 0) }} SKS
                                                 | {{ $jadwal->hari ?? '-' }} {{ $jadwal->sesi ?? '-' }}
-                                                | Ruang {{ $jadwal->ruang ?? '-' }}
+                                                | Ruang {{ $ruangJadwal }}
                                                 | Dosen: {{ trim($jadwal->nama_dosen ?? '-') }}
                                                 @if($kuotaPenuh) | KUOTA PENUH @endif
                                             </option>
@@ -160,11 +165,15 @@
                                         <th>Hari</th>
                                         <th>Sesi</th>
                                         <th>Ruang</th>
-                                        <th>Dosen</th>
+                                        <th class="dosen-column">Dosen</th>
+                                        <td width="1"></td>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($krsRows as $idx => $row)
+                                        @php
+                                            $ruangKrs = !empty($row->ruang) ? urldecode((string) $row->ruang) : '-';
+                                        @endphp
                                         <tr>
                                             <td>{{ $idx + 1 }}</td>
                                             <td>{{ $row->mata_kuliah ?? '-' }}</td>
@@ -172,12 +181,13 @@
                                             <td>{{ $row->sks ?? 0 }}</td>
                                             <td>{{ $row->hari ?? '-' }}</td>
                                             <td>{{ $row->sesi ?? '-' }}</td>
-                                            <td>{{ $row->ruang ?? '-' }}</td>
-                                            <td>{{ trim($row->nama_dosen ?? '-') }}</td>
+                                            <td>{{ $ruangKrs }}</td>
+                                            <td class="dosen-column">{{ trim($row->nama_dosen ?? '-') }}</td>
+                                            <td></td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="8" class="text-center text-muted">Belum ada mata kuliah di KRS Anda.</td>
+                                            <td colspan="9" class="text-center text-muted">Belum ada mata kuliah di KRS Anda.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

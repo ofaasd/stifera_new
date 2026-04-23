@@ -1,4 +1,4 @@
-		<div class="nav-header">
+		<div class="nav-header" style="background-color: #0057bb;">
 			<a href="{{ url(auth()->user()->role === 'admin' ? 'admin/dashboard' : 'dashboard') }}" class="brand-logo">
 				<img class="logo-abbr" src="{{ asset(config('dz.site_level.logo')) }}" alt="" width="30" height="30" align="left">
 				<div class="brand-title" style="padding-top:5px;">

@@ -199,6 +199,7 @@ Route::middleware('auth:pegawai')->group(function () {
     Route::post('/dosen/pertemuan/{id_jadwal}', [PegawaiPertemuanController::class, 'save'])->name('pegawai.pertemuan.save');
     Route::post('/dosen/pertemuan/{id_jadwal}/dokumen', [PegawaiPertemuanController::class, 'uploadDokumen'])->name('pegawai.pertemuan.dokumen');
     Route::post('/dosen/pertemuan/{id_jadwal}/generate-kode', [PegawaiPertemuanController::class, 'generateKode'])->name('pegawai.pertemuan.generate-kode');
+    Route::get('/dosen/pertemuan/{id_jadwal}/export-pdf', [PegawaiPertemuanController::class, 'exportPdf'])->name('pegawai.pertemuan.export-pdf');
 
     Route::get('/pegawai/absensi/tambah_jam_kerja_detail', [PegawaiJamKerjaDetailController::class, 'edit'])->name('pegawai.jam-kerja-detail.edit');
     Route::post('/pegawai/absensi/tambah_jam_kerja_detail', [PegawaiJamKerjaDetailController::class, 'save'])->name('pegawai.jam-kerja-detail.save');
@@ -420,6 +421,7 @@ Route::middleware('auth:mahasiswa')->group(function () {
     Route::get('/mhs/matakuliah', [MahasiswaMatakuliahController::class, 'index'])->name('mahasiswa.matakuliah.index');
     Route::get('/mhs/keuangan', [MahasiswaKeuanganController::class, 'index'])->name('mahasiswa.keuangan.index');
     Route::get('/mhs/presensi', [MahasiswaPresensiController::class, 'index'])->name('mahasiswa.presensi.index');
+    Route::get('/mhs/presensi/export-pdf', [MahasiswaPresensiController::class, 'exportPdf'])->name('mahasiswa.presensi.export-pdf');
     Route::get('/mhs/absen', [MahasiswaAbsenController::class, 'index'])->name('mahasiswa.absen.index');
     Route::post('/mhs/absen/verifikasi', [MahasiswaAbsenController::class, 'verifikasi'])->name('mahasiswa.absen.verifikasi');
     Route::get('/mhs/absen/ttd', [MahasiswaAbsenController::class, 'ttd'])->name('mahasiswa.absen.ttd');
@@ -652,6 +654,7 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/master/pertemuan/{id_jadwal}', [JadwalController::class, 'pertemuanDetail']);
     Route::post('/master/pertemuan/{id_jadwal}', [JadwalController::class, 'pertemuanSave']);
     Route::post('/master/pertemuan/{id_jadwal}/dokumen', [JadwalController::class, 'pertemuanUploadDokumen']);
+    Route::get('/master/pertemuan/{id_jadwal}/export-pdf', [JadwalController::class, 'pertemuanExportPdf']);
     Route::get('/master/jadwal_krs', [JadwalController::class, 'krsIndex']);
     Route::post('/master/jadwal_krs/toggle', [JadwalController::class, 'krsToggle']);
     Route::get('/master/jadwal/input/{kodeMataKuliah}', [JadwalController::class, 'create']);

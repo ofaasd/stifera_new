@@ -35,6 +35,9 @@
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadDokumenModal">
                         <i class="fa-solid fa-upload me-1"></i> Upload RPS / KP
                     </button>
+                    <a href="{{ url('master/pertemuan/' . $jadwal->id . '/export-pdf') }}" class="btn btn-primary">
+                        <i class="fa fa-download me-1"></i> Cetak Absensi PDF
+                    </a>
                 </div>
 
                 <div class="filter cm-content-box box-primary mb-3">

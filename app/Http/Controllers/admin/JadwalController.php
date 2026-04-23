@@ -487,6 +487,203 @@ class JadwalController extends Controller
             ->with('status', 'Dokumen RPS/KP berhasil diupload.');
     }
 
+    public function pertemuanExportPdf(string $idJadwal)
+    {
+        $jadwal = DB::table('master_jadwal_temp as mjt')
+            ->leftJoin('master_mata_kuliah as mmk', 'mjt.kode_mata_kuliah', '=', 'mmk.kode_mata_kuliah')
+            ->leftJoin('program_studi as ps', 'ps.id', '=', 'mmk.id_program_studi')
+            ->leftJoin('master_tahun_ajaran as mta', 'mta.id', '=', 'mjt.id_tahun')
+            ->leftJoin('pegawai_biodata as pb', 'mjt.id_dosen', '=', 'pb.id')
+            ->leftJoin('pegawai_biodata as pb2', 'mjt.id_dosen2', '=', 'pb2.id')
+            ->select(
+                'mjt.*',
+                'mmk.nama_mata_kuliah',
+                'mmk.id_program_studi',
+                'mmk.jumlah_sks',
+                'ps.jenjang as jenjang_prodi',
+                'ps.nama_jurusan as nama_prodi',
+                'mta.awal as tahun_awal',
+                'mta.akhir as tahun_akhir',
+                'mta.jenis as jenis_tahun',
+                'pb.nip_pns as nip_dosen',
+                'pb2.nip_pns as nip_dosen2',
+                DB::raw("TRIM(CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,''))) as nama_dosen"),
+                DB::raw("TRIM(CONCAT(COALESCE(pb2.gelar_depan,''), ' ', COALESCE(pb2.nama_lengkap,''), ' ', COALESCE(pb2.gelar_belakang,''))) as nama_dosen2")
+            )
+            ->where('mjt.id', (int) $idJadwal)
+            ->first();
+
+        if (!$jadwal) {
+            return redirect('master/pertemuan')->with('error', 'Data jadwal tidak ditemukan.');
+        }
+
+        $mahasiswaList = DB::table('master_krs_temp as mkt')
+            ->leftJoin('mahasiswa as m', 'mkt.nim', '=', 'm.nim')
+            ->select('mkt.nim', 'm.nama', 'mkt.id_jadwal')
+            ->where('mkt.id_jadwal', (int) $idJadwal)
+            ->orderBy('m.nama')
+            ->get();
+
+        if ($mahasiswaList->isEmpty()) {
+            return redirect('master/pertemuan/' . (int) $idJadwal)
+                ->with('error', 'Tidak ada mahasiswa dalam kelas ini.');
+        }
+
+        $pertemuanList = DB::table('master_pertemuan')
+            ->select('id_pertemuan', 'tgl_pertemuan')
+            ->where('id_jadwal', (int) $idJadwal)
+            ->orderBy('id_pertemuan')
+            ->get();
+
+        $nimList = $mahasiswaList->pluck('nim')->filter()->values()->all();
+        $tanggalList = $pertemuanList
+            ->pluck('tgl_pertemuan')
+            ->filter(fn ($tgl) => !empty($tgl))
+            ->map(fn ($tgl) => (string) $tgl)
+            ->values()
+            ->all();
+
+        $presensiRows = DB::table('master_presensi')
+            ->select('nim', 'tgl_pertemuan', 'status', 'ttd')
+            ->where('id_jadwal', (int) $idJadwal)
+            ->when(!empty($nimList), fn ($q) => $q->whereIn('nim', $nimList))
+            ->when(!empty($tanggalList), fn ($q) => $q->whereIn('tgl_pertemuan', $tanggalList))
+            ->get();
+
+        $presensiIndex = [];
+        $presensiCountByTanggal = [];
+        foreach ($presensiRows as $row) {
+            $tanggal = (string) $row->tgl_pertemuan;
+            $key = (string) $row->nim . '|' . $tanggal;
+            $status = $row->status !== null ? (int) $row->status : null;
+
+            $presensiIndex[$key] = [
+                'status' => $status,
+                'ttd' => $row->ttd,
+            ];
+
+            if (!isset($presensiCountByTanggal[$tanggal])) {
+                $presensiCountByTanggal[$tanggal] = [
+                    'mhs_hadir' => 0,
+                    'mhs_tidak_hadir' => 0,
+                ];
+            }
+
+            if ($status === 1) {
+                $presensiCountByTanggal[$tanggal]['mhs_hadir']++;
+            } else {
+                $presensiCountByTanggal[$tanggal]['mhs_tidak_hadir']++;
+            }
+        }
+
+        $memoRows = DB::table('master_pertemuan as mp')
+            ->leftJoin('tbl_memo as tm', 'tm.id_pertemuan', '=', 'mp.id')
+            ->select(
+                'mp.id',
+                'mp.id_pertemuan',
+                'mp.tgl_pertemuan',
+                'tm.memo',
+                'tm.sub'
+            )
+            ->where('mp.id_jadwal', (int) $idJadwal)
+            ->orderBy('mp.id_pertemuan')
+            ->get();
+
+        $beritaAcaraRows = $memoRows->map(function ($row) use ($presensiCountByTanggal) {
+            $tanggal = (string) ($row->tgl_pertemuan ?? '');
+            $countRow = $presensiCountByTanggal[$tanggal] ?? [
+                'mhs_hadir' => 0,
+                'mhs_tidak_hadir' => 0,
+            ];
+
+            return [
+                'pertemuan_ke' => (int) ($row->id_pertemuan ?? 0),
+                'rencana_tanggal' => $row->tgl_pertemuan,
+                'tanggal_pelaksanaan' => $row->tgl_pertemuan,
+                'materi' => trim((string) ($row->memo ?? '')),
+                'sub_bahasan' => trim((string) ($row->sub ?? '')),
+                'mhs_hadir' => (int) $countRow['mhs_hadir'],
+                'mhs_tidak_hadir' => (int) $countRow['mhs_tidak_hadir'],
+            ];
+        })->values();
+
+        $ketuaProdi = $this->getKetuaProdiByProgramStudi((string) ($jadwal->jenjang_prodi ?? ''), (int) ($jadwal->id_program_studi ?? 0));
+        $ketuaSekolah = $this->getKetuaSekolahTinggi();
+
+        $html = view('pegawai.absensi_pdf', [
+            'jadwal' => $jadwal,
+            'mahasiswaList' => $mahasiswaList,
+            'pertemuanList' => $pertemuanList,
+            'presensiIndex' => $presensiIndex,
+            'beritaAcaraRows' => $beritaAcaraRows,
+            'ketuaProdi' => $ketuaProdi,
+            'ketuaSekolah' => $ketuaSekolah,
+        ])->render();
+
+        $mpdf = new \Mpdf\Mpdf([
+            'format' => 'A4-L',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
+
+        $mpdf->WriteHTML($html);
+        $filename = 'admin_absensi_' . ($jadwal->kode_mata_kuliah ?? 'jadwal') . '_' . now()->format('Ymd_His') . '.pdf';
+
+        return response($mpdf->Output($filename, 'D'))
+            ->header('Content-Type', 'application/pdf');
+    }
+
+    private function getKetuaProdiByProgramStudi(string $jenjangProdi, int $idProgramStudi): ?object
+    {
+        $jenjang = strtoupper(trim($jenjangProdi));
+        if ($jenjang === '' && $idProgramStudi > 0) {
+            $jenjangDb = DB::table('program_studi')
+                ->where('id', $idProgramStudi)
+                ->value('jenjang');
+            $jenjang = strtoupper(trim((string) $jenjangDb));
+        }
+
+        $kolomNpp = str_contains($jenjang, 'D3') ? 'prodi_d3' : 'prodi_s1';
+        $struktur = DB::table('struktur_pegawai2')->select($kolomNpp)->where('id', 1)->first();
+        $nppKetua = trim((string) ($struktur->{$kolomNpp} ?? ''));
+
+        if ($nppKetua === '') {
+            return null;
+        }
+
+        return DB::table('pegawai as p')
+            ->leftJoin('pegawai_biodata as pb', 'pb.id_pegawai', '=', 'p.id')
+            ->select(
+                'p.npp',
+                'pb.nip_pns',
+                DB::raw("TRIM(CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap, p.nama, ''), ' ', COALESCE(pb.gelar_belakang,''))) as nama_gelar")
+            )
+            ->where('p.npp', $nppKetua)
+            ->first();
+    }
+
+    private function getKetuaSekolahTinggi(): ?object
+    {
+        $struktur = DB::table('struktur_pegawai2')->select('ketua_st')->where('id', 1)->first();
+        $nppKetua = trim((string) ($struktur->ketua_st ?? ''));
+
+        if ($nppKetua === '') {
+            return null;
+        }
+
+        return DB::table('pegawai as p')
+            ->leftJoin('pegawai_biodata as pb', 'pb.id_pegawai', '=', 'p.id')
+            ->select(
+                'p.npp',
+                'pb.nip_pns',
+                DB::raw("TRIM(CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap, p.nama, ''), ' ', COALESCE(pb.gelar_belakang,''))) as nama_gelar")
+            )
+            ->where('p.npp', $nppKetua)
+            ->first();
+    }
+
     private function getTahunAktif(): ?object
     {
         $tahunAktif = DB::table('master_tahun_ajaran')
