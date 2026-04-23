@@ -249,20 +249,57 @@ class DataSupportController extends Controller
 
     private function buildIpsMahasiswaQuery(int $selectedAngkatan, int $selectedProgramStudi, int $selectedTahunAjaran)
     {
-        $query = DB::table('mahasiswa as m')
-            ->leftJoin('rekap_ips as ri', function ($join) use ($selectedTahunAjaran) {
-                $join->on('ri.id_mhs', '=', 'm.nim');
+        $sksExpr = 'COALESCE(mmk_t.jumlah_sks, mmk.jumlah_sks, 0)';
+        $hasNilaiExpr = "(TRIM(COALESCE(mn.nhuruf, '')) <> '' OR mn.nakhir IS NOT NULL)";
+        $nilaiBobotExpr = "
+            CASE
+                WHEN UPPER(TRIM(COALESCE(mn.nhuruf, ''))) = 'A' THEN 4
+                WHEN UPPER(TRIM(COALESCE(mn.nhuruf, ''))) = 'AB' THEN 3.5
+                WHEN UPPER(TRIM(COALESCE(mn.nhuruf, ''))) = 'B' THEN 3
+                WHEN UPPER(TRIM(COALESCE(mn.nhuruf, ''))) = 'BC' THEN 2.5
+                WHEN UPPER(TRIM(COALESCE(mn.nhuruf, ''))) = 'C' THEN 2
+                WHEN UPPER(TRIM(COALESCE(mn.nhuruf, ''))) = 'CD' THEN 1.5
+                WHEN UPPER(TRIM(COALESCE(mn.nhuruf, ''))) = 'D' THEN 1
+                WHEN UPPER(TRIM(COALESCE(mn.nhuruf, ''))) = 'E' THEN 0
+                WHEN mn.nakhir IS NOT NULL AND mn.nakhir >= 85 AND mn.nakhir <= 100 THEN 4
+                WHEN mn.nakhir IS NOT NULL AND mn.nakhir >= 79 AND mn.nakhir < 85 THEN 3.5
+                WHEN mn.nakhir IS NOT NULL AND mn.nakhir >= 73 AND mn.nakhir < 79 THEN 3
+                WHEN mn.nakhir IS NOT NULL AND mn.nakhir >= 67 AND mn.nakhir < 73 THEN 2.5
+                WHEN mn.nakhir IS NOT NULL AND mn.nakhir >= 61 AND mn.nakhir < 67 THEN 2
+                WHEN mn.nakhir IS NOT NULL AND mn.nakhir >= 55 AND mn.nakhir < 61 THEN 1.5
+                WHEN mn.nakhir IS NOT NULL AND mn.nakhir >= 45 AND mn.nakhir < 55 THEN 1
+                ELSE 0
+            END
+        ";
 
-                if ($selectedTahunAjaran > 0) {
-                    $join->where('ri.id_ta', '=', $selectedTahunAjaran);
-                }
+        $ipsSubQuery = DB::table('master_nilai as mn')
+            ->leftJoin('master_jadwal_temp as mjt', function ($join) {
+                $join->on('mjt.id', '=', 'mn.id_jadwal')
+                    ->on('mjt.id_tahun', '=', 'mn.id_tahun');
+            })
+            ->leftJoin('master_jadwal as mj', function ($join) {
+                $join->on('mj.id_jadwal', '=', 'mn.id_jadwal')
+                    ->on('mj.id_tahun', '=', 'mn.id_tahun');
+            })
+            ->leftJoin('master_mata_kuliah as mmk_t', 'mmk_t.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
+            ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mj.kode_mata_kuliah')
+            ->when($selectedTahunAjaran > 0, function ($query) use ($selectedTahunAjaran) {
+                $query->where('mn.id_tahun', $selectedTahunAjaran);
+            })
+            ->selectRaw('mn.nim as nim')
+            ->selectRaw("SUM(CASE WHEN {$hasNilaiExpr} THEN {$sksExpr} ELSE 0 END) as total_sks")
+            ->selectRaw("SUM(CASE WHEN {$hasNilaiExpr} THEN ({$nilaiBobotExpr}) * {$sksExpr} ELSE 0 END) as total_point")
+            ->groupBy('mn.nim');
+
+        $query = DB::table('mahasiswa as m')
+            ->leftJoinSub($ipsSubQuery, 'ips_nilai', function ($join) {
+                $join->on('ips_nilai.nim', '=', 'm.nim');
             })
             ->select([
                 'm.nim',
                 'm.nama',
-                DB::raw('COALESCE(MAX(CAST(ri.ips AS DECIMAL(8,2))), 0) as ips'),
+                DB::raw('COALESCE(ROUND(ips_nilai.total_point / NULLIF(ips_nilai.total_sks, 0), 2), 0) as ips'),
             ])
-            ->groupBy('m.id', 'm.nim', 'm.nama')
             ->orderBy('m.nim');
 
         if ($selectedAngkatan > 0) {

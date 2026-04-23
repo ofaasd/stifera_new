@@ -64,6 +64,17 @@
                             </form>
 
                             @if($isPreview)
+                                <div class="mb-3 d-flex gap-2">
+                                    <button type="button" id="btn-download-excel" class="btn btn-success">
+                                        <i class="fa fa-file-excel me-1"></i> Download Excel
+                                    </button>
+                                    <button type="button" id="btn-download-pdf" class="btn btn-danger">
+                                        <i class="fa fa-file-pdf me-1"></i> Download PDF
+                                    </button>
+                                </div>
+                            @endif
+
+                            @if($isPreview)
                                 <div class="table-responsive">
                                     <table id="table-ips-mahasiswa" class="display table table-bordered table-striped w-100">
                                         <thead>
@@ -141,10 +152,24 @@
                 buttons.push({ extend: 'print', title: 'IPS Mahasiswa' });
             }
 
-            $('#table-ips-mahasiswa').DataTable({
+            const table = $('#table-ips-mahasiswa').DataTable({
                 pageLength: 25,
                 dom: 'Bfrtip',
                 buttons: buttons
+            });
+
+            $('#btn-download-excel').on('click', function () {
+                const excelBtn = table.button('.buttons-excel');
+                if (excelBtn.any()) {
+                    excelBtn.trigger();
+                }
+            });
+
+            $('#btn-download-pdf').on('click', function () {
+                const pdfBtn = table.button('.buttons-pdf');
+                if (pdfBtn.any()) {
+                    pdfBtn.trigger();
+                }
             });
         }
     });
