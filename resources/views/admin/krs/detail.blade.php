@@ -67,6 +67,44 @@
                                 </table>
                             </div>
 
+                            <div class="card mb-3">
+                                <div class="card-header fw-bold bg-light">Tambah KRS Oleh Admin</div>
+                                <div class="card-body">
+                                    <form action="{{ url('master/krs/tambah-krs/' . $idTahun . '/' . ($mahasiswa->nim ?? '')) }}" method="POST">
+                                        @csrf
+                                        <div class="mb-3">
+                                            <label for="id_jadwal" class="form-label fw-bold">Pilih Jadwal <span class="text-danger">*</span></label>
+                                            <select name="id_jadwal" id="id_jadwal" class="form-select @error('id_jadwal') is-invalid @enderror" required>
+                                                <option value="">-- Pilih Jadwal --</option>
+                                                @foreach($jadwalList as $jadwal)
+                                                    <option value="{{ $jadwal->id }}" {{ old('id_jadwal') == $jadwal->id ? 'selected' : '' }}>
+                                                        {{ $jadwal->nama_mata_kuliah ?? $jadwal->kode_mata_kuliah }}
+                                                        ({{ $jadwal->jumlah_sks ?? '-' }} SKS)
+                                                        — {{ $jadwal->hari ?? '-' }}, Sesi {{ $jadwal->sesi ?? '-' }},
+                                                        Ruang {{ $jadwal->ruang ?? '-' }},
+                                                        Rombel {{ $jadwal->rombel ?? '-' }}
+                                                        — {{ trim($jadwal->nama_dosen ?? '-') }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('id_jadwal')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            @if($jadwalList->isEmpty())
+                                                <div class="form-text text-warning mt-1">
+                                                    <i class="fa fa-exclamation-triangle me-1"></i>
+                                                    Tidak ada jadwal aktif tersisa untuk ditambahkan.
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <button type="submit" class="btn btn-success" {{ $jadwalList->isEmpty() ? 'disabled' : '' }}>
+                                            <i class="fa fa-plus me-1"></i> Tambah KRS
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
                             @if($adaNilai)
                                 <div class="alert alert-warning">
                                     <i class="fa fa-exclamation-triangle me-1"></i>

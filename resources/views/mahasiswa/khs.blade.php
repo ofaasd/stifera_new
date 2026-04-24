@@ -244,22 +244,6 @@
                                     </table>
                                 </div>
 
-                                @if(!empty($history['debug']))
-                                    <div class="mt-3">
-                                        <details>
-                                            <summary class="fw-semibold">Debug SQL KHS</summary>
-                                            <div class="small text-muted mt-2 mb-2">
-                                                Source terpakai: <span class="fw-semibold">{{ $history['debug']['selected_source'] ?? '-' }}</span>
-                                            </div>
-                                            <label class="form-label small mb-1">Query master_krs_temp</label>
-                                            <textarea class="form-control form-control-sm mb-2" rows="5" readonly>{{ $history['debug']['master_krs_temp'] ?? '' }}</textarea>
-                                            <label class="form-label small mb-1">Query master_krs</label>
-                                            <textarea class="form-control form-control-sm mb-2" rows="5" readonly>{{ $history['debug']['master_krs'] ?? '' }}</textarea>
-                                            <label class="form-label small mb-1">Query master_nilai fallback</label>
-                                            <textarea class="form-control form-control-sm" rows="5" readonly>{{ $history['debug']['master_nilai'] ?? '' }}</textarea>
-                                        </details>
-                                    </div>
-                                @endif
                             </div>
                         @empty
                             <div class="alert alert-light border text-muted mb-0">

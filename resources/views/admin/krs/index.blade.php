@@ -130,12 +130,16 @@
                                                         <td>{{ $taReguler }}</td>
                                                         <td>{{ $row->nim }}</td>
                                                         <td>{{ $row->nama_mhs ?? '-' }}</td>
-                                                        <td style="background-color:#198754 !important; color:#fff !important; font-weight:bold !important;">{{ (int) ($row->total_sks ?? 0) }}/24</td>
+                                                        @php
+                                                            $totalSks = (int) ($row->total_sks ?? 0);
+                                                            $isBelumKrs = ((int) ($row->total_krs ?? 0) === 0);
+                                                        @endphp
+                                                        <td style="background-color:{{ $isBelumKrs ? '#6c757d' : '#198754' }} !important; color:#fff !important; font-weight:bold !important;">{{ $totalSks }}/24</td>
                                                         <td>BELUM LUNAS</td>
                                                         <td>
                                                             @if($tahunReguler)
                                                                 <a href="{{ url('master/krs/detail/' . $tahunReguler->id . '/' . $row->nim) }}" class="btn btn-primary btn-sm" title="Detail KRS">
-                                                                    <i class="fa fa-eye"></i> 
+                                                                    <i class="fa fa-eye"></i> Detail / Input
                                                                 </a>
                                                             @endif
                                                         </td>
@@ -214,12 +218,16 @@
                                                         <td>{{ $taRpl }}</td>
                                                         <td>{{ $row->nim }}</td>
                                                         <td>{{ $row->nama_mhs ?? '-' }}</td>
-                                                        <td style="background-color:#198754 !important; color:#fff !important; font-weight:bold !important;">{{ (int) ($row->total_sks ?? 0) }}/24</td>
+                                                        @php
+                                                            $totalSks = (int) ($row->total_sks ?? 0);
+                                                            $isBelumKrs = ((int) ($row->total_krs ?? 0) === 0);
+                                                        @endphp
+                                                        <td style="background-color:{{ $isBelumKrs ? '#6c757d' : '#198754' }} !important; color:#fff !important; font-weight:bold !important;">{{ $totalSks }}/24</td>
                                                         <td>BELUM LUNAS</td>
                                                         <td>
                                                             @if($tahunRpl)
                                                                 <a href="{{ url('master/krs/detail/' . $tahunRpl->id . '/' . $row->nim) }}" class="btn btn-primary btn-sm" title="Detail KRS">
-                                                                    <i class="fa fa-eye"></i> Detail
+                                                                    <i class="fa fa-eye"></i> Detail / Input
                                                                 </a>
                                                             @endif
                                                         </td>

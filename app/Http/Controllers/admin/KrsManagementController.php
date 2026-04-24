@@ -68,7 +68,7 @@ class KrsManagementController extends Controller
 
         $krsRegulerQuery = null;
         if ($tahunReguler) {
-            $krsRegulerQuery = $this->getKrsSummaryQueryByTahun((int) $tahunReguler->id);
+            $krsRegulerQuery = $this->getKrsSummaryQueryByTahun((int) $tahunReguler->id, 1);
             $debugSql['krs_list_reguler'] = $this->buildDebugSql('KRS summary Reguler', $krsRegulerQuery);
             $data['krsListReguler'] = $krsRegulerQuery->get();
         } else {
@@ -77,15 +77,15 @@ class KrsManagementController extends Controller
 
         $krsRplQuery = null;
         if ($tahunRpl) {
-            $krsRplQuery = $this->getKrsSummaryQueryByTahun((int) $tahunRpl->id);
+            $krsRplQuery = $this->getKrsSummaryQueryByTahun((int) $tahunRpl->id, 2);
             $debugSql['krs_list_rpl'] = $this->buildDebugSql('KRS summary RPL', $krsRplQuery);
             $data['krsListRpl'] = $krsRplQuery->get();
         } else {
             $data['krsListRpl'] = collect();
         }
 
-        $data['totalMahasiswaInputKrsReguler'] = $data['krsListReguler']->count();
-        $data['totalMahasiswaInputKrsRpl'] = $data['krsListRpl']->count();
+        $data['totalMahasiswaInputKrsReguler'] = (int) $data['krsListReguler']->where('total_krs', '>', 0)->count();
+        $data['totalMahasiswaInputKrsRpl'] = (int) $data['krsListRpl']->where('total_krs', '>', 0)->count();
 
         if ($traceSql) {
             $data['traceSqlData'] = $debugSql;
@@ -106,7 +106,7 @@ class KrsManagementController extends Controller
             return redirect()->back()->with('error', 'Tahun ajaran aktif belum tersedia.');
         }
 
-        $rows = $this->getKrsSummaryByTahun((int) $tahunAktif->id);
+        $rows = $this->getKrsSummaryByTahun((int) $tahunAktif->id, $tipeMhs);
         $jenis = $this->formatJenisSemester((int) ($tahunAktif->jenis ?? 0));
         $ta = ($tahunAktif->awal ?? '-') . ' - ' . ($tahunAktif->akhir ?? '-') . ' (' . $jenis . ')';
 
@@ -224,16 +224,102 @@ class KrsManagementController extends Controller
             ->orderBy('mkt.id')
             ->get();
 
+        $sudahDiambil = $krsRows->pluck('id_jadwal')->filter()->values()->all();
+
+        $jadwalList = DB::table('master_jadwal_temp as mjt')
+            ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
+            ->leftJoin('pegawai_biodata as pb', 'pb.id', '=', 'mjt.id_dosen')
+            ->select(
+                'mjt.id',
+                'mjt.kode_mata_kuliah',
+                'mjt.hari',
+                'mjt.sesi',
+                'mjt.ruang',
+                'mjt.rombel',
+                'mjt.kelas',
+                'mjt.id_dosen',
+                'mmk.nama_mata_kuliah',
+                'mmk.jumlah_sks',
+                DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen")
+            )
+            ->where('mjt.id_tahun', $idTahun)
+            ->where('mjt.status', 1)
+            ->when(!empty($sudahDiambil), function ($query) use ($sudahDiambil) {
+                $query->whereNotIn('mjt.id', $sudahDiambil);
+            })
+            ->orderBy('mmk.nama_mata_kuliah')
+            ->get();
+
         $data['title'] = 'Detail KRS Mahasiswa';
         $data['CurrentPage'] = 'content';
         $data['mahasiswa'] = $mahasiswa;
         $data['tahun'] = $tahun;
         $data['krsRows'] = $krsRows;
+        $data['jadwalList'] = $jadwalList;
         $data['adaNilai'] = $krsRows->contains(fn ($r) => (int) ($r->ada_nilai ?? 0) === 1);
         $data['idTahun'] = $idTahun;
         $data['jenisTA'] = $this->formatJenisSemester((int) ($tahun->jenis ?? 0));
 
         return view('admin.krs.detail', $data);
+    }
+
+    public function storeKrs(Request $request, string $id_tahun, string $nim)
+    {
+        $request->validate(['id_jadwal' => 'required|integer']);
+
+        $idTahun = (int) $id_tahun;
+        $nimClean = trim($nim);
+        $idJadwal = (int) $request->id_jadwal;
+
+        $mahasiswa = DB::table('mahasiswa')->where('nim', $nimClean)->first();
+        if (!$mahasiswa) {
+            return redirect('master/krs')->with('error', 'Mahasiswa tidak ditemukan.');
+        }
+
+        $tahun = DB::table('master_tahun_ajaran')->where('id', $idTahun)->first();
+        if (!$tahun) {
+            return redirect('master/krs')->with('error', 'Tahun ajaran tidak ditemukan.');
+        }
+
+        $jadwal = DB::table('master_jadwal_temp as mjt')
+            ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
+            ->select('mjt.*', 'mmk.jumlah_sks')
+            ->where('mjt.id', $idJadwal)
+            ->where('mjt.id_tahun', $idTahun)
+            ->where('mjt.status', 1)
+            ->first();
+
+        if (!$jadwal) {
+            return redirect()->back()->with('error', 'Jadwal tidak valid atau tidak aktif untuk tahun ajaran ini.');
+        }
+
+        $duplikat = DB::table('master_krs_temp')
+            ->where('nim', $nimClean)
+            ->where('id_tahun', $idTahun)
+            ->where('id_jadwal', $idJadwal)
+            ->exists();
+
+        if ($duplikat) {
+            return redirect()->back()->with('error', 'Jadwal ini sudah ada pada KRS mahasiswa.');
+        }
+
+        DB::table('master_krs_temp')->insert([
+            'id_tahun' => $idTahun,
+            'nim' => $nimClean,
+            'id_jadwal' => $idJadwal,
+            'mata_kuliah' => $jadwal->kode_mata_kuliah,
+            'sks' => (int) ($jadwal->jumlah_sks ?? 0),
+            'hari' => $jadwal->hari,
+            'sesi' => $jadwal->sesi,
+            'ruang' => $jadwal->ruang,
+            'kelas' => $jadwal->kelas ?? null,
+            'id_dosen' => $jadwal->id_dosen,
+            'is_publish' => 1,
+            'log_date' => now(),
+        ]);
+
+        return redirect('master/krs/detail/' . $idTahun . '/' . $nimClean)
+            ->with('status', 'Data KRS berhasil ditambahkan.');
     }
 
     public function downloadPdf(string $id_tahun, string $nim)
@@ -477,24 +563,28 @@ class KrsManagementController extends Controller
             ->count('id');
     }
 
-    private function getKrsSummaryByTahun(int $idTahun)
+    private function getKrsSummaryByTahun(int $idTahun, int $tipeMhs)
     {
-        return $this->getKrsSummaryQueryByTahun($idTahun)->get();
+        return $this->getKrsSummaryQueryByTahun($idTahun, $tipeMhs)->get();
     }
 
-    private function getKrsSummaryQueryByTahun(int $idTahun)
+    private function getKrsSummaryQueryByTahun(int $idTahun, int $tipeMhs)
     {
-        return DB::table('master_krs_temp as mkt')
-            ->leftJoin('mahasiswa as m', 'm.nim', '=', 'mkt.nim')
+        return DB::table('mahasiswa as m')
+            ->leftJoin('master_krs_temp as mkt', function ($join) use ($idTahun) {
+                $join->on('mkt.nim', '=', 'm.nim')
+                    ->where('mkt.id_tahun', '=', $idTahun);
+            })
             ->select(
-                'mkt.nim',
+                'm.nim',
                 'm.nama as nama_mhs',
                 DB::raw('SUM(COALESCE(mkt.sks, 0)) as total_sks'),
                 DB::raw('COUNT(mkt.id) as total_krs')
             )
-            ->where('mkt.id_tahun', $idTahun)
-            ->groupBy('mkt.nim', 'm.nama')
-            ->orderBy('mkt.nim')
+            ->where('m.tipe_mhs', $tipeMhs)
+            ->where('m.status', 1)
+            ->groupBy('m.nim', 'm.nama')
+            ->orderBy('m.nim')
             ->limit(500);
     }
 
