@@ -38,6 +38,9 @@ class PegawaiRiwayatPendidikanController extends Controller
             'universitas' => \DB::table('master_universitas')->orderBy('nama_universitas')->get(),
             'prodi' => \DB::table('master_program_studi')->orderBy('nama_jurusan')->get(),
             'jenjangList' => ['S1', 'S2', 'S3', 'D1', 'D2', 'D3', 'D4', 'Profesi'],
+            'backUrl' => (Auth::guard('admin')->check() && (int) $pegawai->id > 0)
+                ? url('pegawai/' . (int) $pegawai->id . '/edit')
+                : route('pegawai.home'),
         ];
 
         return view('pegawai.riwayat_pendidikan.index', $data);
@@ -74,7 +77,9 @@ class PegawaiRiwayatPendidikanController extends Controller
 
         PegawaiRiwayatPendidikan::create($validated);
 
-        return redirect()->route('pegawai.riwayat-pendidikan.index')->with('status', 'Riwayat pendidikan berhasil ditambahkan.');
+        $redirectParams = Auth::guard('admin')->check() ? ['id_pegawai' => (int) $pegawai->id] : [];
+
+        return redirect()->route('pegawai.riwayat-pendidikan.index', $redirectParams)->with('status', 'Riwayat pendidikan berhasil ditambahkan.');
     }
 
     public function update(Request $request, string $id)
@@ -119,7 +124,9 @@ class PegawaiRiwayatPendidikanController extends Controller
 
         $row->update($validated);
 
-        return redirect()->route('pegawai.riwayat-pendidikan.index')->with('status', 'Riwayat pendidikan berhasil diperbarui.');
+        $redirectParams = Auth::guard('admin')->check() ? ['id_pegawai' => (int) $pegawai->id] : [];
+
+        return redirect()->route('pegawai.riwayat-pendidikan.index', $redirectParams)->with('status', 'Riwayat pendidikan berhasil diperbarui.');
     }
 
     public function destroy(string $id)
@@ -143,6 +150,8 @@ class PegawaiRiwayatPendidikanController extends Controller
 
         $row->delete();
 
-        return redirect()->route('pegawai.riwayat-pendidikan.index')->with('status', 'Riwayat pendidikan berhasil dihapus.');
+        $redirectParams = Auth::guard('admin')->check() ? ['id_pegawai' => (int) $pegawai->id] : [];
+
+        return redirect()->route('pegawai.riwayat-pendidikan.index', $redirectParams)->with('status', 'Riwayat pendidikan berhasil dihapus.');
     }
 }

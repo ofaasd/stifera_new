@@ -386,6 +386,35 @@
                                         </div>
                                     </div>
 
+                                    @if(!$isPegawaiSelfService)
+                                        <div class="row mt-4">
+                                            <div class="col-12">
+                                                <div class="card" style="height:auto !important;">
+                                                    <div class="card-header">
+                                                        <h5 class="mb-0">Menu Riwayat Pegawai</h5>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <p class="text-muted mb-3">Pilih menu riwayat untuk menambah atau mengubah data riwayat pegawai ini.</p>
+                                                        <div class="row g-2">
+                                                            <div class="col-md-3 col-sm-6"><a class="btn btn-outline-primary w-100" href="{{ route('pegawai.riwayat-pendidikan.index', ['id_pegawai' => $query->id_pegawai]) }}">Riwayat Pendidikan</a></div>
+                                                            <div class="col-md-3 col-sm-6"><a class="btn btn-outline-primary w-100" href="{{ route('pegawai.riwayat-jabatan-fungsional.index', ['id_pegawai' => $query->id_pegawai]) }}">Jabatan Fungsional</a></div>
+                                                            <div class="col-md-3 col-sm-6"><a class="btn btn-outline-primary w-100" href="{{ route('pegawai.riwayat-jabatan-struktural.index', ['id_pegawai' => $query->id_pegawai]) }}">Jabatan Struktural</a></div>
+                                                            <div class="col-md-3 col-sm-6"><a class="btn btn-outline-primary w-100" href="{{ route('pegawai.riwayat-organisasi.index', ['id_pegawai' => $query->id_pegawai]) }}">Riwayat Organisasi</a></div>
+                                                            <div class="col-md-3 col-sm-6"><a class="btn btn-outline-primary w-100" href="{{ route('pegawai.riwayat-mengajar.index', ['id_pegawai' => $query->id_pegawai]) }}">Riwayat Mengajar</a></div>
+                                                            <div class="col-md-3 col-sm-6"><a class="btn btn-outline-primary w-100" href="{{ route('pegawai.riwayat-pekerjaan.index', ['id_pegawai' => $query->id_pegawai]) }}">Riwayat Pekerjaan</a></div>
+                                                            <div class="col-md-3 col-sm-6"><a class="btn btn-outline-primary w-100" href="{{ route('pegawai.riwayat-penelitian.index', ['id_pegawai' => $query->id_pegawai]) }}">Riwayat Penelitian</a></div>
+                                                            <div class="col-md-3 col-sm-6"><a class="btn btn-outline-primary w-100" href="{{ route('pegawai.riwayat-pengabdian.index', ['id_pegawai' => $query->id_pegawai]) }}">Riwayat Pengabdian</a></div>
+                                                            <div class="col-md-3 col-sm-6"><a class="btn btn-outline-primary w-100" href="{{ route('pegawai.riwayat-karya-ilmiah.index', ['id_pegawai' => $query->id_pegawai]) }}">Karya Ilmiah</a></div>
+                                                            <div class="col-md-3 col-sm-6"><a class="btn btn-outline-primary w-100" href="{{ route('pegawai.riwayat-buku.index', ['id_pegawai' => $query->id_pegawai]) }}">Riwayat Buku</a></div>
+                                                            <div class="col-md-3 col-sm-6"><a class="btn btn-outline-primary w-100" href="{{ route('pegawai.riwayat-haki.index', ['id_pegawai' => $query->id_pegawai]) }}">Riwayat HAKI</a></div>
+                                                            <div class="col-md-3 col-sm-6"><a class="btn btn-outline-primary w-100" href="{{ route('pegawai.riwayat-bkd.index', ['id_pegawai' => $query->id_pegawai]) }}">Riwayat BKD</a></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
                                     <div class="modal fade" id="ubah_photo" tabindex="-1" role="dialog">
                                         <div class="modal-dialog modal-lg" role="document">
                                             <div class="modal-content">

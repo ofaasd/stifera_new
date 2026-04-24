@@ -117,7 +117,7 @@ Route::get('/pegawai/reset-password', [PegawaiPasswordResetController::class, 's
 Route::post('/pegawai/reset-password', [PegawaiPasswordResetController::class, 'reset'])->name('pegawai.password.reset.store');
 
 
-Route::middleware('auth:pegawai')->group(function () {
+Route::middleware('auth:pegawai,admin')->group(function () {
     Route::get('/pegawai/home', function () {
         $pegawai = Auth::guard('pegawai')->user();
 
@@ -222,66 +222,68 @@ Route::middleware('auth:pegawai')->group(function () {
     Route::post('/pegawai/berkasPendukung/{jenis}', [PegawaiBerkasPendukungController::class, 'store'])->name('pegawai.berkas-pendukung.store');
     Route::delete('/pegawai/berkasPendukung/{jenis}', [PegawaiBerkasPendukungController::class, 'destroy'])->name('pegawai.berkas-pendukung.destroy');
 
-    Route::get('/pegawai/riwayatPendidikan', [PegawaiRiwayatPendidikanController::class, 'index'])->name('pegawai.riwayat-pendidikan.index');
-    Route::post('/pegawai/riwayatPendidikan', [PegawaiRiwayatPendidikanController::class, 'store'])->name('pegawai.riwayat-pendidikan.store');
-    Route::put('/pegawai/riwayatPendidikan/{id}', [PegawaiRiwayatPendidikanController::class, 'update'])->name('pegawai.riwayat-pendidikan.update');
-    Route::delete('/pegawai/riwayatPendidikan/{id}', [PegawaiRiwayatPendidikanController::class, 'destroy'])->name('pegawai.riwayat-pendidikan.destroy');
+    Route::middleware('resolve.pegawai.context')->group(function () {
+        Route::get('/pegawai/riwayatPendidikan', [PegawaiRiwayatPendidikanController::class, 'index'])->name('pegawai.riwayat-pendidikan.index');
+        Route::post('/pegawai/riwayatPendidikan', [PegawaiRiwayatPendidikanController::class, 'store'])->name('pegawai.riwayat-pendidikan.store');
+        Route::put('/pegawai/riwayatPendidikan/{id}', [PegawaiRiwayatPendidikanController::class, 'update'])->name('pegawai.riwayat-pendidikan.update');
+        Route::delete('/pegawai/riwayatPendidikan/{id}', [PegawaiRiwayatPendidikanController::class, 'destroy'])->name('pegawai.riwayat-pendidikan.destroy');
 
-    Route::get('/pegawai/riwayatJabatanFungsional', [PegawaiRiwayatJabatanFungsionalController::class, 'index'])->name('pegawai.riwayat-jabatan-fungsional.index');
-    Route::post('/pegawai/riwayatJabatanFungsional', [PegawaiRiwayatJabatanFungsionalController::class, 'store'])->name('pegawai.riwayat-jabatan-fungsional.store');
-    Route::put('/pegawai/riwayatJabatanFungsional/{id}', [PegawaiRiwayatJabatanFungsionalController::class, 'update'])->name('pegawai.riwayat-jabatan-fungsional.update');
-    Route::delete('/pegawai/riwayatJabatanFungsional/{id}', [PegawaiRiwayatJabatanFungsionalController::class, 'destroy'])->name('pegawai.riwayat-jabatan-fungsional.destroy');
+        Route::get('/pegawai/riwayatJabatanFungsional', [PegawaiRiwayatJabatanFungsionalController::class, 'index'])->name('pegawai.riwayat-jabatan-fungsional.index');
+        Route::post('/pegawai/riwayatJabatanFungsional', [PegawaiRiwayatJabatanFungsionalController::class, 'store'])->name('pegawai.riwayat-jabatan-fungsional.store');
+        Route::put('/pegawai/riwayatJabatanFungsional/{id}', [PegawaiRiwayatJabatanFungsionalController::class, 'update'])->name('pegawai.riwayat-jabatan-fungsional.update');
+        Route::delete('/pegawai/riwayatJabatanFungsional/{id}', [PegawaiRiwayatJabatanFungsionalController::class, 'destroy'])->name('pegawai.riwayat-jabatan-fungsional.destroy');
 
-    Route::get('/pegawai/riwayatJabatanStruktural', [PegawaiRiwayatJabatanStrukturalController::class, 'index'])->name('pegawai.riwayat-jabatan-struktural.index');
-    Route::post('/pegawai/riwayatJabatanStruktural', [PegawaiRiwayatJabatanStrukturalController::class, 'store'])->name('pegawai.riwayat-jabatan-struktural.store');
-    Route::put('/pegawai/riwayatJabatanStruktural/{id}', [PegawaiRiwayatJabatanStrukturalController::class, 'update'])->name('pegawai.riwayat-jabatan-struktural.update');
-    Route::delete('/pegawai/riwayatJabatanStruktural/{id}', [PegawaiRiwayatJabatanStrukturalController::class, 'destroy'])->name('pegawai.riwayat-jabatan-struktural.destroy');
+        Route::get('/pegawai/riwayatJabatanStruktural', [PegawaiRiwayatJabatanStrukturalController::class, 'index'])->name('pegawai.riwayat-jabatan-struktural.index');
+        Route::post('/pegawai/riwayatJabatanStruktural', [PegawaiRiwayatJabatanStrukturalController::class, 'store'])->name('pegawai.riwayat-jabatan-struktural.store');
+        Route::put('/pegawai/riwayatJabatanStruktural/{id}', [PegawaiRiwayatJabatanStrukturalController::class, 'update'])->name('pegawai.riwayat-jabatan-struktural.update');
+        Route::delete('/pegawai/riwayatJabatanStruktural/{id}', [PegawaiRiwayatJabatanStrukturalController::class, 'destroy'])->name('pegawai.riwayat-jabatan-struktural.destroy');
 
-    Route::get('/pegawai/riwayatOrganisasi', [PegawaiRiwayatOrganisasiController::class, 'index'])->name('pegawai.riwayat-organisasi.index');
-    Route::post('/pegawai/riwayatOrganisasi', [PegawaiRiwayatOrganisasiController::class, 'store'])->name('pegawai.riwayat-organisasi.store');
-    Route::put('/pegawai/riwayatOrganisasi/{id}', [PegawaiRiwayatOrganisasiController::class, 'update'])->name('pegawai.riwayat-organisasi.update');
-    Route::delete('/pegawai/riwayatOrganisasi/{id}', [PegawaiRiwayatOrganisasiController::class, 'destroy'])->name('pegawai.riwayat-organisasi.destroy');
+        Route::get('/pegawai/riwayatOrganisasi', [PegawaiRiwayatOrganisasiController::class, 'index'])->name('pegawai.riwayat-organisasi.index');
+        Route::post('/pegawai/riwayatOrganisasi', [PegawaiRiwayatOrganisasiController::class, 'store'])->name('pegawai.riwayat-organisasi.store');
+        Route::put('/pegawai/riwayatOrganisasi/{id}', [PegawaiRiwayatOrganisasiController::class, 'update'])->name('pegawai.riwayat-organisasi.update');
+        Route::delete('/pegawai/riwayatOrganisasi/{id}', [PegawaiRiwayatOrganisasiController::class, 'destroy'])->name('pegawai.riwayat-organisasi.destroy');
 
-    Route::get('/pegawai/riwayatMengajar', [PegawaiRiwayatMengajarController::class, 'index'])->name('pegawai.riwayat-mengajar.index');
-    Route::post('/pegawai/riwayatMengajar', [PegawaiRiwayatMengajarController::class, 'store'])->name('pegawai.riwayat-mengajar.store');
-    Route::put('/pegawai/riwayatMengajar/{id}', [PegawaiRiwayatMengajarController::class, 'update'])->name('pegawai.riwayat-mengajar.update');
-    Route::delete('/pegawai/riwayatMengajar/{id}', [PegawaiRiwayatMengajarController::class, 'destroy'])->name('pegawai.riwayat-mengajar.destroy');
+        Route::get('/pegawai/riwayatMengajar', [PegawaiRiwayatMengajarController::class, 'index'])->name('pegawai.riwayat-mengajar.index');
+        Route::post('/pegawai/riwayatMengajar', [PegawaiRiwayatMengajarController::class, 'store'])->name('pegawai.riwayat-mengajar.store');
+        Route::put('/pegawai/riwayatMengajar/{id}', [PegawaiRiwayatMengajarController::class, 'update'])->name('pegawai.riwayat-mengajar.update');
+        Route::delete('/pegawai/riwayatMengajar/{id}', [PegawaiRiwayatMengajarController::class, 'destroy'])->name('pegawai.riwayat-mengajar.destroy');
 
-    Route::get('/pegawai/riwayatPekerjaan', [PegawaiRiwayatPekerjaanController::class, 'index'])->name('pegawai.riwayat-pekerjaan.index');
-    Route::post('/pegawai/riwayatPekerjaan', [PegawaiRiwayatPekerjaanController::class, 'store'])->name('pegawai.riwayat-pekerjaan.store');
-    Route::put('/pegawai/riwayatPekerjaan/{id}', [PegawaiRiwayatPekerjaanController::class, 'update'])->name('pegawai.riwayat-pekerjaan.update');
-    Route::delete('/pegawai/riwayatPekerjaan/{id}', [PegawaiRiwayatPekerjaanController::class, 'destroy'])->name('pegawai.riwayat-pekerjaan.destroy');
+        Route::get('/pegawai/riwayatPekerjaan', [PegawaiRiwayatPekerjaanController::class, 'index'])->name('pegawai.riwayat-pekerjaan.index');
+        Route::post('/pegawai/riwayatPekerjaan', [PegawaiRiwayatPekerjaanController::class, 'store'])->name('pegawai.riwayat-pekerjaan.store');
+        Route::put('/pegawai/riwayatPekerjaan/{id}', [PegawaiRiwayatPekerjaanController::class, 'update'])->name('pegawai.riwayat-pekerjaan.update');
+        Route::delete('/pegawai/riwayatPekerjaan/{id}', [PegawaiRiwayatPekerjaanController::class, 'destroy'])->name('pegawai.riwayat-pekerjaan.destroy');
 
-    Route::get('/pegawai/riwayatPenelitian', [PegawaiRiwayatPenelitianController::class, 'index'])->name('pegawai.riwayat-penelitian.index');
-    Route::post('/pegawai/riwayatPenelitian', [PegawaiRiwayatPenelitianController::class, 'store'])->name('pegawai.riwayat-penelitian.store');
-    Route::put('/pegawai/riwayatPenelitian/{id}', [PegawaiRiwayatPenelitianController::class, 'update'])->name('pegawai.riwayat-penelitian.update');
-    Route::delete('/pegawai/riwayatPenelitian/{id}', [PegawaiRiwayatPenelitianController::class, 'destroy'])->name('pegawai.riwayat-penelitian.destroy');
+        Route::get('/pegawai/riwayatPenelitian', [PegawaiRiwayatPenelitianController::class, 'index'])->name('pegawai.riwayat-penelitian.index');
+        Route::post('/pegawai/riwayatPenelitian', [PegawaiRiwayatPenelitianController::class, 'store'])->name('pegawai.riwayat-penelitian.store');
+        Route::put('/pegawai/riwayatPenelitian/{id}', [PegawaiRiwayatPenelitianController::class, 'update'])->name('pegawai.riwayat-penelitian.update');
+        Route::delete('/pegawai/riwayatPenelitian/{id}', [PegawaiRiwayatPenelitianController::class, 'destroy'])->name('pegawai.riwayat-penelitian.destroy');
 
-    Route::get('/pegawai/riwayatPengabdian', [PegawaiRiwayatPengabdianController::class, 'index'])->name('pegawai.riwayat-pengabdian.index');
-    Route::post('/pegawai/riwayatPengabdian', [PegawaiRiwayatPengabdianController::class, 'store'])->name('pegawai.riwayat-pengabdian.store');
-    Route::put('/pegawai/riwayatPengabdian/{id}', [PegawaiRiwayatPengabdianController::class, 'update'])->name('pegawai.riwayat-pengabdian.update');
-    Route::delete('/pegawai/riwayatPengabdian/{id}', [PegawaiRiwayatPengabdianController::class, 'destroy'])->name('pegawai.riwayat-pengabdian.destroy');
+        Route::get('/pegawai/riwayatPengabdian', [PegawaiRiwayatPengabdianController::class, 'index'])->name('pegawai.riwayat-pengabdian.index');
+        Route::post('/pegawai/riwayatPengabdian', [PegawaiRiwayatPengabdianController::class, 'store'])->name('pegawai.riwayat-pengabdian.store');
+        Route::put('/pegawai/riwayatPengabdian/{id}', [PegawaiRiwayatPengabdianController::class, 'update'])->name('pegawai.riwayat-pengabdian.update');
+        Route::delete('/pegawai/riwayatPengabdian/{id}', [PegawaiRiwayatPengabdianController::class, 'destroy'])->name('pegawai.riwayat-pengabdian.destroy');
 
-    Route::get('/pegawai/riwayatKaryaIlmiah', [PegawaiRiwayatKaryaIlmiahController::class, 'index'])->name('pegawai.riwayat-karya-ilmiah.index');
-    Route::post('/pegawai/riwayatKaryaIlmiah', [PegawaiRiwayatKaryaIlmiahController::class, 'store'])->name('pegawai.riwayat-karya-ilmiah.store');
-    Route::put('/pegawai/riwayatKaryaIlmiah/{id}', [PegawaiRiwayatKaryaIlmiahController::class, 'update'])->name('pegawai.riwayat-karya-ilmiah.update');
-    Route::delete('/pegawai/riwayatKaryaIlmiah/{id}', [PegawaiRiwayatKaryaIlmiahController::class, 'destroy'])->name('pegawai.riwayat-karya-ilmiah.destroy');
+        Route::get('/pegawai/riwayatKaryaIlmiah', [PegawaiRiwayatKaryaIlmiahController::class, 'index'])->name('pegawai.riwayat-karya-ilmiah.index');
+        Route::post('/pegawai/riwayatKaryaIlmiah', [PegawaiRiwayatKaryaIlmiahController::class, 'store'])->name('pegawai.riwayat-karya-ilmiah.store');
+        Route::put('/pegawai/riwayatKaryaIlmiah/{id}', [PegawaiRiwayatKaryaIlmiahController::class, 'update'])->name('pegawai.riwayat-karya-ilmiah.update');
+        Route::delete('/pegawai/riwayatKaryaIlmiah/{id}', [PegawaiRiwayatKaryaIlmiahController::class, 'destroy'])->name('pegawai.riwayat-karya-ilmiah.destroy');
 
-    Route::get('/pegawai/riwayatBuku', [PegawaiRiwayatBukuController::class, 'index'])->name('pegawai.riwayat-buku.index');
-    Route::post('/pegawai/riwayatBuku', [PegawaiRiwayatBukuController::class, 'store'])->name('pegawai.riwayat-buku.store');
-    Route::put('/pegawai/riwayatBuku/{id}', [PegawaiRiwayatBukuController::class, 'update'])->name('pegawai.riwayat-buku.update');
-    Route::delete('/pegawai/riwayatBuku/{id}', [PegawaiRiwayatBukuController::class, 'destroy'])->name('pegawai.riwayat-buku.destroy');
+        Route::get('/pegawai/riwayatBuku', [PegawaiRiwayatBukuController::class, 'index'])->name('pegawai.riwayat-buku.index');
+        Route::post('/pegawai/riwayatBuku', [PegawaiRiwayatBukuController::class, 'store'])->name('pegawai.riwayat-buku.store');
+        Route::put('/pegawai/riwayatBuku/{id}', [PegawaiRiwayatBukuController::class, 'update'])->name('pegawai.riwayat-buku.update');
+        Route::delete('/pegawai/riwayatBuku/{id}', [PegawaiRiwayatBukuController::class, 'destroy'])->name('pegawai.riwayat-buku.destroy');
 
-    Route::get('/pegawai/riwayatHaki', [PegawaiRiwayatHakiController::class, 'index'])->name('pegawai.riwayat-haki.index');
-    Route::post('/pegawai/riwayatHaki', [PegawaiRiwayatHakiController::class, 'store'])->name('pegawai.riwayat-haki.store');
-    Route::put('/pegawai/riwayatHaki/{id}', [PegawaiRiwayatHakiController::class, 'update'])->name('pegawai.riwayat-haki.update');
-    Route::delete('/pegawai/riwayatHaki/{id}', [PegawaiRiwayatHakiController::class, 'destroy'])->name('pegawai.riwayat-haki.destroy');
+        Route::get('/pegawai/riwayatHaki', [PegawaiRiwayatHakiController::class, 'index'])->name('pegawai.riwayat-haki.index');
+        Route::post('/pegawai/riwayatHaki', [PegawaiRiwayatHakiController::class, 'store'])->name('pegawai.riwayat-haki.store');
+        Route::put('/pegawai/riwayatHaki/{id}', [PegawaiRiwayatHakiController::class, 'update'])->name('pegawai.riwayat-haki.update');
+        Route::delete('/pegawai/riwayatHaki/{id}', [PegawaiRiwayatHakiController::class, 'destroy'])->name('pegawai.riwayat-haki.destroy');
 
-    Route::get('/pegawai/riwayatBkd', [PegawaiRiwayatBkdController::class, 'index']);
-    Route::get('/pegawai/riwayatbkd', [PegawaiRiwayatBkdController::class, 'index'])->name('pegawai.riwayat-bkd.index');
-    Route::post('/pegawai/riwayatbkd', [PegawaiRiwayatBkdController::class, 'store'])->name('pegawai.riwayat-bkd.store');
-    Route::put('/pegawai/riwayatbkd/{id}', [PegawaiRiwayatBkdController::class, 'update'])->name('pegawai.riwayat-bkd.update');
-    Route::delete('/pegawai/riwayatbkd/{id}', [PegawaiRiwayatBkdController::class, 'destroy'])->name('pegawai.riwayat-bkd.destroy');
+        Route::get('/pegawai/riwayatBkd', [PegawaiRiwayatBkdController::class, 'index']);
+        Route::get('/pegawai/riwayatbkd', [PegawaiRiwayatBkdController::class, 'index'])->name('pegawai.riwayat-bkd.index');
+        Route::post('/pegawai/riwayatbkd', [PegawaiRiwayatBkdController::class, 'store'])->name('pegawai.riwayat-bkd.store');
+        Route::put('/pegawai/riwayatbkd/{id}', [PegawaiRiwayatBkdController::class, 'update'])->name('pegawai.riwayat-bkd.update');
+        Route::delete('/pegawai/riwayatbkd/{id}', [PegawaiRiwayatBkdController::class, 'destroy'])->name('pegawai.riwayat-bkd.destroy');
+    });
 
     Route::post('/pegawai/logout', [PegawaiLoginController::class, 'logout'])->name('pegawai.logout');
 });

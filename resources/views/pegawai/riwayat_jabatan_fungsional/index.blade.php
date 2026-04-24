@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col-xl-12">
                 <div class="mb-4 pb-3">
-                    <a href="{{ route('pegawai.home') }}" class="btn btn-secondary">
+                    <a href="{{ (Auth::guard('admin')->check() && Auth::guard('pegawai')->check()) ? url('pegawai/' . Auth::guard('pegawai')->id() . '/edit') : route('pegawai.home') }}" class="btn btn-secondary">
                         <i class="fa-solid fa-arrow-left me-1"></i> Kembali
                     </a>
                 </div>

@@ -13,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'resolve.pegawai.context' => \App\Http\Middleware\ResolvePegawaiContext::class,
+        ]);
+
         $middleware->redirectGuestsTo(function (Request $request) {
             if ($request->routeIs('mahasiswa.*') || $request->is('mhs') || $request->is('mhs/*') || $request->is('mahasiswa') || $request->is('mahasiswa/*')) {
                 return route('mahasiswa.login');
