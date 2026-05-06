@@ -17,6 +17,20 @@
         word-break: break-word;
         overflow-wrap: anywhere;
     }
+
+    @media (max-width: 767.98px) {
+        .table-responsive .table {
+            table-layout: auto;
+            min-width: 650px;
+        }
+
+        .table-responsive .table th,
+        .table-responsive .table td {
+            white-space: nowrap;
+            word-break: normal;
+            overflow-wrap: normal;
+        }
+    }
 </style>
 @endsection
 
