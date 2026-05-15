@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Menu extends Model
 {
-	protected $table = 'menu';
+	protected $table = 'menu_new';
 	public $timestamps = false;
 
 	protected $casts = [

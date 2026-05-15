@@ -28,7 +28,7 @@ use Illuminate\Notifications\Notifiable;
  */
 class User extends Authenticatable
 {
-	protected $table = 'users';
+	protected $table = 'users_new';
 	use Notifiable, HasRoles;
 
 	protected $casts = [
