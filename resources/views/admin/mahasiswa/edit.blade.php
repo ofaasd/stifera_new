@@ -40,10 +40,10 @@
                                                     <tr>
                                                         <td rowspan="4" style="position: top;">
                                                             <center>
-                                                                @if($detail[0]['foto_peserta'])
-                                                                    <img src="{{ asset('assets/foto_pmb_peserta/' . $detail[0]['foto_peserta']) }}" width="120px" height="160px">
+                                                                @if($detail[0]['foto_mhs'])
+                                                                    <img src="{{ asset('assets/foto_mahasiswa/' . $detail[0]['foto_mhs']) }}" width="120px" height="160px">
                                                                 @else
-                                                                    <img src="{{ asset('assets/foto_pmb_peserta/default.png') }}" width="120px" height="160px">
+                                                                    <img src="{{ asset('assets/foto_mahasiswa/default.png') }}" width="120px" height="160px">
                                                                 @endif
                                                                 
                                                             </center>
