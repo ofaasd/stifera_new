@@ -58,7 +58,7 @@
                                 <div class="col-md-6 mb-2">
                                     <strong>RPS:</strong>
                                     @if(!empty($jadwal->rps))
-                                        <a href="{{ asset('files/assets/files/' . $jadwal->rps) }}" target="_blank" class="btn btn-primary btn-sm">Lihat File</a>
+                                        <a href="{{ asset('assets/files/' . $jadwal->rps) }}" target="_blank" class="btn btn-primary btn-sm">Lihat File</a>
                                     @else
                                         -
                                     @endif
@@ -66,7 +66,7 @@
                                 <div class="col-md-6 mb-2">
                                     <strong>KP:</strong>
                                     @if(!empty($jadwal->kp))
-                                        <a href="{{ asset('files/assets/files/' . $jadwal->kp) }}" target="_blank" class="btn btn-primary btn-sm">Lihat File</a>
+                                        <a href="{{ asset('assets/files/' . $jadwal->kp) }}" target="_blank" class="btn btn-primary btn-sm">Lihat File</a>
                                     @else
                                         -
                                     @endif
