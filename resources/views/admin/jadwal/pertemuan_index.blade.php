@@ -58,13 +58,13 @@
                                                 <td>{{ $row->hari }}, {{ $row->sesi }} {{ $row->ruang }}</td>
                                                 <td>
                                                     @if(!empty($row->rps))
-                                                        <span class="badge badge-success">Ada</span>
+                                                        <a href="{{ asset('assets/files/' . $row->rps) }}" class="badge badge-success" target="_blank">Ada</a>
                                                     @else
                                                         <span class="badge badge-danger">Kosong</span>
                                                     @endif
 
                                                     @if(!empty($row->kp))
-                                                        <span class="badge badge-success">Ada</span>
+                                                        <a href="{{ asset('assets/files/' . $row->kp) }}" class="badge badge-success" target="_blank">Ada</a>
                                                     @else
                                                         <span class="badge badge-danger">Kosong</span>
                                                     @endif

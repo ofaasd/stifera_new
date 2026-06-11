@@ -51,12 +51,17 @@
                                                 <td>{{ trim($row->nama_dosen ?? '-') }}</td>
                                                 <td>{{ $row->hari }}, {{ $row->sesi }} {{ $row->ruang }}</td>
                                                 <td>
-                                                    <span class="badge {{ !empty($row->rps) ? 'badge-success' : 'badge-danger' }}">
-                                                        RPS: {{ !empty($row->rps) ? 'Ada' : 'Kosong' }}
-                                                    </span>
-                                                    <span class="badge {{ !empty($row->kp) ? 'badge-success' : 'badge-danger' }}">
-                                                        KP: {{ !empty($row->kp) ? 'Ada' : 'Kosong' }}
-                                                    </span>
+                                                    @if(!empty($row->rps))
+                                                        <a href="{{ asset('assets/files/' . $row->rps) }}" class="badge badge-success" target="_blank">RPS: Ada</a>
+                                                    @else
+                                                        <span class="badge badge-danger">RPS: Kosong</span>
+                                                    @endif
+
+                                                    @if(!empty($row->kp))
+                                                        <a href="{{ asset('assets/files/' . $row->kp) }}" class="badge badge-success" target="_blank">KP: Ada</a>
+                                                    @else
+                                                        <span class="badge badge-danger">KP: Kosong</span>
+                                                    @endif
                                                 </td>
                                                 <td>
                                                     <a href="{{ url('dosen/pertemuan/' . $row->id) }}" class="btn btn-success btn-sm" title="Set Pertemuan">
