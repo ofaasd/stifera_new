@@ -268,7 +268,8 @@
                             @endphp
 
                             @if($hasSignatureImage && $imageSrc)
-                                <img src="{{ $imageSrc }}" alt="TTD" class="signature-img">
+                                kesini
+                                <!-- <img src="{{ $imageSrc }}" alt="TTD" class="signature-img"> -->
                             @else
                                 <span class="signature-check">&#10003;</span>
                             @endif
