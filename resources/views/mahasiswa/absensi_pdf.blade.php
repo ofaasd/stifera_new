@@ -90,6 +90,15 @@
             max-width: 60px;
             max-height: 40px;
         }
+        .signature-check {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
         .summary {
             margin-top: 12px;
             width: 45%;
@@ -232,18 +241,34 @@
                             @php
                                 $ttdPath = $detail['ttd'] ?? null;
                                 $hasSignatureImage = false;
+                                $imageSrc = null;
+
                                 if (!empty($ttdPath)) {
-                                    if (str_starts_with($ttdPath, 'data:') || filter_var($ttdPath, FILTER_VALIDATE_URL)) {
+                                    if (str_starts_with($ttdPath, 'data:')) {
                                         $hasSignatureImage = true;
+                                        $imageSrc = $ttdPath;
+                                    } elseif (filter_var($ttdPath, FILTER_VALIDATE_URL)) {
+                                        $hasSignatureImage = true;
+                                        $imageSrc = $ttdPath;
                                     } else {
-                                        $publicPath = public_path(ltrim($ttdPath, '/'));
-                                        $hasSignatureImage = is_file($publicPath);
+                                        $cleanPath = ltrim($ttdPath, '/');
+                                        $publicFile = public_path($cleanPath);
+                                        if (is_file($publicFile)) {
+                                            $hasSignatureImage = true;
+                                            $imageSrc = asset($cleanPath);
+                                        } else {
+                                            $storageFile = storage_path('app/public/' . $cleanPath);
+                                            if (is_file($storageFile)) {
+                                                $hasSignatureImage = true;
+                                                $imageSrc = asset('storage/' . $cleanPath);
+                                            }
+                                        }
                                     }
                                 }
                             @endphp
 
-                            @if($hasSignatureImage)
-                                <img src="{{ $ttdPath }}" alt="TTD" class="signature-img">
+                            @if($hasSignatureImage && $imageSrc)
+                                <img src="{{ $imageSrc }}" alt="TTD" class="signature-img">
                             @else
                                 <span class="signature-check">&#10003;</span>
                             @endif
