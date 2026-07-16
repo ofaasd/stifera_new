@@ -105,6 +105,11 @@
             font-size: 12px;
             font-weight: bold;
         }
+        .signature-check svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
         .pertemuan-date {
             font-size: 7px;
             line-height: 1.15;
@@ -372,7 +377,11 @@
                                     @if($hasSignature && $imageSrc)
                                         <img src="{{ $imageSrc }}" alt="TTD" class="attendance-signature">
                                     @else
-                                        <span class="signature-check">&#10003;</span>
+                                        <span class="signature-check">
+                                            <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                <path d="M2 8l3 3 8-8" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </span>
                                     @endif
                                 @else
                                     {{ $statusDisplay }}

@@ -94,10 +94,12 @@
             display: inline-block;
             width: 24px;
             height: 24px;
-            line-height: 24px;
-            text-align: center;
-            font-size: 16px;
-            font-weight: bold;
+            vertical-align: middle;
+        }
+        .signature-check svg {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
         .summary {
             margin-top: 12px;
@@ -269,8 +271,12 @@
 
                             @if($hasSignatureImage && $imageSrc)
                                 <img src="{{ $imageSrc }}" alt="TTD" class="signature-img">
-                            @else
-                                <span class="signature-check">&#10003;</span>
+                                @else
+                                <span class="signature-check">
+                                    <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <path d="M2 8l3 3 8-8" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
                             @endif
                         </td>
                     </tr>
