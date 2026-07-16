@@ -229,10 +229,23 @@
                         </td>
                         <td class="center">{{ $statusLabel }}</td>
                         <td class="center">
-                            @if($detail['ttd'])
-                                <img src="{{ $detail['ttd'] }}" alt="TTD" class="signature-img">
+                            @php
+                                $ttdPath = $detail['ttd'] ?? null;
+                                $hasSignatureImage = false;
+                                if (!empty($ttdPath)) {
+                                    if (str_starts_with($ttdPath, 'data:') || filter_var($ttdPath, FILTER_VALIDATE_URL)) {
+                                        $hasSignatureImage = true;
+                                    } else {
+                                        $publicPath = public_path(ltrim($ttdPath, '/'));
+                                        $hasSignatureImage = is_file($publicPath);
+                                    }
+                                }
+                            @endphp
+
+                            @if($hasSignatureImage)
+                                <img src="{{ $ttdPath }}" alt="TTD" class="signature-img">
                             @else
-                                -
+                                <span class="signature-check">&#10003;</span>
                             @endif
                         </td>
                     </tr>
