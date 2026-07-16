@@ -408,7 +408,7 @@
             // Jika data sudah padat, pindahkan blok tanda tangan ke halaman berikutnya agar tidak terbelah.
             $forceSignatureNewPage = count($mahasiswaList) >= 17;
             $jenjangProdi = strtoupper(trim((string) ($jadwal->jenjang_prodi ?? 'S1')));
-            $labelJenjang = str_contains($jenjangProdi, 'D3') ? 'D3' : 'S1';
+            $labelJenjang = str_contains($jenjangProdi, 'D III') ? 'D 3' : 'S1';
             $namaKetuaProdi = trim((string) ($ketuaProdi->nama_gelar ?? '-'));
             $nipKetuaProdi = trim((string) ($ketuaProdi->nip_pns ?? ''));
             $namaDosen1 = trim((string) ($jadwal->nama_dosen ?? '-'));

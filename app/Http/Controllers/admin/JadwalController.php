@@ -645,7 +645,7 @@ class JadwalController extends Controller
             $jenjang = strtoupper(trim((string) $jenjangDb));
         }
 
-        $kolomNpp = str_contains($jenjang, 'D3') ? 'prodi_d3' : 'prodi_s1';
+        $kolomNpp = str_contains($jenjang, 'D III') ? 'prodi_d3' : 'prodi_s1';
         $struktur = DB::table('struktur_pegawai2')->select($kolomNpp)->where('id', 1)->first();
         $nppKetua = trim((string) ($struktur->{$kolomNpp} ?? ''));
 
