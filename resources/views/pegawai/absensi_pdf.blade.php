@@ -96,6 +96,15 @@
             display: block;
             margin: 0 auto;
         }
+        .signature-check {
+            display: inline-block;
+            width: 20px;
+            height: 18px;
+            line-height: 18px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
         .pertemuan-date {
             font-size: 7px;
             line-height: 1.15;
@@ -331,8 +340,40 @@
                                 }
                             @endphp
                             <td class="center">
-                                @if($p && $p['status'] === 1 && !empty($p['ttd']))
-                                    <img src="{{ $p['ttd'] }}" alt="TTD" class="attendance-signature">
+                                @php
+                                    $imageSrc = null;
+                                    $hasSignature = false;
+                                    if ($p && $p['status'] === 1 && !empty($p['ttd'])) {
+                                        $ttdVal = $p['ttd'];
+                                        if (str_starts_with($ttdVal, 'data:')) {
+                                            $hasSignature = true;
+                                            $imageSrc = $ttdVal;
+                                        } elseif (filter_var($ttdVal, FILTER_VALIDATE_URL)) {
+                                            $hasSignature = true;
+                                            $imageSrc = $ttdVal;
+                                        } else {
+                                            $clean = ltrim($ttdVal, '/');
+                                            $publicFile = public_path($clean);
+                                            if (is_file($publicFile)) {
+                                                $hasSignature = true;
+                                                $imageSrc = asset($clean);
+                                            } else {
+                                                $storageFile = storage_path('app/public/' . $clean);
+                                                if (is_file($storageFile)) {
+                                                    $hasSignature = true;
+                                                    $imageSrc = asset('storage/' . $clean);
+                                                }
+                                            }
+                                        }
+                                    }
+                                @endphp
+
+                                @if($p && $p['status'] === 1)
+                                    @if($hasSignature && $imageSrc)
+                                        <img src="{{ $imageSrc }}" alt="TTD" class="attendance-signature">
+                                    @else
+                                        <span class="signature-check">&#10003;</span>
+                                    @endif
                                 @else
                                     {{ $statusDisplay }}
                                 @endif
