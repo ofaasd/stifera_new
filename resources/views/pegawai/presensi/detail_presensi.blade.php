@@ -25,7 +25,7 @@
                         <div class="cm-content-body form excerpt">
                             <div class="card-body pb-4">
                                 <div class="table-responsive datatables">
-                                    <table id="example" class="display table">
+                                    <table id="table-presensi-detail" class="display table">
                                         <thead>
                                             <tr>
                                                 <th>No</th>
@@ -63,4 +63,15 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+<script>
+    $(document).ready(function() {
+        $('#table-presensi-detail').DataTable({
+            paging: false,
+            info: false
+        });
+    });
+</script>
 @endsection
