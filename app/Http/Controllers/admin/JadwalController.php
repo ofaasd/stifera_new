@@ -248,23 +248,25 @@ class JadwalController extends Controller
             return redirect('master/jadwal')->with('error', 'Data jadwal tidak ditemukan.');
         }
 
-        $prepared = [[
-            'label' => (($jadwal->tipe_mhs == 2) ? 'Karyawan' : 'Reguler') . ' Rombel ' . ($jadwal->rombel ?? '-'),
-            'existing_id' => (int) $jadwal->id,
-            'id_tahun' => (int) $jadwal->id_tahun,
-            'kode_mata_kuliah' => $jadwal->kode_mata_kuliah,
-            'id_dosen' => (int) $request->id_dosen,
-            'id_dosen2' => !empty($request->id_dosen2) ? (int) $request->id_dosen2 : null,
-            'hari' => $request->hari,
-            'sesi' => $request->sesi,
-            'ruang' => $request->ruang,
-            'rombel' => $jadwal->rombel,
-            'tipe_mhs' => (int) $jadwal->tipe_mhs,
-            'status' => (int) $request->status,
-            'kuota_diambil' => (int) $request->input('kuota_diambil', (int) ($jadwal->kuota_diambil ?? 0)),
-            'rps' => $jadwal->rps,
-            'kp' => $jadwal->kp,
-        ]];
+        $prepared = [
+            [
+                'label' => (($jadwal->tipe_mhs == 2) ? 'Karyawan' : 'Reguler') . ' Rombel ' . ($jadwal->rombel ?? '-'),
+                'existing_id' => (int) $jadwal->id,
+                'id_tahun' => (int) $jadwal->id_tahun,
+                'kode_mata_kuliah' => $jadwal->kode_mata_kuliah,
+                'id_dosen' => (int) $request->id_dosen,
+                'id_dosen2' => !empty($request->id_dosen2) ? (int) $request->id_dosen2 : null,
+                'hari' => $request->hari,
+                'sesi' => $request->sesi,
+                'ruang' => $request->ruang,
+                'rombel' => $jadwal->rombel,
+                'tipe_mhs' => (int) $jadwal->tipe_mhs,
+                'status' => (int) $request->status,
+                'kuota_diambil' => (int) $request->input('kuota_diambil', (int) ($jadwal->kuota_diambil ?? 0)),
+                'rps' => $jadwal->rps,
+                'kp' => $jadwal->kp,
+            ]
+        ];
 
         $conflicts = $this->validateDatabaseConflicts($prepared);
         if (!empty($conflicts)) {
@@ -487,6 +489,40 @@ class JadwalController extends Controller
             ->with('status', 'Dokumen RPS/KP berhasil diupload.');
     }
 
+    public function pertemuanVerifikasiDokumen(Request $request, string $idJadwal, string $jenis)
+    {
+        $jadwal = DB::table('master_jadwal_temp')->where('id', (int) $idJadwal)->first();
+        if (!$jadwal) {
+            return redirect('master/pertemuan')->with('error', 'Data jadwal tidak ditemukan.');
+        }
+
+        if (!in_array($jenis, ['rps', 'kp'])) {
+            return redirect('master/pertemuan/' . (int) $jadwal->id)->with('error', 'Jenis dokumen tidak valid.');
+        }
+
+        $oldName = $jadwal->{$jenis};
+        if (empty($oldName)) {
+            return redirect('master/pertemuan/' . (int) $jadwal->id)->with('error', strtoupper($jenis) . ' belum diupload oleh pengampu.');
+        }
+
+        if (str_starts_with($oldName, 'VERIFIED_')) {
+            return redirect('master/pertemuan/' . (int) $jadwal->id)->with('status', strtoupper($jenis) . ' sudah diverifikasi.');
+        }
+
+        $newName = 'VERIFIED_' . $oldName;
+        $uploadPath = public_path('assets/files');
+
+        if (file_exists($uploadPath . '/' . $oldName)) {
+            rename($uploadPath . '/' . $oldName, $uploadPath . '/' . $newName);
+        }
+
+        DB::table('master_jadwal_temp')
+            ->where('id', (int) $jadwal->id)
+            ->update([$jenis => $newName]);
+
+        return redirect('master/pertemuan/' . (int) $jadwal->id)->with('status', 'Dokumen ' . strtoupper($jenis) . ' berhasil diverifikasi.');
+    }
+
     public function pertemuanExportPdf(string $idJadwal)
     {
         $jadwal = DB::table('master_jadwal_temp as mjt')
@@ -538,16 +574,16 @@ class JadwalController extends Controller
         $nimList = $mahasiswaList->pluck('nim')->filter()->values()->all();
         $tanggalList = $pertemuanList
             ->pluck('tgl_pertemuan')
-            ->filter(fn ($tgl) => !empty($tgl))
-            ->map(fn ($tgl) => (string) $tgl)
+            ->filter(fn($tgl) => !empty($tgl))
+            ->map(fn($tgl) => (string) $tgl)
             ->values()
             ->all();
 
         $presensiRows = DB::table('master_presensi')
             ->select('nim', 'tgl_pertemuan', 'status', 'ttd')
             ->where('id_jadwal', (int) $idJadwal)
-            ->when(!empty($nimList), fn ($q) => $q->whereIn('nim', $nimList))
-            ->when(!empty($tanggalList), fn ($q) => $q->whereIn('tgl_pertemuan', $tanggalList))
+            ->when(!empty($nimList), fn($q) => $q->whereIn('nim', $nimList))
+            ->when(!empty($tanggalList), fn($q) => $q->whereIn('tgl_pertemuan', $tanggalList))
             ->get();
 
         $presensiIndex = [];

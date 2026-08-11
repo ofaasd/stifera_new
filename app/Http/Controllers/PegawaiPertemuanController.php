@@ -93,10 +93,10 @@ class PegawaiPertemuanController extends Controller
             ->get();
 
         $tanggalByPertemuan = [];
-        $pertemuanByNomor   = [];
+        $pertemuanByNomor = [];
         foreach ($existing as $row) {
             $tanggalByPertemuan[(int) $row->id_pertemuan] = optional($row->tgl_pertemuan)->format('Y-m-d');
-            $pertemuanByNomor[(int) $row->id_pertemuan]   = $row;
+            $pertemuanByNomor[(int) $row->id_pertemuan] = $row;
         }
 
         return view('pegawai.pertemuan.detail', [
@@ -104,7 +104,7 @@ class PegawaiPertemuanController extends Controller
             'CurrentPage' => 'content',
             'jadwal' => $jadwal,
             'tanggalByPertemuan' => $tanggalByPertemuan,
-            'pertemuanByNomor'   => $pertemuanByNomor,
+            'pertemuanByNomor' => $pertemuanByNomor,
             'listPertemuan' => range(1, 16),
         ]);
     }
@@ -129,24 +129,24 @@ class PegawaiPertemuanController extends Controller
         }
 
         $validated = $request->validate([
-            'tanggal'   => 'required|array',
+            'tanggal' => 'required|array',
             'tanggal.*' => 'nullable|date',
         ]);
 
         $tanggalTerisi = collect($validated['tanggal'] ?? [])
-            ->filter(fn ($tgl) => !empty($tgl))
-            ->map(fn ($tgl) => (string) $tgl)
+            ->filter(fn($tgl) => !empty($tgl))
+            ->map(fn($tgl) => (string) $tgl)
             ->values();
 
         $duplikatTanggal = $tanggalTerisi
             ->countBy()
-            ->filter(fn ($jumlah) => $jumlah > 1)
+            ->filter(fn($jumlah) => $jumlah > 1)
             ->keys()
             ->values();
 
         if ($duplikatTanggal->isNotEmpty()) {
             $tanggalList = $duplikatTanggal
-                ->map(fn ($tgl) => Carbon::parse($tgl)->format('d/m/Y'))
+                ->map(fn($tgl) => Carbon::parse($tgl)->format('d/m/Y'))
                 ->implode(', ');
 
             return redirect()->back()
@@ -161,12 +161,12 @@ class PegawaiPertemuanController extends Controller
                 if (!empty($tanggal)) {
                     MasterPertemuan::updateOrCreate(
                         [
-                            'id_jadwal'    => (int) $jadwal->id,
-                            'id_tahun'     => (int) $jadwal->id_tahun,
+                            'id_jadwal' => (int) $jadwal->id,
+                            'id_tahun' => (int) $jadwal->id_tahun,
                             'id_pertemuan' => $i,
                         ],
                         [
-                            'tgl_pertemuan'   => $tanggal,
+                            'tgl_pertemuan' => $tanggal,
                             'kunci_kehadiran' => 0,
                         ]
                     );
@@ -203,7 +203,7 @@ class PegawaiPertemuanController extends Controller
 
         $validated = $request->validate([
             'id_pertemuan' => 'required|integer|min:1|max:16',
-            'durasi'       => 'required|in:5,10,15,30',
+            'durasi' => 'required|in:5,10,15,30',
         ]);
 
         $pertemuan = MasterPertemuan::where('id_jadwal', (int) $idJadwal)
@@ -224,12 +224,12 @@ class PegawaiPertemuanController extends Controller
             ], 422);
         }
 
-        $kode        = strtoupper(substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 6));
+        $kode = strtoupper(substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZ23456789'), 0, 6));
         $expiredKode = Carbon::now()->addMinutes((int) $validated['durasi']);
         $pesertaCount = 0;
 
         DB::transaction(function () use ($pertemuan, $kode, $expiredKode, $idJadwal, $isRegenerate, &$pesertaCount) {
-            $pertemuan->kode_kelas   = $kode;
+            $pertemuan->kode_kelas = $kode;
             $pertemuan->expired_kode = $expiredKode;
             $pertemuan->save();
 
@@ -245,13 +245,13 @@ class PegawaiPertemuanController extends Controller
                 foreach ($nimList as $nim) {
                     DB::table('master_presensi')->updateOrInsert(
                         [
-                            'nim'           => (string) $nim,
-                            'id_jadwal'     => (int) $idJadwal,
+                            'nim' => (string) $nim,
+                            'id_jadwal' => (int) $idJadwal,
                             'tgl_pertemuan' => $pertemuan->tgl_pertemuan,
                         ],
                         [
-                            'status'   => 0,
-                            'ttd'      => null,
+                            'status' => 0,
+                            'ttd' => null,
                             'log_date' => Carbon::now(),
                         ]
                     );
@@ -260,8 +260,8 @@ class PegawaiPertemuanController extends Controller
         });
 
         return response()->json([
-            'success'      => true,
-            'kode'         => $kode,
+            'success' => true,
+            'kode' => $kode,
             'expired_kode' => $expiredKode->format('H:i:s'),
             'expired_full' => $expiredKode->format('d/m/Y H:i:s'),
             'is_regenerate' => $isRegenerate,
@@ -290,7 +290,7 @@ class PegawaiPertemuanController extends Controller
 
         $request->validate([
             'rps_file' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
-            'kp_file'  => 'nullable|file|mimes:pdf,doc,docx|max:5120',
+            'kp_file' => 'nullable|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
         if (!$request->hasFile('rps_file') && !$request->hasFile('kp_file')) {
@@ -395,16 +395,16 @@ class PegawaiPertemuanController extends Controller
         $nimList = $mahasiswaList->pluck('nim')->filter()->values()->all();
         $tanggalList = $pertemuanList
             ->pluck('tgl_pertemuan')
-            ->filter(fn ($tgl) => !empty($tgl))
-            ->map(fn ($tgl) => (string) $tgl)
+            ->filter(fn($tgl) => !empty($tgl))
+            ->map(fn($tgl) => (string) $tgl)
             ->values()
             ->all();
 
         $presensiRows = DB::table('master_presensi')
             ->select('nim', 'tgl_pertemuan', 'status', 'ttd')
             ->where('id_jadwal', (int) $idJadwal)
-            ->when(!empty($nimList), fn ($q) => $q->whereIn('nim', $nimList))
-            ->when(!empty($tanggalList), fn ($q) => $q->whereIn('tgl_pertemuan', $tanggalList))
+            ->when(!empty($nimList), fn($q) => $q->whereIn('nim', $nimList))
+            ->when(!empty($tanggalList), fn($q) => $q->whereIn('tgl_pertemuan', $tanggalList))
             ->get();
 
         $presensiIndex = [];

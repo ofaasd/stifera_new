@@ -60,16 +60,26 @@
                                     <strong>RPS:</strong>
                                     @if(!empty($jadwal->rps))
                                         <a href="{{ asset('assets/files/' . $jadwal->rps) }}" target="_blank" class="btn btn-primary btn-sm">Lihat File</a>
+                                        @if(str_starts_with($jadwal->rps, 'VERIFIED_'))
+                                            <span class="badge bg-success ms-1"><i class="fa fa-check-circle me-1"></i> Terverifikasi oleh Admin</span>
+                                        @else
+                                            <span class="badge bg-warning ms-1 text-dark"><i class="fa fa-clock me-1"></i> Menunggu Verifikasi</span>
+                                        @endif
                                     @else
-                                        <span class="text-muted">-</span>
+                                        <span class="text-muted d-block">-</span>
                                     @endif
                                 </div>
                                 <div class="col-md-6 mb-2">
                                     <strong>KP:</strong>
                                     @if(!empty($jadwal->kp))
                                         <a href="{{ asset('assets/files/' . $jadwal->kp) }}" target="_blank" class="btn btn-primary btn-sm">Lihat File</a>
+                                        @if(str_starts_with($jadwal->kp, 'VERIFIED_'))
+                                            <span class="badge bg-success ms-1"><i class="fa fa-check-circle me-1"></i> Terverifikasi oleh Admin</span>
+                                        @else
+                                            <span class="badge bg-warning ms-1 text-dark"><i class="fa fa-clock me-1"></i> Menunggu Verifikasi</span>
+                                        @endif
                                     @else
-                                        <span class="text-muted">-</span>
+                                        <span class="text-muted d-block">-</span>
                                     @endif
                                 </div>
                             </div>
@@ -78,7 +88,13 @@
                 </div>
 
                 {{-- Form Setting Pertemuan --}}
-                <div class="filter cm-content-box box-primary">
+                @php
+                    $isRpsVerified = !empty($jadwal->rps) && str_starts_with($jadwal->rps, 'VERIFIED_');
+                    $isKpVerified = !empty($jadwal->kp) && str_starts_with($jadwal->kp, 'VERIFIED_');
+                @endphp
+
+                @if($isRpsVerified && $isKpVerified)
+                    <div class="filter cm-content-box box-primary">
                     <div class="content-title SlideToolHeader">
                         <div class="cpa">
                             <i class="fa-solid fa-calendar-check me-1"></i>{{ $title }}
@@ -170,7 +186,15 @@
                             </form>
                         </div>
                     </div>
-                </div>
+                @else
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                        <i class="fa-solid fa-triangle-exclamation fs-3 me-3"></i>
+                        <div>
+                            <h5 class="alert-heading fw-bold mb-1">Menunggu Verifikasi Admin</h5>
+                            <p class="mb-0">Mohon maaf, <strong>Form Setting Jadwal Pertemuan</strong> belum dapat diakses. Anda harus <button type="button" class="btn btn-link p-0 fw-bold align-baseline" data-bs-toggle="modal" data-bs-target="#uploadDokumenModal">Mengunggah (Upload) Dokumen RPS dan KP</button> terlebih dahulu, dan menunggu admin melakukan <strong>Verifikasi Dokumen</strong> Anda di sistem.</p>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

@@ -18,30 +18,31 @@
                     </div>
                 @endif
 
-                <div class="filter cm-content-box box-primary">
-                    <div class="content-title SlideToolHeader">
-                        <div class="cpa">
-                            <i class="fa-solid fa-list-check me-1"></i>{{ $title }}
-                        </div>
-                        <div class="tools">
-                            <a href="javascript:void(0);" class="expand handle"><i class="fal fa-angle-down"></i></a>
-                        </div>
+                <div class="card">
+                    <div class="card-header border-0 pb-0">
+                        <h4 class="card-title"><i class="fa-solid fa-list-check me-1"></i>{{ $title }}</h4>
                     </div>
-                    <div class="cm-content-body form excerpt">
-                        <div class="card-body pb-4">
-                            <div class="table-responsive">
-                                <table id="table-setting-pertemuan" class="table table-striped table-bordered nowrap">
-                                    <thead>
-                                        <tr>
-                                            <th>No</th>
-                                            <th>Kode</th>
-                                            <th>Nama</th>
-                                            <th>Pengampu</th>
-                                            <th>Hari, Jam</th>
-                                            <th>RPS / KP</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
+                    <div class="card-body pb-4">
+                        <style>
+                            #table-setting-pertemuan th, #table-setting-pertemuan td {
+                                white-space: normal !important;
+                                word-break: break-word;
+                                vertical-align: top;
+                            }
+                        </style>
+                        <div class="table-responsive">
+                            <table id="table-setting-pertemuan" class="table table-striped table-bordered" style="table-layout: fixed; width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 5%">No</th>
+                                        <th style="width: 10%">Kode</th>
+                                        <th style="width: 25%">Nama</th>
+                                        <th style="width: 20%">Pengampu</th>
+                                        <th style="width: 15%">Hari, Jam</th>
+                                        <th style="width: 15%">RPS / KP</th>
+                                        <th style="width: 10%">Aksi</th>
+                                    </tr>
+                                </thead>
                                     <tbody>
                                         @forelse($jadwalList as $idx => $row)
                                             <tr>
@@ -52,20 +53,20 @@
                                                 <td>{{ $row->hari }}, {{ $row->sesi }} {{ $row->ruang }}</td>
                                                 <td>
                                                     @if(!empty($row->rps))
-                                                        <a href="{{ asset('assets/files/' . $row->rps) }}" class="badge badge-success" target="_blank">RPS: Ada</a>
+                                                        <a href="{{ asset('assets/files/' . $row->rps) }}" class="badge badge-success d-block w-100 mb-1" target="_blank">RPS: Ada</a>
                                                     @else
-                                                        <span class="badge badge-danger">RPS: Kosong</span>
+                                                        <span class="badge badge-danger d-block w-100 mb-1">RPS: Kosong</span>
                                                     @endif
 
                                                     @if(!empty($row->kp))
-                                                        <a href="{{ asset('assets/files/' . $row->kp) }}" class="badge badge-success" target="_blank">KP: Ada</a>
+                                                        <a href="{{ asset('assets/files/' . $row->kp) }}" class="badge badge-success d-block w-100" target="_blank">KP: Ada</a>
                                                     @else
-                                                        <span class="badge badge-danger">KP: Kosong</span>
+                                                        <span class="badge badge-danger d-block w-100">KP: Kosong</span>
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    <a href="{{ url('dosen/pertemuan/' . $row->id) }}" class="btn btn-success btn-sm" title="Set Pertemuan">
-                                                        <i class="fa-solid fa-calendar-check me-1"></i> 
+                                                    <a href="{{ url('dosen/pertemuan/' . $row->id) }}" class="btn btn-success btn-sm d-block w-100" title="Set Pertemuan">
+                                                        <i class="fa-solid fa-calendar-check"></i>
                                                     </a>
                                                 </td>
                                             </tr>
@@ -75,8 +76,7 @@
                                             </tr>
                                         @endforelse
                                     </tbody>
-                                </table>
-                            </div>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -91,7 +91,13 @@
     $(document).ready(function () {
         $('#table-setting-pertemuan').DataTable({
             responsive: true,
-            pageLength: 25
+            pageLength: 25,
+            language: {
+                paginate: {
+                    next: '<i class="fa-solid fa-angle-right"></i>',
+                    previous: '<i class="fa-solid fa-angle-left"></i>' 
+                }
+            }
         });
     });
 </script>

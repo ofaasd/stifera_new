@@ -139,7 +139,7 @@ Route::middleware('auth:pegawai,admin')->group(function () {
                 ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
                 ->where(function ($q) use ($biodataId) {
                     $q->where('mjt.id_dosen', $biodataId)
-                      ->orWhere('mjt.id_dosen2', $biodataId);
+                        ->orWhere('mjt.id_dosen2', $biodataId);
                 })
                 ->select(
                     'mjt.id',
@@ -444,7 +444,7 @@ Route::middleware('auth:mahasiswa')->group(function () {
 
 
 Route::middleware('auth:admin')->group(function () {
-    Route::get('/dashboard',[DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
 
@@ -460,7 +460,7 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/pegawai/reset_password/{npp}', [PegawaiController::class, 'reset_password']);
     Route::get('/pegawai/delete_pegawai/{npp}', [PegawaiController::class, 'delete_pegawai']);
     Route::get('/pegawai/lihat_krm', [PegawaiController::class, 'lihat_krm']);
-    Route::get('/pegawai/struktur', [PegawaiController::class, 'struktur']); 
+    Route::get('/pegawai/struktur', [PegawaiController::class, 'struktur']);
     Route::post('/pegawai/get_status', [PegawaiController::class, 'get_status']);
     Route::post('/pegawai/get_homebase', [PegawaiController::class, 'get_homebase']);
     Route::post('/pegawai/get_prodi', [PegawaiController::class, 'get_prodi']);
@@ -550,8 +550,8 @@ Route::middleware('auth:admin')->group(function () {
 
     Route::get('/master/matakuliah/delete/{id}', [MatakuliahController::class, 'delete']);
     Route::get('/master/kurikulum/delete/{id}', [KurikulumController::class, 'delete']);
-    
-    
+
+
     Route::post('/pmb/req_data', [PmbController::class, 'req_data']);
     Route::post('/pmb/daftar_sekolah', [PmbController::class, 'daftar_sekolah']);
     Route::post('/pmb/daftar_mou', [PmbController::class, 'daftar_mou']);
@@ -575,8 +575,8 @@ Route::middleware('auth:admin')->group(function () {
     Route::post('/pmb/gelombang_ta', [PmbGelombangController::class, 'store_ta']);
     Route::post('/pmb/gelombang_ta_update', [PmbGelombangController::class, 'store_ta']);
     Route::post('/pmb/gelombang_ta_hapus', [PmbGelombangController::class, 'delete_ta']);
-    
-    
+
+
     //Action Wilayah 
     Route::post('/wilayah/get_kota_kecamatan', [WilayahController::class, 'get_kota_kecamatan']);
 
@@ -659,6 +659,7 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/master/pertemuan/{id_jadwal}', [JadwalController::class, 'pertemuanDetail']);
     Route::post('/master/pertemuan/{id_jadwal}', [JadwalController::class, 'pertemuanSave']);
     Route::post('/master/pertemuan/{id_jadwal}/dokumen', [JadwalController::class, 'pertemuanUploadDokumen']);
+    Route::post('/master/pertemuan/{id_jadwal}/verifikasi/{jenis}', [JadwalController::class, 'pertemuanVerifikasiDokumen']);
     Route::get('/master/pertemuan/{id_jadwal}/export-pdf', [JadwalController::class, 'pertemuanExportPdf']);
     Route::get('/master/jadwal_krs', [JadwalController::class, 'krsIndex']);
     Route::post('/master/jadwal_krs/toggle', [JadwalController::class, 'krsToggle']);
@@ -680,4 +681,3 @@ Route::middleware('auth:admin')->group(function () {
     Route::post('/master/nilai/upload', [NilaiController::class, 'upload']);
     Route::get('/master/nilai/template', [NilaiController::class, 'downloadTemplate']);
 });
-    
