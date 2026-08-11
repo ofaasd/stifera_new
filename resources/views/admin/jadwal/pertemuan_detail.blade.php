@@ -58,17 +58,37 @@
                                 <div class="col-md-6 mb-2">
                                     <strong>RPS:</strong>
                                     @if(!empty($jadwal->rps))
-                                        <a href="{{ asset('assets/files/' . $jadwal->rps) }}" target="_blank" class="btn btn-primary btn-sm">Lihat File</a>
+                                        <div class="d-inline-block mt-1">
+                                            <a href="{{ asset('assets/files/' . $jadwal->rps) }}" target="_blank" class="btn btn-primary btn-sm mb-1">Lihat File</a>
+                                            @if(str_starts_with($jadwal->rps, 'VERIFIED_'))
+                                                <span class="badge bg-success mb-1"><i class="fa fa-check-circle me-1"></i> Terverifikasi</span>
+                                            @else
+                                                <form action="{{ url('master/pertemuan/' . $jadwal->id . '/verifikasi/rps') }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-warning btn-sm mb-1" onclick="return confirm('Anda yakin dokumen RPS ini sudah valid dan ingin diverifikasi?')"><i class="fa fa-check me-1"></i> Verifikasi</button>
+                                                </form>
+                                            @endif
+                                        </div>
                                     @else
-                                        -
+                                        <span class="text-muted d-block">-</span>
                                     @endif
                                 </div>
                                 <div class="col-md-6 mb-2">
                                     <strong>KP:</strong>
                                     @if(!empty($jadwal->kp))
-                                        <a href="{{ asset('assets/files/' . $jadwal->kp) }}" target="_blank" class="btn btn-primary btn-sm">Lihat File</a>
+                                        <div class="d-inline-block mt-1">
+                                            <a href="{{ asset('assets/files/' . $jadwal->kp) }}" target="_blank" class="btn btn-primary btn-sm mb-1">Lihat File</a>
+                                            @if(str_starts_with($jadwal->kp, 'VERIFIED_'))
+                                                <span class="badge bg-success mb-1"><i class="fa fa-check-circle me-1"></i> Terverifikasi</span>
+                                            @else
+                                                <form action="{{ url('master/pertemuan/' . $jadwal->id . '/verifikasi/kp') }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-warning btn-sm mb-1" onclick="return confirm('Anda yakin dokumen KP ini sudah valid dan ingin diverifikasi?')"><i class="fa fa-check me-1"></i> Verifikasi</button>
+                                                </form>
+                                            @endif
+                                        </div>
                                     @else
-                                        -
+                                        <span class="text-muted d-block">-</span>
                                     @endif
                                 </div>
                             </div>
