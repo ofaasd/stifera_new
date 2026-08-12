@@ -29,8 +29,10 @@ class NilaiController extends Controller
             ->join('master_jadwal_temp as mjt', 'mjt.id_dosen', '=', 'pb.id')
             ->where('pb.status_pegawai', 'aktif')
             ->groupBy('pb.id', 'pb.gelar_depan', 'pb.nama_lengkap', 'pb.gelar_belakang', 'pb.nidn', 'pb.nip_pns')
-            ->orderBy('nama_dosen')
-            ->get();
+            ->get()
+            ->sortBy(function ($item) {
+                return strtolower(preg_replace('/\s+/', ' ', $item->nama_dosen));
+            })->values();
 
         $data['no'] = 1;
         return view('admin.nilai.index', $data);
