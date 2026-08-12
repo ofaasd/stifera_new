@@ -3,7 +3,7 @@
                 <nav class="navbar navbar-expand">
                     <div class="collapse navbar-collapse justify-content-between">
                         <div class="header-left">
-							<form>
+							<!-- <form>
 								<div class="input-group search-area">
 									<span class="input-group-text"><button>
 										<svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -13,7 +13,7 @@
 									</button></span>
 									<input type="text" class="form-control" placeholder="Search">
 								</div>
-							</form>	
+							</form> -->	
 							@php
     $menuConfig = config('dz.pagelevel.'.$CurrentPage.'.front-menu');
 @endphp

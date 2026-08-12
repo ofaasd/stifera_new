@@ -185,6 +185,16 @@ class MahasiswaKrsController extends Controller
             return redirect()->route('mahasiswa.krs.index')->with('error', 'Data KRS belum tersedia untuk diunduh.');
         }
 
+        $isKrsDisetujuiWali = DB::table('master_krs_temp')
+            ->where('nim', $mahasiswa->nim)
+            ->where('id_tahun', (int) $tahunAktif->id)
+            ->where('is_publish', 1)
+            ->exists();
+
+        if (!$isKrsDisetujuiWali) {
+            return redirect()->route('mahasiswa.krs.index')->with('error', 'Data KRS tidak dapat diunduh karena belum diverifikasi oleh Dosen Wali.');
+        }
+
         $ipsTerakhir = $this->getIpsTerakhir($mahasiswa->nim, (int) $tahunAktif->id);
         $batasSks = function_exists('sksbatas') ? (int) sksbatas($ipsTerakhir) : 24;
         $mahasiswaProfil = $this->getMahasiswaProfil((int) ($mahasiswa->id ?? 0));
@@ -256,27 +266,27 @@ class MahasiswaKrsController extends Controller
         $tahun = DB::table('master_tahun_ajaran')
             ->where('id', $idTahun)
             ->first();
-        if($tahun->is_aktif == 1){
+        if ($tahun->is_aktif == 1) {
             //gunakan jadwal temp
             return DB::table('master_krs_temp as mkt')
-            ->leftJoin('master_jadwal_temp as mjt', function ($join) use ($idTahun) {
-                $join->on('mjt.id', '=', 'mkt.id_jadwal')
-                    ->where('mjt.id_tahun', '=', $idTahun);
-            })
-            ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
-            ->leftJoin('pegawai_biodata as pb', 'pb.id', '=', 'mkt.id_dosen')
-            ->select(
-                'mkt.*',
-                'mmk.nama_mata_kuliah',
-                'mjt.kode_mata_kuliah',
-                DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen")
-            )
-            ->where('mkt.nim', $nim)
-            ->where('mkt.id_tahun', $idTahun)
-            ->orderBy('mkt.id')
-            ->get();
+                ->leftJoin('master_jadwal_temp as mjt', function ($join) use ($idTahun) {
+                    $join->on('mjt.id', '=', 'mkt.id_jadwal')
+                        ->where('mjt.id_tahun', '=', $idTahun);
+                })
+                ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
+                ->leftJoin('pegawai_biodata as pb', 'pb.id', '=', 'mkt.id_dosen')
+                ->select(
+                    'mkt.*',
+                    'mmk.nama_mata_kuliah',
+                    'mjt.kode_mata_kuliah',
+                    DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen")
+                )
+                ->where('mkt.nim', $nim)
+                ->where('mkt.id_tahun', $idTahun)
+                ->orderBy('mkt.id')
+                ->get();
         }
-        
+
     }
 
     private function getJadwalTersedia(string $nim, int $idTahun, int $tipeMhs)

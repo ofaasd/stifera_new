@@ -39,7 +39,7 @@ class PerwalianController extends Controller
         $keyword = trim((string) $request->input('q', ''));
 
         $query = PegawaiBiodatum::query()
-            ->select('id_pegawai', 'nama_lengkap', 'nidn', 'status_pegawai')
+            ->select('id_pegawai', 'nama_lengkap', 'gelar_depan', 'gelar_belakang', 'nidn', 'status_pegawai')
             ->whereNotNull('id_pegawai')
             ->whereNotNull('nama_lengkap');
 
@@ -52,12 +52,15 @@ class PerwalianController extends Controller
 
         $dosenList = $query
             ->orderByRaw("CASE WHEN LOWER(COALESCE(status_pegawai, '')) = 'aktif' THEN 0 ELSE 1 END")
-            ->orderBy('nama_lengkap')
             ->limit(30)
             ->get();
 
         $results = $dosenList->map(function ($dosen) {
-            $text = trim((string) $dosen->nama_lengkap);
+            $text = trim(($dosen->gelar_depan ?? '') . ' ' . ($dosen->nama_lengkap ?? '') . ' ' . ($dosen->gelar_belakang ?? ''));
+            if (empty($text)) {
+                $text = trim((string) $dosen->nama_lengkap);
+            }
+
             if (!empty($dosen->nidn)) {
                 $text .= ' (' . $dosen->nidn . ')';
             }
@@ -66,7 +69,7 @@ class PerwalianController extends Controller
                 'id' => (string) $dosen->id_pegawai,
                 'text' => $text,
             ];
-        })->values();
+        })->sortBy('text', SORT_NATURAL | SORT_FLAG_CASE)->values();
 
         return response()->json([
             'results' => $results,
