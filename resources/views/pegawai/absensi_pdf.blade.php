@@ -358,8 +358,11 @@
                                             $imageSrc = $ttdVal;
                                         } else {
                                             $clean = ltrim($ttdVal, '/');
-                                            $publicFile = public_path($clean);
-                                            if (is_file($publicFile)) {
+                                            $customPath = 'images/ttd/' . $clean;
+                                            if (is_file(public_path($customPath))) {
+                                                $hasSignature = true;
+                                                $imageSrc = asset($customPath);
+                                            } elseif (is_file(public_path($clean))) {
                                                 $hasSignature = true;
                                                 $imageSrc = asset($clean);
                                             } else {

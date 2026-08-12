@@ -119,8 +119,28 @@
                                                             </select>
                                                         </td>
                                                         <td class="text-center">
-                                                            @if(!empty($ttd_val))
-                                                                <img src="{{ $ttd_val }}" alt="TTD {{ $a->nim }}" style="max-width: 180px; max-height: 80px; border: 1px solid #ddd; border-radius: 6px; background: #fff;">
+                                                            @php
+                                                                $hasSig = false;
+                                                                $sigSrc = null;
+                                                                if (!empty($ttd_val)) {
+                                                                    if (\Illuminate\Support\Str::startsWith($ttd_val, 'data:image')) {
+                                                                        $hasSig = true;
+                                                                        $sigSrc = $ttd_val;
+                                                                    } else {
+                                                                        $customPath = 'images/ttd/' . $ttd_val;
+                                                                        if (is_file(public_path($customPath))) {
+                                                                            $hasSig = true;
+                                                                            $sigSrc = asset($customPath);
+                                                                        } elseif (is_file(public_path($ttd_val))) {
+                                                                            $hasSig = true;
+                                                                            $sigSrc = asset($ttd_val);
+                                                                        }
+                                                                    }
+                                                                }
+                                                            @endphp
+
+                                                            @if($hasSig)
+                                                                <img src="{{ $sigSrc }}" alt="TTD {{ $a->nim }}" style="max-width: 180px; max-height: 80px; border: 1px solid #ddd; border-radius: 6px; background: #fff;">
                                                             @else
                                                                 <span class="text-muted small">Belum ada TTD</span>
                                                             @endif
