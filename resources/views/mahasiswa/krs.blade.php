@@ -94,9 +94,15 @@
                             </div>
 
                             <div>
-                                <a href="{{ route('mahasiswa.krs.download') }}" class="btn btn-primary {{ $krsRows->isEmpty() ? 'disabled' : '' }}" @if($krsRows->isEmpty()) aria-disabled="true" @endif>
-                                    <i class="fa fa-download me-1"></i>Download KRS
-                                </a>
+                                @if($krsRows->isEmpty() || !$isKrsDisetujuiWali)
+                                    <button class="btn btn-secondary disabled" title="KRS belum diverifikasi oleh Dosen Wali" aria-disabled="true">
+                                        <i class="fa fa-download me-1"></i>Download KRS
+                                    </button>
+                                @else
+                                    <a href="{{ route('mahasiswa.krs.download') }}" class="btn btn-primary">
+                                        <i class="fa fa-download me-1"></i>Download KRS
+                                    </a>
+                                @endif
                             </div>
                         </div>
                     </div>

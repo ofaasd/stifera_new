@@ -131,8 +131,10 @@ class JadwalController extends Controller
         $data['existingMap'] = $existingMap;
         $data['dosenList'] = DB::table('pegawai_biodata')
             ->where('status_pegawai', 'aktif')
-            ->orderBy('nama_lengkap')
-            ->get();
+            ->get()
+            ->sortBy(function ($d) {
+                return strtolower(trim(($d->gelar_depan ?? '') . ' ' . ($d->nama_lengkap ?? '') . ' ' . ($d->gelar_belakang ?? '')));
+            })->values();
         $data['hariList'] = DB::table('master_hari')->orderBy('id')->get();
         $data['sesiList'] = DB::table('master_jam')->orderBy('id')->get();
         $data['ruangList'] = DB::table('master_ruang')->orderBy('nama_ruang')->get();
@@ -223,8 +225,10 @@ class JadwalController extends Controller
         $data['tahun'] = $tahun;
         $data['dosenList'] = DB::table('pegawai_biodata')
             ->where('status_pegawai', 'aktif')
-            ->orderBy('nama_lengkap')
-            ->get();
+            ->get()
+            ->sortBy(function ($d) {
+                return strtolower(trim(($d->gelar_depan ?? '') . ' ' . ($d->nama_lengkap ?? '') . ' ' . ($d->gelar_belakang ?? '')));
+            })->values();
         $data['hariList'] = DB::table('master_hari')->orderBy('id')->get();
         $data['sesiList'] = DB::table('master_jam')->orderBy('id')->get();
         $data['ruangList'] = DB::table('master_ruang')->orderBy('nama_ruang')->get();

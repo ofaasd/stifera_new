@@ -14,7 +14,7 @@ class NilaiController extends Controller
      */
     public function index()
     {
-        $data['title']       = 'Input Nilai - Daftar Dosen';
+        $data['title'] = 'Input Nilai - Daftar Dosen';
         $data['CurrentPage'] = 'content';
 
         // Ambil dosen yang memiliki jadwal di master_jadwal_temp
@@ -29,7 +29,7 @@ class NilaiController extends Controller
             ->join('master_jadwal_temp as mjt', 'mjt.id_dosen', '=', 'pb.id')
             ->where('pb.status_pegawai', 'aktif')
             ->groupBy('pb.id', 'pb.gelar_depan', 'pb.nama_lengkap', 'pb.gelar_belakang', 'pb.nidn', 'pb.nip_pns')
-            ->orderBy('pb.nama_lengkap')
+            ->orderBy('nama_dosen')
             ->get();
 
         $data['no'] = 1;
@@ -46,10 +46,10 @@ class NilaiController extends Controller
             return redirect('master/nilai')->with('error', 'Dosen tidak ditemukan.');
         }
 
-        $data['title']       = 'Input Nilai - Jadwal Dosen';
+        $data['title'] = 'Input Nilai - Jadwal Dosen';
         $data['CurrentPage'] = 'content';
-        $data['dosen']       = $dosen;
-        $data['id_dosen']    = $id_dosen;
+        $data['dosen'] = $dosen;
+        $data['id_dosen'] = $id_dosen;
 
         $data['jadwal'] = DB::table('master_jadwal_temp as mjt')
             ->select(
@@ -65,15 +65,31 @@ class NilaiController extends Controller
             ->leftJoin('master_tahun_ajaran as mta', 'mta.id', '=', 'mjt.id_tahun')
             ->leftJoin('master_krs_temp as mk', function ($join) {
                 $join->on('mk.id_jadwal', '=', 'mjt.id')
-                     ->on('mk.id_tahun', '=', 'mjt.id_tahun');
+                    ->on('mk.id_tahun', '=', 'mjt.id_tahun');
             })
             ->where('mjt.id_dosen', $id_dosen)
             ->groupBy(
-                'mjt.id', 'mjt.kode_jadwal', 'mjt.id_dosen', 'mjt.id_dosen2', 'mjt.id_tahun',
-                'mjt.kode_mata_kuliah', 'mjt.hari', 'mjt.sesi', 'mjt.ruang', 'mjt.kelas',
-                'mjt.rombel', 'mjt.kuota_diambil', 'mjt.status', 'mjt.tipe_mhs', 'mjt.rps', 'mjt.kp',
-                'mmk.nama_mata_kuliah', 'mmk.jumlah_sks',
-                'mta.awal', 'mta.akhir', 'mta.jenis'
+                'mjt.id',
+                'mjt.kode_jadwal',
+                'mjt.id_dosen',
+                'mjt.id_dosen2',
+                'mjt.id_tahun',
+                'mjt.kode_mata_kuliah',
+                'mjt.hari',
+                'mjt.sesi',
+                'mjt.ruang',
+                'mjt.kelas',
+                'mjt.rombel',
+                'mjt.kuota_diambil',
+                'mjt.status',
+                'mjt.tipe_mhs',
+                'mjt.rps',
+                'mjt.kp',
+                'mmk.nama_mata_kuliah',
+                'mmk.jumlah_sks',
+                'mta.awal',
+                'mta.akhir',
+                'mta.jenis'
             )
             ->orderBy('mta.awal', 'desc')
             ->get();
@@ -131,17 +147,17 @@ class NilaiController extends Controller
             ->leftJoin('mahasiswa as mhs', 'mhs.nim', '=', 'mk.nim')
             ->leftJoin('master_nilai as mn', function ($join) {
                 $join->on('mn.nim', '=', 'mk.nim')
-                     ->on('mn.id_jadwal', '=', 'mk.id_jadwal')
-                     ->on('mn.id_tahun', '=', 'mk.id_tahun');
+                    ->on('mn.id_jadwal', '=', 'mk.id_jadwal')
+                    ->on('mn.id_tahun', '=', 'mk.id_tahun');
             })
             ->where('mk.id_jadwal', $id_jadwal)
             ->orderBy('mhs.nama')
             ->get();
 
-        $data['title']      = 'Input Nilai Mahasiswa';
+        $data['title'] = 'Input Nilai Mahasiswa';
         $data['CurrentPage'] = 'content';
-        $data['jadwal']     = $jadwal;
-        $data['mahasiswa']  = $mahasiswa;
+        $data['jadwal'] = $jadwal;
+        $data['mahasiswa'] = $mahasiswa;
         $data['persentase'] = $persentase;
         $status = DB::table('master_nilai')
             ->where('id_jadwal', $id_jadwal)
@@ -156,16 +172,16 @@ class NilaiController extends Controller
 
         $data['publishStatus'] = [
             'tugas' => (int) ($status->publish_tugas ?? 0),
-            'uts'   => (int) ($status->publish_uts ?? 0),
-            'uas'   => (int) ($status->publish_uas ?? 0),
+            'uts' => (int) ($status->publish_uts ?? 0),
+            'uas' => (int) ($status->publish_uas ?? 0),
         ];
 
         $data['validasiStatus'] = [
             'tugas' => (int) ($status->validasi_tugas ?? 0),
-            'uts'   => (int) ($status->validasi_uts ?? 0),
-            'uas'   => (int) ($status->validasi_uas ?? 0),
+            'uts' => (int) ($status->validasi_uts ?? 0),
+            'uas' => (int) ($status->validasi_uas ?? 0),
         ];
-        $data['no']         = 1;
+        $data['no'] = 1;
         return view('admin.nilai.input', $data);
     }
 
@@ -175,12 +191,12 @@ class NilaiController extends Controller
     public function save(Request $request)
     {
         $id_jadwal = $request->input('id_jadwal');
-        $id_tahun  = $request->input('id_tahun');
-        $id_dosen  = $request->input('id_dosen');
-        $nims      = $request->input('nim', []);
-        $ntugas    = $request->input('ntugas', []);
-        $nuts      = $request->input('nuts', []);
-        $nuas      = $request->input('nuas', []);
+        $id_tahun = $request->input('id_tahun');
+        $id_dosen = $request->input('id_dosen');
+        $nims = $request->input('nim', []);
+        $ntugas = $request->input('ntugas', []);
+        $nuts = $request->input('nuts', []);
+        $nuas = $request->input('nuas', []);
 
         // Ambil persentase nilai
         $persentase = DB::table('master_persentase_nilai')
@@ -188,13 +204,13 @@ class NilaiController extends Controller
             ->first();
 
         $pct_tugas = $persentase ? (float) $persentase->ntugas : 30;
-        $pct_uts   = $persentase ? (float) $persentase->nuts   : 35;
-        $pct_uas   = $persentase ? (float) $persentase->nuas   : 35;
+        $pct_uts = $persentase ? (float) $persentase->nuts : 35;
+        $pct_uas = $persentase ? (float) $persentase->nuas : 35;
 
         foreach ($nims as $i => $nim) {
-            $nt  = isset($ntugas[$i]) && $ntugas[$i] !== '' ? (float) $ntugas[$i] : null;
-            $nu  = isset($nuts[$i])   && $nuts[$i] !== ''   ? (float) $nuts[$i]   : null;
-            $nua = isset($nuas[$i])   && $nuas[$i] !== ''   ? (float) $nuas[$i]   : null;
+            $nt = isset($ntugas[$i]) && $ntugas[$i] !== '' ? (float) $ntugas[$i] : null;
+            $nu = isset($nuts[$i]) && $nuts[$i] !== '' ? (float) $nuts[$i] : null;
+            $nua = isset($nuas[$i]) && $nuas[$i] !== '' ? (float) $nuas[$i] : null;
 
             // Hitung nilai akhir jika semua nilai ada
             $nakhir = null;
@@ -206,24 +222,24 @@ class NilaiController extends Controller
 
             DB::table('master_nilai')->updateOrInsert(
                 [
-                    'nim'       => $nim,
+                    'nim' => $nim,
                     'id_jadwal' => $id_jadwal,
-                    'id_tahun'  => $id_tahun,
+                    'id_tahun' => $id_tahun,
                 ],
                 [
-                    'ntugas'   => $nt,
-                    'nuts'     => $nu,
-                    'nuas'     => $nua,
-                    'nakhir'   => $nakhir,
-                    'nhuruf'   => $nhuruf,
-                    'ndosen'   => $id_dosen,
-                    'is_krs'   => DB::raw('COALESCE(is_krs, 1)'),
+                    'ntugas' => $nt,
+                    'nuts' => $nu,
+                    'nuas' => $nua,
+                    'nakhir' => $nakhir,
+                    'nhuruf' => $nhuruf,
+                    'ndosen' => $id_dosen,
+                    'is_krs' => DB::raw('COALESCE(is_krs, 1)'),
                     'publish_tugas' => DB::raw('COALESCE(publish_tugas, 0)'),
-                    'publish_uts'   => DB::raw('COALESCE(publish_uts, 0)'),
-                    'publish_uas'   => DB::raw('COALESCE(publish_uas, 0)'),
-                    'validasi_tugas'=> DB::raw('COALESCE(validasi_tugas, 0)'),
-                    'validasi_uts'  => DB::raw('COALESCE(validasi_uts, 0)'),
-                    'validasi_uas'  => DB::raw('COALESCE(validasi_uas, 0)'),
+                    'publish_uts' => DB::raw('COALESCE(publish_uts, 0)'),
+                    'publish_uas' => DB::raw('COALESCE(publish_uas, 0)'),
+                    'validasi_tugas' => DB::raw('COALESCE(validasi_tugas, 0)'),
+                    'validasi_uts' => DB::raw('COALESCE(validasi_uts, 0)'),
+                    'validasi_uas' => DB::raw('COALESCE(validasi_uas, 0)'),
                     'log_date' => now(),
                 ]
             );
@@ -238,8 +254,8 @@ class NilaiController extends Controller
         $request->validate([
             'id_jadwal' => 'required|integer',
             'pct_tugas' => 'required|numeric|min:0|max:100',
-            'pct_uts'   => 'required|numeric|min:0|max:100',
-            'pct_uas'   => 'required|numeric|min:0|max:100',
+            'pct_uts' => 'required|numeric|min:0|max:100',
+            'pct_uas' => 'required|numeric|min:0|max:100',
         ]);
 
         $total = (float) $request->pct_tugas + (float) $request->pct_uts + (float) $request->pct_uas;
@@ -250,9 +266,9 @@ class NilaiController extends Controller
         DB::table('master_persentase_nilai')->updateOrInsert(
             ['id_jadwal' => $request->id_jadwal],
             [
-                'ntugas'   => $request->pct_tugas,
-                'nuts'     => $request->pct_uts,
-                'nuas'     => $request->pct_uas,
+                'ntugas' => $request->pct_tugas,
+                'nuts' => $request->pct_uts,
+                'nuas' => $request->pct_uas,
                 'datetime' => now(),
             ]
         );
@@ -264,8 +280,8 @@ class NilaiController extends Controller
     {
         $request->validate([
             'id_jadwal' => 'required|integer',
-            'id_tahun'  => 'required|integer',
-            'id_dosen'  => 'required',
+            'id_tahun' => 'required|integer',
+            'id_dosen' => 'required',
             'component' => 'required|in:tugas,uts,uas',
         ]);
 
@@ -273,8 +289,8 @@ class NilaiController extends Controller
 
         $fieldMap = [
             'tugas' => 'publish_tugas',
-            'uts'   => 'publish_uts',
-            'uas'   => 'publish_uas',
+            'uts' => 'publish_uts',
+            'uas' => 'publish_uas',
         ];
         $field = $fieldMap[$request->component];
 
@@ -300,8 +316,8 @@ class NilaiController extends Controller
     {
         $request->validate([
             'id_jadwal' => 'required|integer',
-            'id_tahun'  => 'required|integer',
-            'id_dosen'  => 'required',
+            'id_tahun' => 'required|integer',
+            'id_dosen' => 'required',
             'component' => 'required|in:tugas,uts,uas',
         ]);
 
@@ -309,8 +325,8 @@ class NilaiController extends Controller
 
         $fieldMap = [
             'tugas' => 'validasi_tugas',
-            'uts'   => 'validasi_uts',
-            'uas'   => 'validasi_uas',
+            'uts' => 'validasi_uts',
+            'uas' => 'validasi_uas',
         ];
         $field = $fieldMap[$request->component];
 
@@ -335,15 +351,15 @@ class NilaiController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'id_jadwal'   => 'required|integer',
-            'id_tahun'    => 'required|integer',
-            'id_dosen'    => 'required',
-            'nilai_file'  => 'required|file|mimes:csv,txt,xlsx,xls',
+            'id_jadwal' => 'required|integer',
+            'id_tahun' => 'required|integer',
+            'id_dosen' => 'required',
+            'nilai_file' => 'required|file|mimes:csv,txt,xlsx,xls',
         ]);
 
         $idJadwal = (int) $request->id_jadwal;
-        $idTahun  = (int) $request->id_tahun;
-        $idDosen  = $request->id_dosen;
+        $idTahun = (int) $request->id_tahun;
+        $idDosen = $request->id_dosen;
 
         $this->ensureNilaiRows($idJadwal, $idTahun, $idDosen);
 
@@ -354,11 +370,11 @@ class NilaiController extends Controller
 
         $persentase = DB::table('master_persentase_nilai')->where('id_jadwal', $idJadwal)->first();
         $pctTugas = $persentase ? (float) $persentase->ntugas : 30;
-        $pctUts   = $persentase ? (float) $persentase->nuts   : 35;
-        $pctUas   = $persentase ? (float) $persentase->nuas   : 35;
+        $pctUts = $persentase ? (float) $persentase->nuts : 35;
+        $pctUas = $persentase ? (float) $persentase->nuas : 35;
 
         $imported = 0;
-        $skipped  = 0;
+        $skipped = 0;
 
         foreach ($rows as $row) {
             $nim = trim((string) ($row['nim'] ?? ''));
@@ -391,24 +407,24 @@ class NilaiController extends Controller
 
             DB::table('master_nilai')->updateOrInsert(
                 [
-                    'nim'       => $nim,
+                    'nim' => $nim,
                     'id_jadwal' => $idJadwal,
-                    'id_tahun'  => $idTahun,
+                    'id_tahun' => $idTahun,
                 ],
                 [
-                    'ntugas'   => $nt,
-                    'nuts'     => $nu,
-                    'nuas'     => $na,
-                    'nakhir'   => $nakhir,
-                    'nhuruf'   => $nhuruf,
-                    'ndosen'   => $idDosen,
-                    'is_krs'   => DB::raw('COALESCE(is_krs, 1)'),
+                    'ntugas' => $nt,
+                    'nuts' => $nu,
+                    'nuas' => $na,
+                    'nakhir' => $nakhir,
+                    'nhuruf' => $nhuruf,
+                    'ndosen' => $idDosen,
+                    'is_krs' => DB::raw('COALESCE(is_krs, 1)'),
                     'publish_tugas' => DB::raw('COALESCE(publish_tugas, 0)'),
-                    'publish_uts'   => DB::raw('COALESCE(publish_uts, 0)'),
-                    'publish_uas'   => DB::raw('COALESCE(publish_uas, 0)'),
-                    'validasi_tugas'=> DB::raw('COALESCE(validasi_tugas, 0)'),
-                    'validasi_uts'  => DB::raw('COALESCE(validasi_uts, 0)'),
-                    'validasi_uas'  => DB::raw('COALESCE(validasi_uas, 0)'),
+                    'publish_uts' => DB::raw('COALESCE(publish_uts, 0)'),
+                    'publish_uas' => DB::raw('COALESCE(publish_uas, 0)'),
+                    'validasi_tugas' => DB::raw('COALESCE(validasi_tugas, 0)'),
+                    'validasi_uts' => DB::raw('COALESCE(validasi_uts, 0)'),
+                    'validasi_uas' => DB::raw('COALESCE(validasi_uas, 0)'),
                     'log_date' => now(),
                 ]
             );
@@ -442,20 +458,20 @@ class NilaiController extends Controller
         foreach ($krsRows as $krs) {
             DB::table('master_nilai')->updateOrInsert(
                 [
-                    'nim'       => $krs->nim,
+                    'nim' => $krs->nim,
                     'id_jadwal' => $idJadwal,
-                    'id_tahun'  => $idTahun,
+                    'id_tahun' => $idTahun,
                 ],
                 [
-                    'ndosen'          => $idDosen,
-                    'is_krs'          => DB::raw('COALESCE(is_krs, 1)'),
-                    'publish_tugas'   => DB::raw('COALESCE(publish_tugas, 0)'),
-                    'publish_uts'     => DB::raw('COALESCE(publish_uts, 0)'),
-                    'publish_uas'     => DB::raw('COALESCE(publish_uas, 0)'),
-                    'validasi_tugas'  => DB::raw('COALESCE(validasi_tugas, 0)'),
-                    'validasi_uts'    => DB::raw('COALESCE(validasi_uts, 0)'),
-                    'validasi_uas'    => DB::raw('COALESCE(validasi_uas, 0)'),
-                    'log_date'        => now(),
+                    'ndosen' => $idDosen,
+                    'is_krs' => DB::raw('COALESCE(is_krs, 1)'),
+                    'publish_tugas' => DB::raw('COALESCE(publish_tugas, 0)'),
+                    'publish_uts' => DB::raw('COALESCE(publish_uts, 0)'),
+                    'publish_uas' => DB::raw('COALESCE(publish_uas, 0)'),
+                    'validasi_tugas' => DB::raw('COALESCE(validasi_tugas, 0)'),
+                    'validasi_uts' => DB::raw('COALESCE(validasi_uts, 0)'),
+                    'validasi_uas' => DB::raw('COALESCE(validasi_uas, 0)'),
+                    'log_date' => now(),
                 ]
             );
         }
@@ -510,10 +526,14 @@ class NilaiController extends Controller
 
         foreach ($header as $idx => $label) {
             $col = strtolower(trim((string) $label));
-            if ($col === 'nim') $map['nim'] = $idx;
-            if ($col === 'ntugas' || $col === 'tugas') $map['ntugas'] = $idx;
-            if ($col === 'nuts' || $col === 'uts') $map['nuts'] = $idx;
-            if ($col === 'nuas' || $col === 'uas') $map['nuas'] = $idx;
+            if ($col === 'nim')
+                $map['nim'] = $idx;
+            if ($col === 'ntugas' || $col === 'tugas')
+                $map['ntugas'] = $idx;
+            if ($col === 'nuts' || $col === 'uts')
+                $map['nuts'] = $idx;
+            if ($col === 'nuas' || $col === 'uas')
+                $map['nuas'] = $idx;
         }
 
         return $map;
@@ -527,23 +547,28 @@ class NilaiController extends Controller
         };
 
         return [
-            'nim'    => trim((string) $get('nim')),
+            'nim' => trim((string) $get('nim')),
             'ntugas' => $this->normalizeScore($get('ntugas')),
-            'nuts'   => $this->normalizeScore($get('nuts')),
-            'nuas'   => $this->normalizeScore($get('nuas')),
+            'nuts' => $this->normalizeScore($get('nuts')),
+            'nuas' => $this->normalizeScore($get('nuas')),
         ];
     }
 
     private function normalizeScore($value): ?float
     {
-        if ($value === null) return null;
+        if ($value === null)
+            return null;
         $v = trim((string) $value);
-        if ($v === '') return null;
+        if ($v === '')
+            return null;
         $v = str_replace(',', '.', $v);
-        if (!is_numeric($v)) return null;
+        if (!is_numeric($v))
+            return null;
         $n = (float) $v;
-        if ($n < 0) $n = 0;
-        if ($n > 100) $n = 100;
+        if ($n < 0)
+            $n = 0;
+        if ($n > 100)
+            $n = 100;
         return $n;
     }
 
@@ -552,12 +577,18 @@ class NilaiController extends Controller
      */
     private function hitungHuruf(float $nilai): string
     {
-        if ($nilai >= 85) return 'A';
-        if ($nilai >= 80) return 'AB';
-        if ($nilai >= 75) return 'B';
-        if ($nilai >= 70) return 'BC';
-        if ($nilai >= 60) return 'C';
-        if ($nilai >= 50) return 'D';
+        if ($nilai >= 85)
+            return 'A';
+        if ($nilai >= 80)
+            return 'AB';
+        if ($nilai >= 75)
+            return 'B';
+        if ($nilai >= 70)
+            return 'BC';
+        if ($nilai >= 60)
+            return 'C';
+        if ($nilai >= 50)
+            return 'D';
         return 'E';
     }
 }

@@ -35,14 +35,14 @@
                                 </button>
                             </div>
                             <div class="table-responsive">
-                                <table id="table-perwalian" class="table table-striped table-bordered nowrap">
+                                <table id="table-perwalian" class="table table-striped table-bordered table-responsive-sm w-100" style="table-layout: fixed;">
                                     <thead>
                                         <tr>
-                                            <th>No</th>
-                                            <th>NIM</th>
-                                            <th>Nama Mahasiswa</th>
-                                            <th>Program Studi</th>
-                                            <th style="min-width: 300px;">Dosen Wali</th>
+                                            <th style="width: 5%;">No</th>
+                                            <th style="width: 15%;">NIM</th>
+                                            <th style="width: 25%;">Nama Mahasiswa</th>
+                                            <th style="width: 20%;">Program Studi</th>
+                                            <th style="width: 35%;">Dosen Wali</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -99,6 +99,32 @@
     }
     .select2-container--default .select2-selection--single .select2-selection__arrow {
         height: 36px;
+    }
+    .select2-container {
+        width: 100% !important;
+        max-width: 100%;
+    }
+    .select2-container--default .select2-selection--single {
+        height: 38px !important;
+        padding: 0.375rem 2rem 0.375rem 0.35rem;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 24px;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .select2-dropdown {
+        min-width: 300px !important;
+    }
+    
+    #table-perwalian td {
+        vertical-align: middle;
+    }
+    #table-perwalian th {
+        vertical-align: middle; 
     }
 </style>
 
@@ -176,9 +202,12 @@
         const table = $('#table-perwalian').DataTable({
             responsive: true,
             pageLength: 25,
-            columnDefs: [
-                { targets: 0, width: '5%' }
-            ]
+            language: {
+                paginate: {
+                    next: '<i class="fa-solid fa-angle-right"></i>',
+                    previous: '<i class="fa-solid fa-angle-left"></i>'
+                }
+            }
         });
 
         initSelect2($('#table-perwalian'));
