@@ -565,7 +565,49 @@
                             </td>
                             <td>{{ $row['sub_bahasan'] !== '' ? $row['sub_bahasan'] : '-' }}</td>
                             <td class="bac-row-space"></td>
-                            <td class="bac-row-space"></td>
+                            <td class="center">
+                                @php
+                                    $randSig = $row['random_signature'] ?? null;
+                                    $hasRandSig = false;
+                                    $randImageSrc = null;
+                                    if (!empty($randSig)) {
+                                        if (str_starts_with($randSig, 'data:')) {
+                                            $hasRandSig = true;
+                                            $randImageSrc = $randSig;
+                                        } elseif (filter_var($randSig, FILTER_VALIDATE_URL)) {
+                                            $hasRandSig = true;
+                                            $randImageSrc = $randSig;
+                                        } else {
+                                            $clean = ltrim($randSig, '/');
+                                            $customPath = 'images/ttd/' . $clean;
+                                            if (is_file(public_path($customPath))) {
+                                                $hasRandSig = true;
+                                                $randImageSrc = asset($customPath);
+                                            } elseif (is_file(public_path($clean))) {
+                                                $hasRandSig = true;
+                                                $randImageSrc = asset($clean);
+                                            } else {
+                                                $storageFile = storage_path('app/public/' . $clean);
+                                                if (is_file($storageFile)) {
+                                                    $hasRandSig = true;
+                                                    $randImageSrc = asset('storage/' . $clean);
+                                                }
+                                            }
+                                        }
+                                    }
+                                @endphp
+                                @if($hasRandSig && $randImageSrc)
+                                    <img src="{{ $randImageSrc }}" alt="TTD" class="attendance-signature">
+                                @else
+                                    @if((int) ($row['mhs_hadir'] ?? 0) > 0)
+                                        <span class="signature-check">
+                                            <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                                <path d="M2 8l3 3 8-8" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </span>
+                                    @endif
+                                @endif
+                            </td>
                             <td class="center">{{ (int) ($row['mhs_hadir'] ?? 0) }}</td>
                             <td class="center">{{ (int) ($row['mhs_tidak_hadir'] ?? 0) }}</td>
                         </tr>

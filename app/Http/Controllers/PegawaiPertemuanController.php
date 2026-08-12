@@ -423,11 +423,15 @@ class PegawaiPertemuanController extends Controller
                 $presensiCountByTanggal[$tanggal] = [
                     'mhs_hadir' => 0,
                     'mhs_tidak_hadir' => 0,
+                    'signatures' => [],
                 ];
             }
 
             if ($status === 1) {
                 $presensiCountByTanggal[$tanggal]['mhs_hadir']++;
+                if (!empty($row->ttd)) {
+                    $presensiCountByTanggal[$tanggal]['signatures'][] = $row->ttd;
+                }
             } else {
                 $presensiCountByTanggal[$tanggal]['mhs_tidak_hadir']++;
             }
@@ -453,7 +457,13 @@ class PegawaiPertemuanController extends Controller
             $countRow = $presensiCountByTanggal[$tanggal] ?? [
                 'mhs_hadir' => 0,
                 'mhs_tidak_hadir' => 0,
+                'signatures' => [],
             ];
+
+            $randomSignature = null;
+            if (!empty($countRow['signatures'])) {
+                $randomSignature = $countRow['signatures'][array_rand($countRow['signatures'])];
+            }
 
             return [
                 'pertemuan_ke' => (int) ($row->id_pertemuan ?? 0),
@@ -463,6 +473,7 @@ class PegawaiPertemuanController extends Controller
                 'sub_bahasan' => trim((string) ($row->sub ?? '')),
                 'mhs_hadir' => (int) $countRow['mhs_hadir'],
                 'mhs_tidak_hadir' => (int) $countRow['mhs_tidak_hadir'],
+                'random_signature' => $randomSignature,
             ];
         })->values();
 
