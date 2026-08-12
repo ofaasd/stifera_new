@@ -249,6 +249,12 @@
     </style>
 </head>
 <body>
+    @php
+        $namaDosenGabung = trim((string) ($jadwal->nama_dosen ?? '-'));
+        if (trim((string) ($jadwal->nama_dosen2 ?? '')) !== '') {
+            $namaDosenGabung .= ' dan ' . trim((string) ($jadwal->nama_dosen2 ?? ''));
+        }
+    @endphp
     <div class="sheet">
         {{-- Header dengan Logo --}}
         <table class="header-table">
@@ -280,7 +286,7 @@
             <tr>
                 <td class="label">Pengampu</td>
                 <td class="separator">:</td>
-                <td>{{ trim((string) ($jadwal->nama_dosen ?? '-')) }}</td>
+                <td>{{ $namaDosenGabung }}</td>
                 <td class="label" style="padding-left: 30px;">Kelas</td>
                 <td class="separator">:</td>
                 <td>{{ (($jadwal->tipe_mhs == 2 ? 'Karyawan' : 'Reguler') . ' ' . ($jadwal->rombel ?? '-')) }}</td>
@@ -413,11 +419,37 @@
             $jenjangProdi = strtoupper(trim((string) ($jadwal->jenjang_prodi ?? 'S1')));
             $labelJenjang = str_contains($jenjangProdi, 'D III') ? 'D 3' : 'S1';
             $namaKetuaProdi = trim((string) ($ketuaProdi->nama_gelar ?? '-'));
-            $nipKetuaProdi = trim((string) ($ketuaProdi->nip_pns ?? ''));
+            $nipKetuaProdiVal = trim((string) ($ketuaProdi->npp ?? ''));
+            if ($nipKetuaProdiVal === '') $nipKetuaProdiVal = trim((string) ($ketuaProdi->nip_pns ?? ''));
+            
+            if ($nipKetuaProdiVal === '') {
+                $nipKetuaProdiVal = trim((string) ($ketuaProdi->nidn ?? ''));
+                $nipKetuaProdiText = $nipKetuaProdiVal !== '' ? 'NIDN. ' . $nipKetuaProdiVal : '-';
+            } else {
+                $nipKetuaProdiText = 'NIP. ' . $nipKetuaProdiVal;
+            }
+
             $namaDosen1 = trim((string) ($jadwal->nama_dosen ?? '-'));
-            $nipDosen1 = trim((string) ($jadwal->nip_dosen ?? ''));
+            $nipDosen1Val = trim((string) ($jadwal->npp_dosen ?? ''));
+            if ($nipDosen1Val === '') $nipDosen1Val = trim((string) ($jadwal->nip_dosen ?? ''));
+            
+            if ($nipDosen1Val === '') {
+                $nipDosen1Val = trim((string) ($jadwal->nidn_dosen ?? ''));
+                $nipDosen1Text = $nipDosen1Val !== '' ? 'NIDN. ' . $nipDosen1Val : '-';
+            } else {
+                $nipDosen1Text = 'NIP. ' . $nipDosen1Val;
+            }
+
             $namaDosen2 = trim((string) ($jadwal->nama_dosen2 ?? '-'));
-            $nipDosen2 = trim((string) ($jadwal->nip_dosen2 ?? ''));
+            $nipDosen2Val = trim((string) ($jadwal->npp_dosen2 ?? ''));
+            if ($nipDosen2Val === '') $nipDosen2Val = trim((string) ($jadwal->nip_dosen2 ?? ''));
+            
+            if ($nipDosen2Val === '') {
+                $nipDosen2Val = trim((string) ($jadwal->nidn_dosen2 ?? ''));
+                $nipDosen2Text = $nipDosen2Val !== '' ? 'NIDN. ' . $nipDosen2Val : '-';
+            } else {
+                $nipDosen2Text = 'NIP. ' . $nipDosen2Val;
+            }
         @endphp
         @if($forceSignatureNewPage)
             <pagebreak />
@@ -437,22 +469,18 @@
                 <tr>
                     <td>
                         <span class="signature-name">{{ $namaKetuaProdi !== '' ? $namaKetuaProdi : '-' }}</span><br>
-                        NIP. {{ $nipKetuaProdi !== '' ? $nipKetuaProdi : '-' }}
+                        {{ $nipKetuaProdiText }}
                     </td>
                     <td class="signature-center">
                         <span class="signature-name">{{ $namaDosen1 !== '' ? $namaDosen1 : '-' }}</span><br>
-                        NIP. {{ $nipDosen1 !== '' ? $nipDosen1 : '-' }}
+                        {{ $nipDosen1Text }}
                     </td>
                     <td class="signature-right">
                         <span class="signature-name">{{ $namaDosen2 !== '' ? $namaDosen2 : '-' }}</span><br>
-                        NIP. {{ $nipDosen2 !== '' ? $nipDosen2 : '-' }}
+                        {{ $nipDosen2Text }}
                     </td>
                 </tr>
             </table>
-
-            <div class="pagination-note">
-                <em>Laporan ini dicetak otomatis oleh sistem akademik pada {{ now()->translatedFormat('d F Y H:i:s') }}</em>
-            </div>
         </div>
 
         @php
@@ -464,13 +492,17 @@
                 4 => 'ANTARA GENAP GANJIL',
                 default => '-',
             };
-            $namaDosenGabung = trim((string) ($jadwal->nama_dosen ?? '-'));
-            if (trim((string) ($jadwal->nama_dosen2 ?? '')) !== '') {
-                $namaDosenGabung .= ' dan ' . trim((string) ($jadwal->nama_dosen2 ?? ''));
-            }
             $ruangBac = !empty($jadwal->ruang) ? urldecode((string) $jadwal->ruang) : '-';
             $namaKetuaSekolah = trim((string) ($ketuaSekolah->nama_gelar ?? '-'));
-            $nipKetuaSekolah = trim((string) ($ketuaSekolah->nip_pns ?? ''));
+            $nipKetuaSekolahVal = trim((string) ($ketuaSekolah->npp ?? ''));
+            if ($nipKetuaSekolahVal === '') $nipKetuaSekolahVal = trim((string) ($ketuaSekolah->nip_pns ?? ''));
+            
+            if ($nipKetuaSekolahVal === '') {
+                $nipKetuaSekolahVal = trim((string) ($ketuaSekolah->nidn ?? ''));
+                $nipKetuaSekolahText = $nipKetuaSekolahVal !== '' ? 'NIDN. ' . $nipKetuaSekolahVal : '-';
+            } else {
+                $nipKetuaSekolahText = 'NIP. ' . $nipKetuaSekolahVal;
+            }
         @endphp
 
         <div class="bac-sheet">
@@ -636,11 +668,11 @@
                 <tr>
                     <td>
                         <span class="signature-name">{{ $namaKetuaSekolah !== '' ? $namaKetuaSekolah : '-' }}</span><br>
-                        NIP. {{ $nipKetuaSekolah !== '' ? $nipKetuaSekolah : '-' }}
+                        {{ $nipKetuaSekolahText }}
                     </td>
                     <td class="bac-signature-right">
                         <span class="signature-name">{{ $namaKetuaProdi !== '' ? $namaKetuaProdi : '-' }}</span><br>
-                        NIP. {{ $nipKetuaProdi !== '' ? $nipKetuaProdi : '-' }}
+                        {{ $nipKetuaProdiText }}
                     </td>
                 </tr>
             </table>
