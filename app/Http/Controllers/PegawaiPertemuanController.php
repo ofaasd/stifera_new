@@ -344,6 +344,8 @@ class PegawaiPertemuanController extends Controller
             ->leftJoin('master_tahun_ajaran as mta', 'mta.id', '=', 'mjt.id_tahun')
             ->leftJoin('pegawai_biodata as pb', 'mjt.id_dosen', '=', 'pb.id')
             ->leftJoin('pegawai_biodata as pb2', 'mjt.id_dosen2', '=', 'pb2.id')
+            ->leftJoin('pegawai as p1', 'pb.id_pegawai', '=', 'p1.id')
+            ->leftJoin('pegawai as p2', 'pb2.id_pegawai', '=', 'p2.id')
             ->select(
                 'mjt.*',
                 'mmk.nama_mata_kuliah',
@@ -354,8 +356,12 @@ class PegawaiPertemuanController extends Controller
                 'mta.awal as tahun_awal',
                 'mta.akhir as tahun_akhir',
                 'mta.jenis as jenis_tahun',
+                'p1.npp as npp_dosen',
+                'p2.npp as npp_dosen2',
                 'pb.nip_pns as nip_dosen',
+                'pb.nidn as nidn_dosen',
                 'pb2.nip_pns as nip_dosen2',
+                'pb2.nidn as nidn_dosen2',
                 DB::raw("TRIM(CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,''))) as nama_dosen"),
                 DB::raw("TRIM(CONCAT(COALESCE(pb2.gelar_depan,''), ' ', COALESCE(pb2.nama_lengkap,''), ' ', COALESCE(pb2.gelar_belakang,''))) as nama_dosen2")
             )
@@ -529,6 +535,7 @@ class PegawaiPertemuanController extends Controller
             ->select(
                 'p.npp',
                 'pb.nip_pns',
+                'pb.nidn',
                 DB::raw("TRIM(CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap, p.nama, ''), ' ', COALESCE(pb.gelar_belakang,''))) as nama_gelar")
             )
             ->where('p.npp', $nppKetua)
@@ -549,6 +556,7 @@ class PegawaiPertemuanController extends Controller
             ->select(
                 'p.npp',
                 'pb.nip_pns',
+                'pb.nidn',
                 DB::raw("TRIM(CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap, p.nama, ''), ' ', COALESCE(pb.gelar_belakang,''))) as nama_gelar")
             )
             ->where('p.npp', $nppKetua)
