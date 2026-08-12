@@ -133,7 +133,8 @@ class JadwalController extends Controller
             ->where('status_pegawai', 'aktif')
             ->get()
             ->sortBy(function ($d) {
-                return strtolower(trim(($d->gelar_depan ?? '') . ' ' . ($d->nama_lengkap ?? '') . ' ' . ($d->gelar_belakang ?? '')));
+                $name = trim(($d->gelar_depan ?? '') . ' ' . ($d->nama_lengkap ?? '') . ' ' . ($d->gelar_belakang ?? ''));
+                return strtolower(preg_replace('/\s+/', ' ', $name));
             })->values();
         $data['hariList'] = DB::table('master_hari')->orderBy('id')->get();
         $data['sesiList'] = DB::table('master_jam')->orderBy('id')->get();
@@ -227,7 +228,8 @@ class JadwalController extends Controller
             ->where('status_pegawai', 'aktif')
             ->get()
             ->sortBy(function ($d) {
-                return strtolower(trim(($d->gelar_depan ?? '') . ' ' . ($d->nama_lengkap ?? '') . ' ' . ($d->gelar_belakang ?? '')));
+                $name = trim(($d->gelar_depan ?? '') . ' ' . ($d->nama_lengkap ?? '') . ' ' . ($d->gelar_belakang ?? ''));
+                return strtolower(preg_replace('/\s+/', ' ', $name));
             })->values();
         $data['hariList'] = DB::table('master_hari')->orderBy('id')->get();
         $data['sesiList'] = DB::table('master_jam')->orderBy('id')->get();

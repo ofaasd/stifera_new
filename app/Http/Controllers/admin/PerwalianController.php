@@ -57,8 +57,10 @@ class PerwalianController extends Controller
 
         $results = $dosenList->map(function ($dosen) {
             $text = trim(($dosen->gelar_depan ?? '') . ' ' . ($dosen->nama_lengkap ?? '') . ' ' . ($dosen->gelar_belakang ?? ''));
+            $text = preg_replace('/\s+/', ' ', $text);
             if (empty($text)) {
                 $text = trim((string) $dosen->nama_lengkap);
+                $text = preg_replace('/\s+/', ' ', $text);
             }
 
             if (!empty($dosen->nidn)) {
