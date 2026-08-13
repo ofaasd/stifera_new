@@ -203,8 +203,7 @@
                             <select class="default-select form-control wide" name="kategori_aspek" id="kategori_aspek" required>
                                 <option value="Sikap">Sikap</option>
                                 <option value="Pengetahuan">Pengetahuan</option>
-                                <option value="Keterampilan Umum">Keterampilan Umum</option>
-                                <option value="Keterampilan Khusus">Keterampilan Khusus</option>
+                                <option value="Keterampilan">Keterampilan</option>
                             </select>
                         </div>
                         <div class="mb-3 col-md-6">
