@@ -23,7 +23,8 @@
 
 							return $url === 'simpeg/meninggalkanpekerjaan' || $name === 'izin meninggalkan pekerjaan';
 						});
-						$hasSubmenu = $menu->children->count() > 0 || $isKepegawaianMenu;
+						$isMasterMenu = in_array($menuName, ['master', 'master data', 'data master']);
+						$hasSubmenu = $menu->children->count() > 0 || $isKepegawaianMenu || $isMasterMenu;
 					@endphp
 					<li>
 						@if($hasSubmenu)
@@ -72,6 +73,10 @@
 
 										return $url === 'akademik/kuesioner' || $name === 'kuesioner';
 									});
+									$hasMasterCpl = $menu->children->contains(function ($item) {
+										$url = trim(strtolower((string) ($item->url ?? '')));
+										return $url === 'master/cpl';
+									});
 								@endphp
 								@if($isAkademikMenu && !$hasRombel)
 									<li>
@@ -101,6 +106,11 @@
 								@if($isKepegawaianMenu && !$hasMeninggalkanPekerjaan)
 									<li>
 										<a href="{{ url('simpeg/MeninggalkanPekerjaan') }}">Izin Meninggalkan Pekerjaan</a>
+									</li>
+								@endif
+								@if($isMasterMenu && !$hasMasterCpl)
+									<li>
+										<a href="{{ url('master/cpl') }}">Master CPL</a>
 									</li>
 								@endif
 							</ul>
