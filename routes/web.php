@@ -551,6 +551,8 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/master/matakuliah/delete/{id}', [MatakuliahController::class, 'delete']);
     Route::get('/master/kurikulum/delete/{id}', [KurikulumController::class, 'delete']);
 
+    // Master CPL Routes 
+    Route::resource('master/cpl', \App\Http\Controllers\admin\CplController::class);
 
     Route::post('/pmb/req_data', [PmbController::class, 'req_data']);
     Route::post('/pmb/daftar_sekolah', [PmbController::class, 'daftar_sekolah']);
