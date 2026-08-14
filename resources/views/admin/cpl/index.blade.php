@@ -88,9 +88,18 @@
                                             </thead>
                                             <tbody>
                                                 @foreach($cplS1 as $cpl)
+                                                @php
+                                                    $badgeClass = match($cpl->kategori_aspek) {
+                                                        'Sikap' => 'badge-success light',
+                                                        'Pengetahuan' => 'badge-info light',
+                                                        'Keterampilan Umum' => 'badge-primary light',
+                                                        'Keterampilan Khusus' => 'badge-warning light',
+                                                        default => 'badge-light'
+                                                    };
+                                                @endphp
                                                 <tr>
                                                     <td><strong>{{ $cpl->kode_cpl }}</strong></td>
-                                                    <td><span class="badge badge-light">{{ $cpl->kategori_aspek }}</span></td>
+                                                    <td><span class="badge {{ $badgeClass }}">{{ $cpl->kategori_aspek }}</span></td>
                                                     <td style="white-space: normal; min-width: 300px;">{{ $cpl->deskripsi }}</td>
                                                     <td>{{ $cpl->referensi ?? '-' }}</td>
                                                     <td>{{ $cpl->target_capaian ?? '-' }}</td>
@@ -136,9 +145,18 @@
                                             </thead>
                                             <tbody>
                                                 @foreach($cplD3 as $cpl)
+                                                @php
+                                                    $badgeClass = match($cpl->kategori_aspek) {
+                                                        'Sikap' => 'badge-success light',
+                                                        'Pengetahuan' => 'badge-info light',
+                                                        'Keterampilan Umum' => 'badge-primary light',
+                                                        'Keterampilan Khusus' => 'badge-warning light',
+                                                        default => 'badge-light'
+                                                    };
+                                                @endphp
                                                 <tr>
                                                     <td><strong>{{ $cpl->kode_cpl }}</strong></td>
-                                                    <td><span class="badge badge-light">{{ $cpl->kategori_aspek }}</span></td>
+                                                    <td><span class="badge {{ $badgeClass }}">{{ $cpl->kategori_aspek }}</span></td>
                                                     <td style="white-space: normal; min-width: 300px;">{{ $cpl->deskripsi }}</td>
                                                     <td>{{ $cpl->referensi ?? '-' }}</td>
                                                     <td>{{ $cpl->target_capaian ?? '-' }}</td>
