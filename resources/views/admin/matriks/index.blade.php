@@ -6,6 +6,10 @@
     .custom-hover-table tbody tr.mk-row:hover > td {
         background-color: rgba(0, 0, 0, 0.05) !important;
     }
+    /* Paksa warna teks footer menjadi putih menyesuaikan dengan header */
+    .custom-hover-table tfoot td {
+        color: #fff !important;
+    }
 </style>
 <div class="content-body">
     <div class="container-fluid">
@@ -118,6 +122,7 @@
                                                                         <div class="form-check custom-checkbox custom-control d-inline-block">
                                                                             <input type="checkbox" class="form-check-input chk-cpl" 
                                                                                    name="mapping[{{ $mk->id }}][{{ $cpl->id_cpl }}]" 
+                                                                                   data-prodi="s1" data-cpl="{{ $cpl->id_cpl }}"
                                                                                    value="1" {{ $isChecked }} onchange="calculateTotal(this)">
                                                                         </div>
                                                                     </td>
@@ -129,6 +134,15 @@
                                                         @endforeach
                                                     @endforeach
                                                 </tbody>
+                                                <tfoot>
+                                                    <tr class="bg-primary text-white font-weight-bold">
+                                                        <td colspan="3" class="text-end align-middle">Total Mata Kuliah per CPL:</td>
+                                                        @foreach($cplS1 as $cpl)
+                                                            <td class="text-center align-middle" style="font-size: 16px;"><span id="total-s1-{{ $cpl->id_cpl }}">0</span></td>
+                                                        @endforeach
+                                                        <td></td>
+                                                    </tr>
+                                                </tfoot>
                                             </table>
                                         </div>
                                     </div>
@@ -189,6 +203,7 @@
                                                                         <div class="form-check custom-checkbox custom-control d-inline-block">
                                                                             <input type="checkbox" class="form-check-input chk-cpl" 
                                                                                    name="mapping[{{ $mk->id }}][{{ $cpl->id_cpl }}]" 
+                                                                                   data-prodi="d3" data-cpl="{{ $cpl->id_cpl }}"
                                                                                    value="1" {{ $isChecked }} onchange="calculateTotal(this)">
                                                                         </div>
                                                                     </td>
@@ -200,6 +215,15 @@
                                                         @endforeach
                                                     @endforeach
                                                 </tbody>
+                                                <tfoot>
+                                                    <tr class="bg-primary text-white font-weight-bold">
+                                                        <td colspan="3" class="text-end align-middle">Total Mata Kuliah per CPL:</td>
+                                                        @foreach($cplD3 as $cpl)
+                                                            <td class="text-center align-middle" style="font-size: 16px;"><span id="total-d3-{{ $cpl->id_cpl }}">0</span></td>
+                                                        @endforeach
+                                                        <td></td>
+                                                    </tr>
+                                                </tfoot>
                                             </table>
                                         </div>
                                     </div>
@@ -242,16 +266,51 @@
             badgeTotal.classList.remove('badge-primary');
             badgeTotal.classList.add('badge-secondary', 'light');
         }
+
+        // --- Perhitungan Total per CPL (Kolom) ---
+        var prodi = checkbox.getAttribute('data-prodi');
+        var cplId = checkbox.getAttribute('data-cpl');
+        if (prodi && cplId) {
+            var colCheckboxes = document.querySelectorAll('input[data-prodi="'+prodi+'"][data-cpl="'+cplId+'"]:checked');
+            var colTotalSpan = document.getElementById('total-' + prodi + '-' + cplId);
+            if (colTotalSpan) {
+                colTotalSpan.innerText = colCheckboxes.length;
+            }
+        }
     }
 
     // Hitung inisial saat halaman selesai dimuat
     document.addEventListener("DOMContentLoaded", function() {
+        // 1. Hitung total baris (horizontal)
         var rows = document.querySelectorAll('.mk-row');
         rows.forEach(function(row) {
-            // Ambil elemen checkbox pertama sekadar u/ trigger fungsi
-            var firstChk = row.querySelector('.chk-cpl');
-            if(firstChk) {
-                calculateTotal(firstChk);
+            var checkboxes = row.querySelectorAll('.chk-cpl');
+            var totalRow = 0;
+            checkboxes.forEach(function(chk) {
+                if(chk.checked) totalRow++;
+            });
+            var badgeTotal = row.querySelector('.badge-total');
+            if (badgeTotal) {
+                badgeTotal.innerText = totalRow;
+                if(totalRow > 0) {
+                    badgeTotal.classList.remove('badge-secondary', 'light');
+                    badgeTotal.classList.add('badge-primary');
+                } else {
+                    badgeTotal.classList.remove('badge-primary');
+                    badgeTotal.classList.add('badge-secondary', 'light');
+                }
+            }
+        });
+
+        // 2. Hitung total per CPL (vertikal)
+        var allCplSpans = document.querySelectorAll('span[id^="total-s1-"], span[id^="total-d3-"]');
+        allCplSpans.forEach(function(span) {
+            var parts = span.id.split('-');
+            if(parts.length >= 3) {
+                var prodi = parts[1];
+                var cplId = parts.slice(2).join('-'); // handles uuid or numbers
+                var checkedCols = document.querySelectorAll('input[data-prodi="'+prodi+'"][data-cpl="'+cplId+'"]:checked');
+                span.innerText = checkedCols.length;
             }
         });
     });
