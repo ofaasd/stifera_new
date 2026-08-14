@@ -554,6 +554,10 @@ Route::middleware('auth:admin')->group(function () {
     // Master CPL Routes 
     Route::resource('master/cpl', \App\Http\Controllers\admin\CplController::class);
 
+    // Master Matriks Routes
+    Route::get('master/matriks', [\App\Http\Controllers\admin\MatriksController::class, 'index'])->name('matriks.index');
+    Route::post('master/matriks', [\App\Http\Controllers\admin\MatriksController::class, 'store'])->name('matriks.store');
+
     Route::post('/pmb/req_data', [PmbController::class, 'req_data']);
     Route::post('/pmb/daftar_sekolah', [PmbController::class, 'daftar_sekolah']);
     Route::post('/pmb/daftar_mou', [PmbController::class, 'daftar_mou']);

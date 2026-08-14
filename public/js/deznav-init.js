@@ -32,9 +32,11 @@ function getUrlParams(dParam)
         direction = 'ltr'; 
     } */
 	
+	var savedTheme = localStorage.getItem('theme_version') || "light";
+	
 	dzSettingsOptions = {
 		typography: "poppins",
-		version: "light",
+		version: savedTheme,
 		layout: "vertical",
 		primary: "color_1",
 		headerBg: "color_4",
