@@ -240,6 +240,7 @@
     $(document).ready(function() {
         // Initialize DataTables
         $('#cplTableS1').DataTable({
+            paging: false,
             language: {
                 paginate: {
                     next: '<i class="fa fa-angle-double-right" aria-hidden="true"></i>',
@@ -249,6 +250,7 @@
         });
         
         $('#cplTableD3').DataTable({
+            paging: false,
             language: {
                 paginate: {
                     next: '<i class="fa fa-angle-double-right" aria-hidden="true"></i>',
