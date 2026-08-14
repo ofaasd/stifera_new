@@ -37,7 +37,7 @@ class CplController extends Controller
         })->values();
 
         $data['prodiList'] = DB::table('program_studi')->orderBy('id', 'asc')->get();
-        $data['aspekList'] = ['Sikap', 'Pengetahuan', 'Keterampilan'];
+        $data['aspekList'] = ['Sikap', 'Pengetahuan', 'Keterampilan Umum', 'Keterampilan Khusus'];
 
         return view('admin.cpl.index', $data);
     }
@@ -51,7 +51,7 @@ class CplController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id_prodi' => 'required|integer',
-            'kategori_aspek' => 'required|in:Sikap,Pengetahuan,Keterampilan',
+            'kategori_aspek' => 'required|in:Sikap,Pengetahuan,Keterampilan Umum,Keterampilan Khusus',
             'kode_cpl' => 'required|string|max:10',
             'deskripsi' => 'required|string',
             'referensi' => 'nullable|string|max:100',
@@ -90,7 +90,7 @@ class CplController extends Controller
 
         $validator = Validator::make($request->all(), [
             'id_prodi' => 'required|integer',
-            'kategori_aspek' => 'required|in:Sikap,Pengetahuan,Keterampilan',
+            'kategori_aspek' => 'required|in:Sikap,Pengetahuan,Keterampilan Umum,Keterampilan Khusus',
             'kode_cpl' => 'required|string|max:10',
             'deskripsi' => 'required|string',
             'referensi' => 'nullable|string|max:100',
