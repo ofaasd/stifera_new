@@ -235,7 +235,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('local-js')
 <script>
     $(document).ready(function() {
         // Initialize DataTables
@@ -296,6 +296,10 @@
                 }
                 
                 $('#cplModal').modal('show');
+            },
+            error: function(err) {
+                console.error("AJAX Error:", err);
+                alert("Gagal mengambil data CPL.");
             }
         });
     }
@@ -306,4 +310,4 @@
         }
     }
 </script>
-@endpush
+@endsection
