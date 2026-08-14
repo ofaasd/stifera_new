@@ -49,6 +49,11 @@
 											{{ $child->nama_menu }}
 										</a>
 									</li>
+									@if(trim(strtolower((string) ($child->url ?? ''))) === 'master/kurikulum')
+										<li>
+											<a href="{{ url('master/matriks') }}">Matriks Kurikulum</a>
+										</li>
+									@endif
 								@endforeach
 								@php
 									$isAkademikMenu = $menuName === 'akademik';
