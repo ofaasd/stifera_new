@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->id('id_cpl'); // Primary Key, Auto Increment
             $table->integer('id_prodi')->index();
             $table->integer('id_kurikulum')->nullable()->index();
-            $table->enum('kategori_aspek', ['Sikap', 'Pengetahuan', 'Keterampilan']);
+            $table->enum('kategori_aspek', ['Sikap', 'Pengetahuan', 'Keterampilan Umum', 'Keterampilan Khusus']);
             $table->string('kode_cpl', 10);
             $table->text('deskripsi');
             $table->string('referensi', 100)->nullable();
