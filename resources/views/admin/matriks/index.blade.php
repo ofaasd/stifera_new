@@ -101,8 +101,14 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @php $globalNoS1 = 1; @endphp
+                                                    @php 
+                                                        $globalNoS1 = 1; 
+                                                        $totalSksS1 = 0;
+                                                    @endphp
                                                     @foreach($mkS1Grouped as $semester => $mks)
+                                                        @php
+                                                            $totalSksS1 += $mks->sum('jumlah_sks');
+                                                        @endphp
                                                         <tr class="bg-light font-weight-bold">
                                                             <td colspan="{{ 4 + count($cplS1) }}" class="text-start text-dark fs-14">
                                                                 <i class="fas fa-tag me-2"></i> <strong>Semester {{ $semester }}</strong>
@@ -134,11 +140,14 @@
                                                         @endforeach
                                                     @endforeach
                                                 </tbody>
-                                                <tfoot>
-                                                    <tr class="bg-primary text-white font-weight-bold">
-                                                        <td colspan="3" class="text-end align-middle">Total Mata Kuliah per CPL:</td>
+                                                <tfoot class="bg-primary text-white font-weight-bold">
+                                                    <tr>
+                                                        <td colspan="2" class="text-end align-middle">Total Mata Kuliah per CPL:</td>
+                                                        <td class="text-center align-middle fs-14 text-white">{{ $totalSksS1 }}</td>
                                                         @foreach($cplS1 as $cpl)
-                                                            <td class="text-center align-middle" style="font-size: 16px;"><span id="total-s1-{{ $cpl->id_cpl }}">0</span></td>
+                                                            <td class="text-center align-middle" style="font-size: 16px;">
+                                                                <span id="total-s1-{{ $cpl->id_cpl }}" class="badge badge-secondary light badge-total">0</span>
+                                                            </td>
                                                         @endforeach
                                                         <td></td>
                                                     </tr>
@@ -182,8 +191,14 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    @php $globalNoD3 = 1; @endphp
+                                                    @php 
+                                                        $globalNoD3 = 1; 
+                                                        $totalSksD3 = 0;
+                                                    @endphp
                                                     @foreach($mkD3Grouped as $semester => $mks)
+                                                        @php
+                                                            $totalSksD3 += $mks->sum('jumlah_sks');
+                                                        @endphp
                                                         <tr class="bg-light font-weight-bold">
                                                             <td colspan="{{ 4 + count($cplD3) }}" class="text-start text-dark fs-14">
                                                                 <i class="fas fa-tag me-2"></i> <strong>Semester {{ $semester }}</strong>
@@ -215,11 +230,14 @@
                                                         @endforeach
                                                     @endforeach
                                                 </tbody>
-                                                <tfoot>
-                                                    <tr class="bg-primary text-white font-weight-bold">
-                                                        <td colspan="3" class="text-end align-middle">Total Mata Kuliah per CPL:</td>
+                                                <tfoot class="bg-primary text-white font-weight-bold">
+                                                    <tr>
+                                                        <td colspan="2" class="text-end align-middle">Total Mata Kuliah per CPL:</td>
+                                                        <td class="text-center align-middle fs-14 text-white">{{ $totalSksD3 }}</td>
                                                         @foreach($cplD3 as $cpl)
-                                                            <td class="text-center align-middle" style="font-size: 16px;"><span id="total-d3-{{ $cpl->id_cpl }}">0</span></td>
+                                                            <td class="text-center align-middle" style="font-size: 16px;">
+                                                                <span id="total-d3-{{ $cpl->id_cpl }}" class="badge badge-secondary light badge-total">0</span>
+                                                            </td>
                                                         @endforeach
                                                         <td></td>
                                                     </tr>
@@ -274,7 +292,15 @@
             var colCheckboxes = document.querySelectorAll('input[data-prodi="'+prodi+'"][data-cpl="'+cplId+'"]:checked');
             var colTotalSpan = document.getElementById('total-' + prodi + '-' + cplId);
             if (colTotalSpan) {
-                colTotalSpan.innerText = colCheckboxes.length;
+                var len = colCheckboxes.length;
+                colTotalSpan.innerText = len;
+                if(len > 0) {
+                    colTotalSpan.classList.remove('badge-secondary', 'light');
+                    colTotalSpan.classList.add('badge-primary');
+                } else {
+                    colTotalSpan.classList.remove('badge-primary');
+                    colTotalSpan.classList.add('badge-secondary', 'light');
+                }
             }
         }
     }
@@ -310,7 +336,17 @@
                 var prodi = parts[1];
                 var cplId = parts.slice(2).join('-'); // handles uuid or numbers
                 var checkedCols = document.querySelectorAll('input[data-prodi="'+prodi+'"][data-cpl="'+cplId+'"]:checked');
-                span.innerText = checkedCols.length;
+                var len = checkedCols.length;
+                span.innerText = len;
+                
+                // Tambahkan styling badge
+                if(len > 0) {
+                    span.classList.remove('badge-secondary', 'light');
+                    span.classList.add('badge-primary');
+                } else {
+                    span.classList.remove('badge-primary');
+                    span.classList.add('badge-secondary', 'light');
+                }
             }
         });
     });

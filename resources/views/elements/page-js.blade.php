@@ -4,7 +4,8 @@
 function loadScripts($scripts) {
     foreach ((array) $scripts as $script) {
         if (is_string($script)) {
-            echo '<script src="' . asset($script) . '" type="text/javascript"></script>' . PHP_EOL;
+            $version = (strpos($script, 'custom.js') !== false) ? '?v=' . time() : '';
+            echo '<script src="' . asset($script) . $version . '" type="text/javascript"></script>' . PHP_EOL;
         }
     }
 }
