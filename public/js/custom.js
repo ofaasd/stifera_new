@@ -132,11 +132,24 @@ var NexaDash = function(){
 
 	var handleNavigation = function() {
 		$(".nav-control").on('click', function() {
-
 			$('#main-wrapper').toggleClass("menu-toggle");
-
 			$(".hamburger").toggleClass("is-active");
+
+			if ($('#main-wrapper').hasClass("menu-toggle")) {
+				localStorage.setItem("sidebar_collapsed", "true");
+			} else {
+				localStorage.setItem("sidebar_collapsed", "false");
+			}
 		});
+
+		// Atur state saat halaman dimuat
+		if (localStorage.getItem("sidebar_collapsed") === "true") {
+			$('#main-wrapper').addClass("menu-toggle");
+			$(".hamburger").addClass("is-active");
+		} else {
+			$('#main-wrapper').removeClass("menu-toggle");
+			$(".hamburger").removeClass("is-active");
+		}
 	}
   
 	var handleCurrentActive = function() {

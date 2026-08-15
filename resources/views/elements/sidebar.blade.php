@@ -1,4 +1,45 @@
-		<div class="deznav">
+<style>
+    /* Memperbaiki bug white-on-white text saat sidebar di toggle berbagai mode */
+    #main-wrapper.menu-toggle .deznav .metismenu li > ul,
+    body.menu-toggle .deznav .metismenu li > ul,
+    .menu-toggle .deznav .metismenu li > ul,
+    [data-sidebar-style="mini"] .deznav .metismenu li > ul,
+    [data-sidebar-style="compact"] .deznav .metismenu li > ul,
+    [data-sidebar-style="icon-hover"] .deznav .metismenu li > ul {
+        background-color: #0057bb !important;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
+    }
+    
+    #main-wrapper.menu-toggle .deznav .metismenu li:hover > a > .nav-text,
+    body.menu-toggle .deznav .metismenu li:hover > a > .nav-text,
+    .menu-toggle .deznav .metismenu li:hover > a > .nav-text,
+    [data-sidebar-style="mini"] .deznav .metismenu li:hover > a > .nav-text,
+    [data-sidebar-style="compact"] .deznav .metismenu li:hover > a > .nav-text,
+    [data-sidebar-style="icon-hover"] .deznav .metismenu li:hover > a > .nav-text {
+        background-color: #0057bb !important;
+        color: #fff !important;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
+    }
+    
+    #main-wrapper.menu-toggle .deznav .metismenu li > ul a,
+    body.menu-toggle .deznav .metismenu li > ul a,
+    .menu-toggle .deznav .metismenu li > ul a,
+    [data-sidebar-style="mini"] .deznav .metismenu li > ul a,
+    [data-sidebar-style="compact"] .deznav .metismenu li > ul a,
+    [data-sidebar-style="icon-hover"] .deznav .metismenu li > ul a {
+        color: #fff !important;
+    }
+    
+    #main-wrapper.menu-toggle .deznav .metismenu li > ul a:hover,
+    body.menu-toggle .deznav .metismenu li > ul a:hover,
+    .menu-toggle .deznav .metismenu li > ul a:hover,
+    [data-sidebar-style="mini"] .deznav .metismenu li > ul a:hover,
+    [data-sidebar-style="compact"] .deznav .metismenu li > ul a:hover,
+    [data-sidebar-style="icon-hover"] .deznav .metismenu li > ul a:hover {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+    }
+</style>
+<div class="deznav">
 			<div class="deznav-scroll grid-menu">
 				<ul class="metismenu" id="menu">
 				@foreach($menus as $menu)
