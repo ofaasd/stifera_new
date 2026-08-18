@@ -134,6 +134,11 @@
 										<a href="{{ url('akademik/kuesioner') }}">Kuesioner</a>
 									</li>
 								@endif
+								@if($isAkademikMenu)
+									<li>
+										<a href="{{ url('admin/yudisium') }}">Manajemen Yudisium</a>
+									</li>
+								@endif
 								@if($isPmbMenu && !$hasSoalPmb)
 									<li>
 										<a href="{{ url('pmb/soal') }}">Soal PMB</a>
