@@ -525,7 +525,7 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/master/pengaturan-ujian/kursi/{id_jadwal}', [PengaturanUjianController::class, 'kursi']);
     Route::post('/master/pengaturan-ujian/kursi/{id_jadwal}', [PengaturanUjianController::class, 'saveKursi']);
 
-    //Action Presensi 
+    //Action Presensi
     Route::get('/master/presensi', [PresensiController::class, 'index']);
     Route::get('/master/presensi/tanggal/{id}', [PresensiController::class, 'detail_presensi']);
     Route::get('/master/presensi/input/{id}', [PresensiController::class, 'create']);
@@ -551,13 +551,20 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/master/matakuliah/delete/{id}', [MatakuliahController::class, 'delete']);
     Route::get('/master/kurikulum/delete/{id}', [KurikulumController::class, 'delete']);
 
-    // Master CPL Routes 
+    // Master CPL Routes
     Route::resource('master/cpl', \App\Http\Controllers\admin\CplController::class);
 
     // Master Matriks Routes
     Route::get('master/matriks', [\App\Http\Controllers\admin\MatriksController::class, 'index'])->name('matriks.index');
     Route::post('master/matriks', [\App\Http\Controllers\admin\MatriksController::class, 'store'])->name('matriks.store');
 
+    // Yudisium Admin Routes
+    Route::get('admin/yudisium', [\App\Http\Controllers\admin\YudisiumController::class, 'index'])->name('admin.yudisium.index');
+    Route::post('admin/yudisium/periode', [\App\Http\Controllers\admin\YudisiumController::class, 'storePeriode'])->name('admin.yudisium.storePeriode');
+    Route::get('admin/yudisium/{id}/verifikasi', [\App\Http\Controllers\admin\YudisiumController::class, 'show'])->name('admin.yudisium.show');
+    Route::post('admin/yudisium/verifikasi-berkas', [\App\Http\Controllers\admin\YudisiumController::class, 'verifikasiBerkas'])->name('admin.yudisium.verifikasiBerkas');
+    Route::post('admin/yudisium/terima-hardcopy', [\App\Http\Controllers\admin\YudisiumController::class, 'terimaHardcopy'])->name('admin.yudisium.terimaHardcopy');
+    Route::post('admin/yudisium/tetapkan', [\App\Http\Controllers\admin\YudisiumController::class, 'tetapkanYudisium'])->name('admin.yudisium.tetapkan');
     Route::post('/pmb/req_data', [PmbController::class, 'req_data']);
     Route::post('/pmb/daftar_sekolah', [PmbController::class, 'daftar_sekolah']);
     Route::post('/pmb/daftar_mou', [PmbController::class, 'daftar_mou']);
@@ -583,7 +590,7 @@ Route::middleware('auth:admin')->group(function () {
     Route::post('/pmb/gelombang_ta_hapus', [PmbGelombangController::class, 'delete_ta']);
 
 
-    //Action Wilayah 
+    //Action Wilayah
     Route::post('/wilayah/get_kota_kecamatan', [WilayahController::class, 'get_kota_kecamatan']);
 
     // Alias menu pengumuman lama
@@ -686,4 +693,10 @@ Route::middleware('auth:admin')->group(function () {
     Route::post('/master/nilai/validasi-toggle', [NilaiController::class, 'toggleValidasi']);
     Route::post('/master/nilai/upload', [NilaiController::class, 'upload']);
     Route::get('/master/nilai/template', [NilaiController::class, 'downloadTemplate']);
+});
+
+Route::middleware('auth:mahasiswa')->group(function () {
+    Route::get('/mahasiswa/yudisium', [\App\Http\Controllers\mahasiswa\YudisiumMahasiswaController::class, 'index'])->name('mahasiswa.yudisium.index');
+    Route::post('/mahasiswa/yudisium/store', [\App\Http\Controllers\mahasiswa\YudisiumMahasiswaController::class, 'store'])->name('mahasiswa.yudisium.store');
+    Route::post('/mahasiswa/yudisium/revisi', [\App\Http\Controllers\mahasiswa\YudisiumMahasiswaController::class, 'updateRevisi'])->name('mahasiswa.yudisium.updateRevisi');
 });

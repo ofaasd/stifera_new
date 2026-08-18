@@ -32,7 +32,12 @@ function getUrlParams(dParam)
         direction = 'ltr'; 
     } */
 	
-	var savedTheme = localStorage.getItem('theme_version') || "light";
+    var savedTheme = "light";
+    try {
+        savedTheme = localStorage.getItem('theme_version') || "light";
+    } catch (e) {
+        console.warn("Storage access blocked for theme");
+    }
 	
 	dzSettingsOptions = {
 		typography: "poppins",

@@ -135,21 +135,31 @@ var NexaDash = function(){
 			$('#main-wrapper').toggleClass("menu-toggle");
 			$(".hamburger").toggleClass("is-active");
 
-			if ($('#main-wrapper').hasClass("menu-toggle")) {
-				localStorage.setItem("sidebar_collapsed", "true");
-			} else {
-				localStorage.setItem("sidebar_collapsed", "false");
-			}
+            try {
+                if ($('#main-wrapper').hasClass("menu-toggle")) {
+                    localStorage.setItem("sidebar_collapsed", "true");
+                } else {
+                    localStorage.setItem("sidebar_collapsed", "false");
+                }
+            } catch (e) {
+                console.warn("Storage access blocked");
+            }
 		});
 
 		// Atur state saat halaman dimuat
-		if (localStorage.getItem("sidebar_collapsed") === "true") {
-			$('#main-wrapper').addClass("menu-toggle");
-			$(".hamburger").addClass("is-active");
-		} else {
-			$('#main-wrapper').removeClass("menu-toggle");
-			$(".hamburger").removeClass("is-active");
-		}
+        try {
+            if (localStorage.getItem("sidebar_collapsed") === "true") {
+                $('#main-wrapper').addClass("menu-toggle");
+                $(".hamburger").addClass("is-active");
+            } else {
+                $('#main-wrapper').removeClass("menu-toggle");
+                $(".hamburger").removeClass("is-active");
+            }
+        } catch (e) {
+            console.warn("Storage access blocked");
+            $('#main-wrapper').removeClass("menu-toggle");
+            $(".hamburger").removeClass("is-active");
+        }
 	}
   
 	var handleCurrentActive = function() {

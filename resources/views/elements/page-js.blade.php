@@ -1,11 +1,13 @@
 <script>var enableSupportButton = '{{ config('dz.site_level.support_button') }}';</script>
 
 @php
-function loadScripts($scripts) {
-    foreach ((array) $scripts as $script) {
-        if (is_string($script)) {
-            $version = (strpos($script, 'custom.js') !== false) ? '?v=' . time() : '';
-            echo '<script src="' . asset($script) . $version . '" type="text/javascript"></script>' . PHP_EOL;
+if (!function_exists('loadScripts')) {
+    function loadScripts($scripts) {
+        foreach ((array) $scripts as $script) {
+            if (is_string($script)) {
+                $version = (strpos($script, 'custom.js') !== false) ? '?v=' . time() : '';
+                echo '<script src="' . asset($script) . $version . '" type="text/javascript"></script>' . PHP_EOL;
+            }
         }
     }
 }

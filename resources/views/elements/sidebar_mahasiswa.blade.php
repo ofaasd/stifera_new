@@ -29,6 +29,7 @@
                     <li><a href="{{ url('mhs/daftar_nilai') }}">Daftar Nilai</a></li>
                     <li><a href="{{ url('mhs/matakuliah') }}">Mata kuliah</a></li>
                     <li><a href="{{ url('mhs/keuangan') }}">Keuangan</a></li>
+                    <li><a href="{{ route('mahasiswa.yudisium.index') }}">Pengajuan Yudisium</a></li>
                 </ul>
             </li>
             <li>
