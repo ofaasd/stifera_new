@@ -44,6 +44,11 @@
 				<ul class="metismenu" id="menu">
 				@foreach($menus as $menu)
 					@php
+						$menuUrlRaw = trim(strtolower((string) ($menu->url ?? '')));
+						if ($menuUrlRaw === 'yudisium' || $menuUrlRaw === 'transkrip' || $menuUrlRaw === '/yudisium' || $menuUrlRaw === '/transkrip') {
+							continue;
+						}
+
 						$menuName = strtolower(trim((string) ($menu->nama_menu ?? '')));
 						$isKepegawaianMenu = $menuName === 'kepegawaian';
 						$hasJamKerjaDosen = $menu->children->contains(function ($item) {
@@ -80,6 +85,11 @@
 								@foreach($menu->children as $child)
 									@php
 										$childName = strtolower(trim((string) ($child->nama_menu ?? '')));
+										$childUrlRaw = trim(strtolower((string) ($child->url ?? '')));
+										if ($childUrlRaw === 'yudisium' || $childUrlRaw === 'transkrip' || $childUrlRaw === '/yudisium' || $childUrlRaw === '/transkrip') {
+											continue;
+										}
+
 										$isPengaturanUjian = $childName === 'pengaturan ujian';
 										$childUrl = $isPengaturanUjian
 											? url('master/pengaturan-ujian')

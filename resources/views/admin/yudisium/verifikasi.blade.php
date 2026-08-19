@@ -69,7 +69,7 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="form-check custom-checkbox">
                                             <input type="checkbox" class="form-check-input" id="checkPkf" name="is_accepted" value="1" {{ $pendaftaran->is_hardcopy_pkf ? 'checked' : '' }} onchange="this.form.submit()">
-                                            <label class="form-check-label font-weight-bold" for="checkPkf">Hardcopy Laporan PKF</label>
+                                            <label class="form-check-label font-weight-bold" for="checkPkf">Hardcopy Laporan {{ $labelPK ?? 'PKF' }}</label>
                                         </div>
                                     </div>
                                 </form>
@@ -82,7 +82,7 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="form-check custom-checkbox">
                                             <input type="checkbox" class="form-check-input" id="checkSkripsi" name="is_accepted" value="1" {{ $pendaftaran->is_hardcopy_skripsi ? 'checked' : '' }} onchange="this.form.submit()">
-                                            <label class="form-check-label font-weight-bold" for="checkSkripsi">Hardcopy Skripsi</label>
+                                            <label class="form-check-label font-weight-bold" for="checkSkripsi">Hardcopy {{ $labelTA ?? 'Skripsi' }}</label>
                                         </div>
                                     </div>
                                 </form>

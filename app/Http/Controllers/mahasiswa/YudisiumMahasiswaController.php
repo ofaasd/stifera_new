@@ -10,26 +10,62 @@ use App\Models\YudisiumBerkas;
 use Illuminate\Support\Facades\Auth;
 
 class YudisiumMahasiswaController extends Controller
+    protected function getMandatoryKeys($id_prodi)
+    {
+        if ($id_prodi == 1) { // D-III
+            return [
+                'laporan_pkl' => 'Laporan PKL',
+                'agenda_pkl' => 'Agenda PKL',
+                'kti' => 'KTI',
+                'bimbingan_kti' => 'Bimbingan KTI',
+                'bimbingan_akademik' => 'Bimbingan Akademik',
+                'bebas_administrasi' => 'Bebas Administrasi',
+                'bebas_perpus_lab' => 'Bebas Perpus & Lab',
+                'sertifikat_osce' => 'Sertifikat OSCE',
+                'sertifikat_ukom' => 'Sertifikat UKOM',
+                'sertifikat_amt' => 'Sertifikat AMT (Untuk mahasiswa RPL isikan dengan sertifikat lain)'
+            ];
+        } else { // S-1 (default)
+            return [
+                'laporan_pkf' => 'Laporan PKF',
+                'agenda_pkf' => 'Agenda PKF',
+                'skripsi' => 'Skripsi',
+                'bimbingan_skripsi' => 'Bimbingan Skripsi',
+                'bimbingan_akademik' => 'Bimbingan Akademik',
+                'bebas_administrasi' => 'Bebas Administrasi',
+                'bebas_perpus_lab' => 'Bebas Perpus & Lab',
+                'sertifikat_amt' => 'Sertifikat AMT (Untuk mahasiswa RPL isikan dengan sertifikat lain)'
+            ];
+        }
+    }
+
 {
     // List mandatory items according to the user request.
     // The keys will be used in the DB.
-    protected $mandatoryKeys = [
-        'laporan_pkf' => 'Laporan PKF',
-        'agenda_pkf' => 'Agenda PKF',
-        'skripsi' => 'Skripsi',
-        'bimbingan_skripsi' => 'Bimbingan Skripsi',
-        'bimbingan_akademik' => 'Bimbingan Akademik',
-        'bebas_administrasi' => 'Bebas Administrasi',
-        'bebas_perpus_lab' => 'Bebas Perpus & Lab',
-        'sertifikat_amt' => 'Sertifikat AMT'
-    ];
+    
 
     public function index()
     {
         $data['CurrentPage'] = 'content'; // Ensure template loads needed JS
         $data['title'] = 'Pengajuan Yudisium';
 
-        $activePeriode = YudisiumPeriode::where('is_active', true)->first();
+        $mahasiswa = Auth::guard('mahasiswa')->user();
+        $idMahasiswa = $mahasiswa->id;
+
+        $activePeriode = YudisiumPeriode::where('is_active', true)
+            ->where('id_program_studi', $mahasiswa->id_program_studi)
+            ->whereRaw("FIND_IN_SET(?, angkatan_allowed)", [$mahasiswa->angkatan])
+            ->first();
+
+        // Coba alternatif LIKE jika DB server tidak mendukung FIND_IN_SET pada format koma spasi dengan baik:
+        // Sebenarnya lebih aman pakai LIKE '%'.$mahasiswa->angkatan.'%' saja.
+        if (!$activePeriode) {
+            $activePeriode = YudisiumPeriode::where('is_active', true)
+                ->where('id_program_studi', $mahasiswa->id_program_studi)
+                ->where('angkatan_allowed', 'LIKE', '%' . $mahasiswa->angkatan . '%')
+                ->first();
+        }
+
         if (!$activePeriode) {
             return view('mahasiswa.yudisium.pengajuan', array_merge($data, [
                 'periode_aktif' => false,
@@ -37,14 +73,13 @@ class YudisiumMahasiswaController extends Controller
             ]));
         }
 
-        $idMahasiswa = Auth::guard('mahasiswa')->user()->id;
-
         $pendaftaran = YudisiumPendaftaran::with('berkas')->where('id_periode', $activePeriode->id)
             ->where('id_mahasiswa', $idMahasiswa)
             ->first();
 
         // Pass mandatory keys to display form or statuses
-        $data['mandatoryFiles'] = $this->mandatoryKeys;
+        $data['mandatoryFiles'] = $this->getMandatoryKeys($mahasiswa->id_program_studi);
+        $data['jumlah_sertifikat'] = ($mahasiswa->id_program_studi == 1) ? 7 : 11;
         $data['periode_aktif'] = true;
         $data['activePeriode'] = $activePeriode;
         $data['pendaftaran'] = $pendaftaran;
@@ -67,20 +102,23 @@ class YudisiumMahasiswaController extends Controller
 
         $idMahasiswa = $mahasiswa->id;
 
-        // Validasi
+                // Validasi
         $rules = [];
-        foreach ($this->mandatoryKeys as $key => $label) {
+        $mandatoryKeys = $this->getMandatoryKeys($mahasiswa->id_program_studi);
+        $jumlahSertifikat = ($mahasiswa->id_program_studi == 1) ? 7 : 11;
+
+        foreach ($mandatoryKeys as $key => $label) {
             $rules[$key] = 'required|mimes:pdf,jpg,jpeg,png|max:25600'; // maks 25MB
         }
-        $rules['sertifikat_kegiatan'] = 'required|array|min:11';
+        $rules['sertifikat_kegiatan'] = 'required|array|min:'.$jumlahSertifikat;
         $rules['sertifikat_kegiatan.*'] = 'required|mimes:pdf,jpg,jpeg,png|max:25600';
 
         $request->validate($rules, [
             'required' => ':attribute wajib diunggah',
             'mimes' => ':attribute harus berupa file PDF atau JPG/PNG',
             'max' => ':attribute tidak boleh lebih dari 25MB',
-            'sertifikat_kegiatan.min' => 'Anda wajib mengunggah minimal 11 sertifikat kegiatan'
-        ], $this->mandatoryKeys);
+            'sertifikat_kegiatan.min' => 'Anda wajib mengunggah minimal '.$jumlahSertifikat.' sertifikat kegiatan'
+        ], $mandatoryKeys);
 
         // Buat Pendaftaran Baru
         $pendaftaran = YudisiumPendaftaran::firstOrCreate([
@@ -96,7 +134,7 @@ class YudisiumMahasiswaController extends Controller
             mkdir($destinationPath, 0777, true);
         }
 
-        foreach ($this->mandatoryKeys as $key => $label) {
+        foreach ($mandatoryKeys as $key => $label) {
             if ($request->hasFile($key)) {
                 $file = $request->file($key);
                 $fileName = time() . '_' . $key . '.' . $file->getClientOriginalExtension();

@@ -108,17 +108,37 @@ class YudisiumController extends Controller
 
         $data['pendaftaran'] = YudisiumPendaftaran::with(['mahasiswa', 'berkas', 'periode'])->findOrFail($id);
 
-        // Pre-defined mandatory files format matching $request
-        $data['mandatoryFiles'] = [
-            'laporan_pkf' => 'Laporan PKF',
-            'agenda_pkf' => 'Agenda PKF',
-            'skripsi' => 'Skripsi',
-            'bimbingan_skripsi' => 'Bukti Bimbingan Skripsi',
-            'bimbingan_akademik' => 'Bukti Bimbingan Akademik',
-            'bebas_administrasi' => 'Bebas Administrasi',
-            'bebas_perpus_lab' => 'Bebas Perpustakaan & Lab',
-            'sertifikat_prestasi' => 'Sertifikat Prestasi/PPM'
-        ];
+        
+        $isD3 = $data['pendaftaran']->mahasiswa->id_program_studi == 1;
+        if ($isD3) {
+            $data['mandatoryFiles'] = [
+                'laporan_pkl' => 'Laporan PKL',
+                'agenda_pkl' => 'Agenda PKL',
+                'kti' => 'KTI',
+                'bimbingan_kti' => 'Bimbingan KTI',
+                'bimbingan_akademik' => 'Bimbingan Akademik',
+                'bebas_administrasi' => 'Bebas Administrasi',
+                'bebas_perpus_lab' => 'Bebas Perpus & Lab',
+                'sertifikat_osce' => 'Sertifikat OSCE',
+                'sertifikat_ukom' => 'Sertifikat UKOM',
+                'sertifikat_amt' => 'Sertifikat AMT (Atau Lainnya utk RPL)'
+            ];
+            $data['labelPK'] = 'PKL';
+            $data['labelTA'] = 'KTI';
+        } else {
+            $data['mandatoryFiles'] = [
+                'laporan_pkf' => 'Laporan PKF',
+                'agenda_pkf' => 'Agenda PKF',
+                'skripsi' => 'Skripsi',
+                'bimbingan_skripsi' => 'Bukti Bimbingan Skripsi',
+                'bimbingan_akademik' => 'Bukti Bimbingan Akademik',
+                'bebas_administrasi' => 'Bebas Administrasi',
+                'bebas_perpus_lab' => 'Bebas Perpustakaan & Lab',
+                'sertifikat_amt' => 'Sertifikat AMT (Atau Lainnya utk RPL)'
+            ];
+            $data['labelPK'] = 'PKF';
+            $data['labelTA'] = 'Skripsi';
+        }
 
         return view('admin.yudisium.verifikasi', $data);
     }
@@ -177,7 +197,7 @@ class YudisiumController extends Controller
 
         // Pengecekan final dari sisi backend
         if (!$pendaftaran->is_hardcopy_pkf || !$pendaftaran->is_hardcopy_skripsi) {
-            return redirect()->back()->withErrors(['error' => 'Gagal menetapkan. Hardcopy PKF atau Skripsi belum diterima.']);
+            return redirect()->back()->withErrors(['error' => 'Gagal menetapkan. Hardcopy PKL/PKF atau Skripsi/KTI belum diterima.']);
         }
 
         $semuaBerkasValid = $pendaftaran->berkas->every(function ($berkas) {
