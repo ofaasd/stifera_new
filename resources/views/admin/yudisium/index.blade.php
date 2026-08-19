@@ -35,11 +35,11 @@
                         <div class="tab-content">
                             <!-- TAB PENDAFTAR -->
                             <div class="tab-pane fade show active" id="pendaftar" role="tabpanel">
-                                @if(!$activePeriode)
+                                @if($activePeriodes == null || count($activePeriodes) == 0)
                                     <div class="alert alert-warning">Belum ada periode yudisium yang aktif. Silahkan tambahkan periode terlebih dahulu.</div>
                                 @else
                                     <div class="d-flex justify-content-between align-items-center mb-4">
-                                        <h4 class="card-title mb-0">Daftar Pengajuan Periode: <span class="text-primary">{{ $activePeriode->nama_periode }}</span></h4>
+                                        <h4 class="card-title mb-0">Daftar Pengajuan Yudisium Aktif</h4>
                                     </div>
                                     <div class="table-responsive">
                                         <table class="table table-bordered table-striped" id="tablePendaftar">
@@ -48,6 +48,7 @@
                                                     <th>No</th>
                                                     <th>NIM</th>
                                                     <th>Nama Mahasiswa</th>
+                                                    <th>Prodi & Periode</th>
                                                     <th>Tgl Pengajuan</th>
                                                     <th>Status</th>
                                                     <th>Aksi</th>
@@ -59,6 +60,10 @@
                                                     <td class="text-center">{{ $index + 1 }}</td>
                                                     <td class="text-center">{{ $pd->mahasiswa->nim ?? '-' }}</td>
                                                     <td>{{ $pd->mahasiswa->nama ?? '-' }}</td>
+                                                    <td class="text-center">
+                                                        <span class="badge badge-light shadow-sm text-dark">{{ $pd->periode->programStudi->nama_jurusan ?? '-' }}</span><br>
+                                                        <small class="text-primary">{{ $pd->periode->nama_periode }}</small>
+                                                    </td>
                                                     <td class="text-center">{{ $pd->created_at->format('d/m/Y H:i') }}</td>
                                                     <td class="text-center">
                                                         @if($pd->status_pengajuan == 'menunggu')
@@ -79,7 +84,7 @@
                                                 </tr>
                                                 @empty
                                                 <tr>
-                                                    <td colspan="6" class="text-center">Belum ada mahasiswa yang mendaftar pada periode ini.</td>
+                                                    <td colspan="7" class="text-center">Belum ada mahasiswa yang mendaftar pada periode aktif saat ini.</td>
                                                 </tr>
                                                 @endforelse
                                             </tbody>
@@ -102,9 +107,12 @@
                                             <tr>
                                                 <th>No</th>
                                                 <th>Nama Periode</th>
+                                                <th>Prodi</th>
+                                                <th>Angkatan Izin</th>
                                                 <th>Tgl Mulai</th>
                                                 <th>Tgl Akhir</th>
                                                 <th>Status</th>
+                                                <th>Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -112,6 +120,8 @@
                                             <tr>
                                                 <td class="text-center">{{ $index + 1 }}</td>
                                                 <td>{{ $period->nama_periode }}</td>
+                                                <td class="text-center">{{ $period->programStudi->nama_jurusan ?? '-' }}</td>
+                                                <td class="text-center">{{ $period->angkatan_allowed }}</td>
                                                 <td class="text-center">{{ \Carbon\Carbon::parse($period->tanggal_mulai)->format('d/m/Y') }}</td>
                                                 <td class="text-center">{{ \Carbon\Carbon::parse($period->tanggal_akhir)->format('d/m/Y') }}</td>
                                                 <td class="text-center">
@@ -120,6 +130,16 @@
                                                     @else
                                                         <span class="badge badge-secondary">Nonaktif</span>
                                                     @endif
+                                                </td>
+                                                <td class="text-center">
+                                                    <form action="{{ route('admin.yudisium.toggleActivePeriode', $period->id) }}" method="POST">
+                                                        @csrf
+                                                        @if($period->is_active)
+                                                            <button type="submit" class="btn btn-warning btn-sm shadow" title="Nonaktifkan"><i class="fas fa-power-off"></i></button>
+                                                        @else
+                                                            <button type="submit" class="btn btn-success btn-sm shadow" title="Aktifkan"><i class="fas fa-check-circle"></i></button>
+                                                        @endif
+                                                    </form>
                                                 </td>
                                             </tr>
                                             @endforeach
@@ -149,6 +169,26 @@
                     <div class="mb-3">
                         <label class="form-label font-weight-bold">Nama Periode</label>
                         <input type="text" name="nama_periode" class="form-control" placeholder="Contoh: Periode Ganjil 2025/2026" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label font-weight-bold">Program Studi</label>
+                            <select name="id_program_studi" class="form-control" required>
+                                <option value="">-- Pilih Prodi --</option>
+                                @foreach($prodi_list as $prd)
+                                    <option value="{{ $prd->id }}">{{ $prd->nama_jurusan }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label font-weight-bold">Angkatan Tujuan</label>
+                            <select name="angkatan_allowed[]" class="form-control default-select" multiple required>
+                                @foreach($angkatan_list as $akt)
+                                    <option value="{{ $akt }}">{{ $akt }}</option>
+                                @endforeach
+                            </select>
+                            <small class="text-muted">Tahan tombol CTRL (Windows) atau CMD (Mac) untuk memilih lebih dari 1 angkatan</small>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">

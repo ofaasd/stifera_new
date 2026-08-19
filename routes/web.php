@@ -560,6 +560,7 @@ Route::middleware('auth:admin')->group(function () {
 
     // Yudisium Admin Routes
     Route::get('admin/yudisium', [\App\Http\Controllers\admin\YudisiumController::class, 'index'])->name('admin.yudisium.index');
+    Route::post('admin/yudisium/{id}/toggle-active', [\App\Http\Controllers\admin\YudisiumController::class, 'toggleActivePeriode'])->name('admin.yudisium.toggleActivePeriode');
     Route::post('admin/yudisium/periode', [\App\Http\Controllers\admin\YudisiumController::class, 'storePeriode'])->name('admin.yudisium.storePeriode');
     Route::get('admin/yudisium/{id}/verifikasi', [\App\Http\Controllers\admin\YudisiumController::class, 'show'])->name('admin.yudisium.show');
     Route::post('admin/yudisium/verifikasi-berkas', [\App\Http\Controllers\admin\YudisiumController::class, 'verifikasiBerkas'])->name('admin.yudisium.verifikasiBerkas');

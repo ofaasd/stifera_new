@@ -54,12 +54,18 @@ class YudisiumMahasiswaController extends Controller
 
     public function store(Request $request)
     {
-        $activePeriode = YudisiumPeriode::where('is_active', true)->first();
+        $mahasiswa = Auth::guard('mahasiswa')->user();
+
+        $activePeriode = YudisiumPeriode::where('is_active', true)
+            ->where('id_program_studi', $mahasiswa->id_program_studi)
+            ->where('angkatan_allowed', 'LIKE', '%' . $mahasiswa->angkatan . '%')
+            ->first();
+
         if (!$activePeriode) {
-            return redirect()->back()->withErrors('Pendaftaran yudisium belum dibuka.');
+            return redirect()->back()->withErrors('Pendaftaran yudisium belum dibuka untuk prodi / angkatan Anda.');
         }
 
-        $idMahasiswa = Auth::guard('mahasiswa')->user()->id;
+        $idMahasiswa = $mahasiswa->id;
 
         // Validasi
         $rules = [];

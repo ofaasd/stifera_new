@@ -17,21 +17,23 @@ class YudisiumController extends Controller
         $data['CurrentPage'] = 'content';
         $data['title'] = 'Manajemen Yudisium';
 
-        $data['periodes'] = YudisiumPeriode::orderBy('tanggal_mulai', 'desc')->get();
+        $data['periodes'] = YudisiumPeriode::with('programStudi')->orderBy('tanggal_mulai', 'desc')->get();
+        $data['prodi_list'] = DB::table('program_studi')->where('off', 0)->get();
+        $data['angkatan_list'] = DB::table('mahasiswa')
+            ->select('angkatan')
+            ->whereNotNull('angkatan')
+            ->where('angkatan', '>', 0)
+            ->distinct()
+            ->orderBy('angkatan', 'desc')
+            ->pluck('angkatan');
 
-        // Asumsi periode aktif hanya satu
-        $activePeriode = YudisiumPeriode::where('is_active', true)->first();
+        $activePeriodes = YudisiumPeriode::where('is_active', true)->pluck('id')->toArray();
+        $data['activePeriodes'] = $activePeriodes;
 
-        if ($activePeriode) {
-            $data['pendaftars'] = YudisiumPendaftaran::with('mahasiswa')
-                ->where('id_periode', $activePeriode->id)
-                ->orderBy('created_at', 'desc')
-                ->get();
-        } else {
-            $data['pendaftars'] = [];
-        }
-
-        $data['activePeriode'] = $activePeriode;
+        $data['pendaftars'] = YudisiumPendaftaran::with(['mahasiswa', 'periode.programStudi'])
+            ->whereIn('id_periode', $activePeriodes)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('admin.yudisium.index', $data);
     }
@@ -40,23 +42,49 @@ class YudisiumController extends Controller
     {
         $request->validate([
             'nama_periode' => 'required',
+            'id_program_studi' => 'required|exists:program_studi,id',
+            'angkatan_allowed' => 'required|array|min:1',
+            'angkatan_allowed.*' => 'required|string',
             'tanggal_mulai' => 'required|date',
             'tanggal_akhir' => 'required|date'
         ]);
 
         if ($request->has('is_active') && $request->is_active == 1) {
-            // Nonaktifkan yang lama jika ada request aktif
-            YudisiumPeriode::where('is_active', true)->update(['is_active' => false]);
+            // Nonaktifkan periode lama untuk prodi yang SAMA
+            YudisiumPeriode::where('is_active', true)
+                ->where('id_program_studi', $request->id_program_studi)
+                ->update(['is_active' => false]);
         }
 
         YudisiumPeriode::create([
             'nama_periode' => $request->nama_periode,
+            'id_program_studi' => $request->id_program_studi,
+            'angkatan_allowed' => implode(', ', $request->angkatan_allowed),
             'tanggal_mulai' => $request->tanggal_mulai,
             'tanggal_akhir' => $request->tanggal_akhir,
             'is_active' => $request->has('is_active') ? true : false,
         ]);
 
         return redirect()->back()->with('success', 'Periode Yudisium berhasil ditambahkan');
+    }
+
+    public function toggleActivePeriode(Request $request, $id)
+    {
+        $periode = YudisiumPeriode::findOrFail($id);
+
+        $newStatus = !$periode->is_active;
+
+        if ($newStatus) {
+            // Jika diubah jadi aktif, nonaktifkan periode lain di prodi yang sama
+            YudisiumPeriode::where('is_active', true)
+                ->where('id_program_studi', $periode->id_program_studi)
+                ->update(['is_active' => false]);
+        }
+
+        $periode->is_active = $newStatus;
+        $periode->save();
+
+        return redirect()->back()->with('success', 'Status keaktifan periode berhasil diubah');
     }
 
     public function show($id)
