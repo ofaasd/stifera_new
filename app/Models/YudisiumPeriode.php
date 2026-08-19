@@ -12,6 +12,11 @@ class YudisiumPeriode extends Model
     protected $table = 'yudisium_periode';
     protected $guarded = [];
 
+    public function programStudi()
+    {
+        return $this->belongsTo(MasterProgramStudi::class, 'id_program_studi', 'id');
+    }
+
     public function pendaftaran()
     {
         return $this->hasMany(YudisiumPendaftaran::class, 'id_periode', 'id');

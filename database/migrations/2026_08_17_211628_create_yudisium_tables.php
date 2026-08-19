@@ -13,6 +13,8 @@ return new class extends Migration {
         Schema::create('yudisium_periode', function (Blueprint $table) {
             $table->id();
             $table->string('nama_periode');
+            $table->unsignedBigInteger('id_program_studi')->nullable();
+            $table->string('angkatan_allowed')->nullable()->comment('Comma separated angkatan');
             $table->date('tanggal_mulai');
             $table->date('tanggal_akhir');
             $table->boolean('is_active')->default(true);
