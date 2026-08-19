@@ -124,6 +124,11 @@
                             
                             <!-- Peringatan Hardcopy -->
                             <div class="card-body pb-0">
+                                @php
+                                    $isD3 = Auth::guard('mahasiswa')->user()->id_program_studi == 1;
+                                    $labelPK = $isD3 ? 'PKL' : 'PKF';
+                                    $labelTA = $isD3 ? 'KTI' : 'Skripsi';
+                                @endphp
                                 @if(!$pendaftaran->is_hardcopy_pkf || !$pendaftaran->is_hardcopy_skripsi)
                                     <div class="alert alert-danger shadow border-0 solid mb-4">
                                         <div class="d-flex justify-content-between">
@@ -132,10 +137,10 @@
                                                 <p class="mb-0 text-white">Harap segera menyerahkan <strong>fisik/cetakan</strong> berkas berikut ke loket akademik kampus agar proses kelulusan Yudisium dapat ditetapkan:</p>
                                                 <ul class="list-unstyled mt-2 mb-0">
                                                     @if(!$pendaftaran->is_hardcopy_pkf)
-                                                        <li><i class="fas fa-times-circle text-white me-2"></i> Hardcopy Laporan PKF</li>
+                                                        <li><i class="fas fa-times-circle text-white me-2"></i> Hardcopy Laporan {{ $labelPK }}</li>
                                                     @endif
                                                     @if(!$pendaftaran->is_hardcopy_skripsi)
-                                                        <li><i class="fas fa-times-circle text-white me-2"></i> Hardcopy Skripsi</li>
+                                                        <li><i class="fas fa-times-circle text-white me-2"></i> Hardcopy {{ $labelTA }}</li>
                                                     @endif
                                                 </ul>
                                             </div>
