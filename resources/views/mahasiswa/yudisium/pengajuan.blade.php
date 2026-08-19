@@ -55,7 +55,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="alert alert-info solid border-0">
-                                    <i class="fas fa-info-circle me-2"></i> Lengkapi ke-8 persyaratan wajib di bawah ini. Harap diunggah menggunakan format file <strong>PDF, JPG, atau PNG</strong> dengan ukuran maksimal <strong>2MB</strong> per berkas.
+                                    <i class="fas fa-info-circle me-2"></i> Lengkapi ke-8 persyaratan wajib di bawah ini. Harap diunggah menggunakan format file <strong>PDF, JPG, atau PNG</strong> dengan ukuran maksimal <strong>25MB</strong> per berkas.
                                 </div>
                                 <form action="{{ route('mahasiswa.yudisium.store') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
@@ -72,11 +72,20 @@
 
                                     <div class="row">
                                         <div class="col-12 mb-3">
-                                            <h4 class="text-primary font-weight-bold">Sertifikat Tambahan (Opsional)</h4>
-                                            <p class="text-muted" style="font-size: 14px;">Bisa ditambahkan jika Anda memiliki sertifikat pendukung tambahan di luar sertifikat AMT (Maksimal 11 file).</p>
+                                            <h4 class="text-primary font-weight-bold">Sertifikat Kegiatan</h4>
+                                            <p class="text-muted" style="font-size: 14px;">Anda diwajibkan untuk mengunggah <strong>minimal 11 Sertifikat Kegiatan</strong>. Anda dapat terus menambah file tambahan jika ada.</p>
                                         </div>
-                                        <div class="col-12" id="sertifikat-dynamic-zone">
-                                            <!-- Dynamically added fields go here -->
+                                        <div class="col-12">
+                                            <div class="row" id="sertifikat-dynamic-zone">
+                                                @for($i = 1; $i <= 11; $i++)
+                                                <div class="col-md-6 mb-3 set-dynamic">
+                                                    <label class="form-label font-weight-bold">Sertifikat Kegiatan #{{ $i }} <span class="text-danger">*</span></label>
+                                                    <div class="d-flex">
+                                                        <input type="file" name="sertifikat_kegiatan[]" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                    </div>
+                                                </div>
+                                                @endfor
+                                            </div>
                                         </div>
                                         <div class="col-12 mt-2">
                                             <button type="button" class="btn btn-outline-primary btn-sm" id="btn-add-sertifikat">
@@ -115,15 +124,15 @@
                             
                             <!-- Peringatan Hardcopy -->
                             <div class="card-body pb-0">
-                                @if(!$pendaftaran->is_hardcopy_pkk || !$pendaftaran->is_hardcopy_skripsi)
+                                @if(!$pendaftaran->is_hardcopy_pkf || !$pendaftaran->is_hardcopy_skripsi)
                                     <div class="alert alert-danger shadow border-0 solid mb-4">
                                         <div class="d-flex justify-content-between">
                                             <div>
                                                 <h4 class="text-white"><i class="fas fa-bullhorn me-2"></i> PRASYARAT HARDCOPY BELUM DITERIMA!</h4>
                                                 <p class="mb-0 text-white">Harap segera menyerahkan <strong>fisik/cetakan</strong> berkas berikut ke loket akademik kampus agar proses kelulusan Yudisium dapat ditetapkan:</p>
                                                 <ul class="list-unstyled mt-2 mb-0">
-                                                    @if(!$pendaftaran->is_hardcopy_pkk)
-                                                        <li><i class="fas fa-times-circle text-white me-2"></i> Hardcopy Laporan PKK</li>
+                                                    @if(!$pendaftaran->is_hardcopy_pkf)
+                                                        <li><i class="fas fa-times-circle text-white me-2"></i> Hardcopy Laporan PKF</li>
                                                     @endif
                                                     @if(!$pendaftaran->is_hardcopy_skripsi)
                                                         <li><i class="fas fa-times-circle text-white me-2"></i> Hardcopy Skripsi</li>
@@ -207,14 +216,14 @@
                                                 </tr>
                                             @endforeach
 
-                                            <!-- Berkas Tambahan (Opsional) -->
+                                            <!-- Berkas Tambahan (Wajib 11+) -->
                                             @php
-                                                $tambahan = $berkasList->where('jenis_berkas', 'sertifikat_tambahan');
+                                                $tambahan = $berkasList->where('jenis_berkas', 'sertifikat_kegiatan');
                                                 $tidx = 1;
                                             @endphp
                                             @foreach($tambahan as $item_tbh)
                                                 <tr>
-                                                    <td class="font-weight-bold text-muted">Sertifikat Tambahan #{{ $tidx++ }}</td>
+                                                    <td class="font-weight-bold text-muted">Sertifikat Kegiatan #{{ $tidx++ }}</td>
                                                     <td class="text-center align-middle">
                                                         @if($item_tbh->status_berkas == 'valid')
                                                             <span class="badge badge-success">Valid</span>
@@ -261,33 +270,27 @@
 @section('local-js')
 <script>
     $(document).ready(function() {
-        var maxFields = 11;
-        var currentFields = 0;
+        var currentFields = 11;
         
         $('#btn-add-sertifikat').click(function(e) {
             e.preventDefault();
-            if (currentFields < maxFields) {
-                currentFields++;
-                var html = `
-                    <div class="row align-items-center mb-3 set-dynamic">
-                        <div class="col-md-6 col-sm-10">
-                            <input type="file" name="sertifikat_tambahan[]" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
-                        </div>
-                        <div class="col-md-2 col-sm-2">
-                            <button type="button" class="btn btn-danger btn-sm btn-remove-set"><i class="fas fa-trash"></i></button>
-                        </div>
+            currentFields++;
+            var html = `
+                <div class="col-md-6 mb-3 set-dynamic">
+                    <label class="form-label font-weight-bold">Sertifikat Kegiatan #${currentFields}</label>
+                    <div class="d-flex align-items-center">
+                        <input type="file" name="sertifikat_kegiatan[]" class="form-control me-2" accept=".pdf,.jpg,.jpeg,.png" required>
+                        <button type="button" class="btn btn-danger btn-sm btn-remove-set px-3"><i class="fas fa-trash"></i></button>
                     </div>
-                `;
-                $('#sertifikat-dynamic-zone').append(html);
-            } else {
-                alert('Maksimal hanya dapat menambahkan 11 sertifikat tambahan.');
-            }
+                </div>
+            `;
+            $('#sertifikat-dynamic-zone').append(html);
         });
 
         // Event listener u/ remove
         $('#sertifikat-dynamic-zone').on('click', '.btn-remove-set', function() {
             $(this).closest('.set-dynamic').remove();
-            currentFields--;
+            // Rekalkulasi penomoran sertifikat ekstra supaya urut (opsional)
         });
     });
 </script>

@@ -24,7 +24,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('id_periode');
             $table->unsignedBigInteger('id_mahasiswa');
             $table->enum('status_pengajuan', ['menunggu', 'revisi', 'valid', 'lulus_yudisium'])->default('menunggu');
-            $table->boolean('is_hardcopy_pkk')->default(false);
+            $table->boolean('is_hardcopy_pkf')->default(false);
             $table->boolean('is_hardcopy_skripsi')->default(false);
             $table->string('no_sk_yudisium')->nullable();
             $table->date('tgl_yudisium')->nullable();

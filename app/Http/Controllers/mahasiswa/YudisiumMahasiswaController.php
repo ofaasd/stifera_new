@@ -14,8 +14,8 @@ class YudisiumMahasiswaController extends Controller
     // List mandatory items according to the user request.
     // The keys will be used in the DB.
     protected $mandatoryKeys = [
-        'laporan_pkk' => 'Laporan PKK',
-        'agenda_pkk' => 'Agenda PKK',
+        'laporan_pkf' => 'Laporan PKF',
+        'agenda_pkf' => 'Agenda PKF',
         'skripsi' => 'Skripsi',
         'bimbingan_skripsi' => 'Bimbingan Skripsi',
         'bimbingan_akademik' => 'Bimbingan Akademik',
@@ -64,13 +64,16 @@ class YudisiumMahasiswaController extends Controller
         // Validasi
         $rules = [];
         foreach ($this->mandatoryKeys as $key => $label) {
-            $rules[$key] = 'required|mimes:pdf,jpg,jpeg,png|max:2048'; // maks 2MB
+            $rules[$key] = 'required|mimes:pdf,jpg,jpeg,png|max:25600'; // maks 25MB
         }
-        $rules['sertifikat_tambahan.*'] = 'nullable|mimes:pdf,jpg,jpeg,png|max:2048';
+        $rules['sertifikat_kegiatan'] = 'required|array|min:11';
+        $rules['sertifikat_kegiatan.*'] = 'required|mimes:pdf,jpg,jpeg,png|max:25600';
 
         $request->validate($rules, [
             'required' => ':attribute wajib diunggah',
-            'mimes' => ':attribute harus berupa file PDF atau JPG/PNG'
+            'mimes' => ':attribute harus berupa file PDF atau JPG/PNG',
+            'max' => ':attribute tidak boleh lebih dari 25MB',
+            'sertifikat_kegiatan.min' => 'Anda wajib mengunggah minimal 11 sertifikat kegiatan'
         ], $this->mandatoryKeys);
 
         // Buat Pendaftaran Baru
@@ -102,20 +105,18 @@ class YudisiumMahasiswaController extends Controller
             }
         }
 
-        // Simpan Sertifikat Tambahan (jika ada)
-        if ($request->hasFile('sertifikat_tambahan')) {
-            $files = $request->file('sertifikat_tambahan');
+        // Simpan Sertifikat Kegiatan (minimal 11 sudah divalidasi)
+        if ($request->hasFile('sertifikat_kegiatan')) {
+            $files = $request->file('sertifikat_kegiatan');
             $count = 0;
             foreach ($files as $file) {
-                if ($count >= 11)
-                    break; // Maksimal 11 list
                 if ($file && $file->isValid()) {
-                    $fileName = time() . '_sertifikat_tambahan_' . $count . '.' . $file->getClientOriginalExtension();
+                    $fileName = time() . '_sertifikat_kegiatan_' . $count . '.' . $file->getClientOriginalExtension();
                     $file->move($destinationPath, $fileName);
 
                     YudisiumBerkas::create([
                         'id_pendaftaran' => $pendaftaran->id,
-                        'jenis_berkas' => 'sertifikat_tambahan',
+                        'jenis_berkas' => 'sertifikat_kegiatan',
                         'file_path' => 'uploads/yudisium/' . $idMahasiswa . '/' . $fileName,
                         'status_berkas' => 'menunggu'
                     ]);
@@ -136,7 +137,9 @@ class YudisiumMahasiswaController extends Controller
     {
         $request->validate([
             'id_berkas' => 'required|exists:yudisium_berkas,id',
-            'file_revisi' => 'required|mimes:pdf,jpg,jpeg,png|max:2048'
+            'file_revisi' => 'required|mimes:pdf,jpg,jpeg,png|max:25600'
+        ], [
+            'file_revisi.max' => 'File revisi tidak boleh melebihi batas 25MB.'
         ]);
 
         $idMahasiswa = Auth::guard('mahasiswa')->user()->id;
