@@ -562,6 +562,7 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('admin/yudisium', [\App\Http\Controllers\admin\YudisiumController::class, 'index'])->name('admin.yudisium.index');
     Route::post('admin/yudisium/{id}/toggle-active', [\App\Http\Controllers\admin\YudisiumController::class, 'toggleActivePeriode'])->name('admin.yudisium.toggleActivePeriode');
     Route::post('admin/yudisium/periode', [\App\Http\Controllers\admin\YudisiumController::class, 'storePeriode'])->name('admin.yudisium.storePeriode');
+    Route::delete('admin/yudisium/periode/{id}', [\App\Http\Controllers\admin\YudisiumController::class, 'destroyPeriode'])->name('admin.yudisium.periode.destroy');
     Route::get('admin/yudisium/{id}/verifikasi', [\App\Http\Controllers\admin\YudisiumController::class, 'show'])->name('admin.yudisium.show');
     Route::post('admin/yudisium/verifikasi-berkas', [\App\Http\Controllers\admin\YudisiumController::class, 'verifikasiBerkas'])->name('admin.yudisium.verifikasiBerkas');
     Route::post('admin/yudisium/terima-hardcopy', [\App\Http\Controllers\admin\YudisiumController::class, 'terimaHardcopy'])->name('admin.yudisium.terimaHardcopy');
