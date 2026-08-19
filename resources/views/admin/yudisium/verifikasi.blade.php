@@ -65,11 +65,11 @@
                                 <form action="{{ route('admin.yudisium.terimaHardcopy') }}" method="POST">
                                     @csrf
                                     <input type="hidden" name="id_pendaftaran" value="{{ $pendaftaran->id }}">
-                                    <input type="hidden" name="type" value="pkk">
+                                    <input type="hidden" name="type" value="pkf">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="form-check custom-checkbox">
-                                            <input type="checkbox" class="form-check-input" id="checkPkk" name="is_accepted" value="1" {{ $pendaftaran->is_hardcopy_pkk ? 'checked' : '' }} onchange="this.form.submit()">
-                                            <label class="form-check-label font-weight-bold" for="checkPkk">Hardcopy Laporan PKK</label>
+                                            <input type="checkbox" class="form-check-input" id="checkPkf" name="is_accepted" value="1" {{ $pendaftaran->is_hardcopy_pkf ? 'checked' : '' }} onchange="this.form.submit()">
+                                            <label class="form-check-label font-weight-bold" for="checkPkf">Hardcopy Laporan PKF</label>
                                         </div>
                                     </div>
                                 </form>
@@ -172,7 +172,7 @@
                 <div class="card">
                     <div class="card-body">
                         @php
-                            $canFinalize = $allValid && $pendaftaran->is_hardcopy_pkk && $pendaftaran->is_hardcopy_skripsi;
+                            $canFinalize = $allValid && $pendaftaran->is_hardcopy_pkf && $pendaftaran->is_hardcopy_skripsi;
                         @endphp
                         
                         <div class="alert {{ $canFinalize ? 'alert-primary' : 'alert-warning' }} solid">

@@ -68,8 +68,8 @@ class YudisiumController extends Controller
 
         // Pre-defined mandatory files format matching $request
         $data['mandatoryFiles'] = [
-            'laporan_pkk' => 'Laporan PKK',
-            'agenda_pkk' => 'Agenda PKK',
+            'laporan_pkf' => 'Laporan PKF',
+            'agenda_pkf' => 'Agenda PKF',
             'skripsi' => 'Skripsi',
             'bimbingan_skripsi' => 'Bukti Bimbingan Skripsi',
             'bimbingan_akademik' => 'Bukti Bimbingan Akademik',
@@ -107,14 +107,14 @@ class YudisiumController extends Controller
     {
         $request->validate([
             'id_pendaftaran' => 'required|exists:yudisium_pendaftaran,id',
-            'type' => 'required|in:pkk,skripsi',
+            'type' => 'required|in:pkf,skripsi',
             'is_accepted' => 'required|boolean'
         ]);
 
         $pendaftaran = YudisiumPendaftaran::findOrFail($request->id_pendaftaran);
 
-        if ($request->type == 'pkk') {
-            $pendaftaran->is_hardcopy_pkk = $request->is_accepted;
+        if ($request->type == 'pkf') {
+            $pendaftaran->is_hardcopy_pkf = $request->is_accepted;
         } else {
             $pendaftaran->is_hardcopy_skripsi = $request->is_accepted;
         }
@@ -134,8 +134,8 @@ class YudisiumController extends Controller
         $pendaftaran = YudisiumPendaftaran::findOrFail($request->id_pendaftaran);
 
         // Pengecekan final dari sisi backend
-        if (!$pendaftaran->is_hardcopy_pkk || !$pendaftaran->is_hardcopy_skripsi) {
-            return redirect()->back()->withErrors(['error' => 'Gagal menetapkan. Hardcopy PKK atau Skripsi belum diterima.']);
+        if (!$pendaftaran->is_hardcopy_pkf || !$pendaftaran->is_hardcopy_skripsi) {
+            return redirect()->back()->withErrors(['error' => 'Gagal menetapkan. Hardcopy PKF atau Skripsi belum diterima.']);
         }
 
         $semuaBerkasValid = $pendaftaran->berkas->every(function ($berkas) {
