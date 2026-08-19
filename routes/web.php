@@ -696,7 +696,7 @@ Route::middleware('auth:admin')->group(function () {
 });
 
 Route::middleware('auth:mahasiswa')->group(function () {
-    Route::get('/mahasiswa/yudisium', [\App\Http\Controllers\mahasiswa\YudisiumMahasiswaController::class, 'index'])->name('mahasiswa.yudisium.index');
-    Route::post('/mahasiswa/yudisium/store', [\App\Http\Controllers\mahasiswa\YudisiumMahasiswaController::class, 'store'])->name('mahasiswa.yudisium.store');
-    Route::post('/mahasiswa/yudisium/revisi', [\App\Http\Controllers\mahasiswa\YudisiumMahasiswaController::class, 'updateRevisi'])->name('mahasiswa.yudisium.updateRevisi');
+    Route::get('/mhs/yudisium', [\App\Http\Controllers\mahasiswa\YudisiumMahasiswaController::class, 'index'])->name('mahasiswa.yudisium.index');
+    Route::post('/mhs/yudisium/store', [\App\Http\Controllers\mahasiswa\YudisiumMahasiswaController::class, 'store'])->name('mahasiswa.yudisium.store');
+    Route::post('/mhs/yudisium/revisi', [\App\Http\Controllers\mahasiswa\YudisiumMahasiswaController::class, 'updateRevisi'])->name('mahasiswa.yudisium.updateRevisi');
 });
