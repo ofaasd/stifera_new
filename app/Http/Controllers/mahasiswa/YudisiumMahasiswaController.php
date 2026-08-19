@@ -10,6 +10,7 @@ use App\Models\YudisiumBerkas;
 use Illuminate\Support\Facades\Auth;
 
 class YudisiumMahasiswaController extends Controller
+{
     protected function getMandatoryKeys($id_prodi)
     {
         if ($id_prodi == 1) { // D-III
@@ -39,10 +40,9 @@ class YudisiumMahasiswaController extends Controller
         }
     }
 
-{
     // List mandatory items according to the user request.
     // The keys will be used in the DB.
-    
+
 
     public function index()
     {
@@ -102,7 +102,7 @@ class YudisiumMahasiswaController extends Controller
 
         $idMahasiswa = $mahasiswa->id;
 
-                // Validasi
+        // Validasi
         $rules = [];
         $mandatoryKeys = $this->getMandatoryKeys($mahasiswa->id_program_studi);
         $jumlahSertifikat = ($mahasiswa->id_program_studi == 1) ? 7 : 11;
@@ -110,14 +110,14 @@ class YudisiumMahasiswaController extends Controller
         foreach ($mandatoryKeys as $key => $label) {
             $rules[$key] = 'required|mimes:pdf,jpg,jpeg,png|max:25600'; // maks 25MB
         }
-        $rules['sertifikat_kegiatan'] = 'required|array|min:'.$jumlahSertifikat;
+        $rules['sertifikat_kegiatan'] = 'required|array|min:' . $jumlahSertifikat;
         $rules['sertifikat_kegiatan.*'] = 'required|mimes:pdf,jpg,jpeg,png|max:25600';
 
         $request->validate($rules, [
             'required' => ':attribute wajib diunggah',
             'mimes' => ':attribute harus berupa file PDF atau JPG/PNG',
             'max' => ':attribute tidak boleh lebih dari 25MB',
-            'sertifikat_kegiatan.min' => 'Anda wajib mengunggah minimal '.$jumlahSertifikat.' sertifikat kegiatan'
+            'sertifikat_kegiatan.min' => 'Anda wajib mengunggah minimal ' . $jumlahSertifikat . ' sertifikat kegiatan'
         ], $mandatoryKeys);
 
         // Buat Pendaftaran Baru
