@@ -132,13 +132,18 @@
                                                     @endif
                                                 </td>
                                                 <td class="text-center">
-                                                    <form action="{{ route('admin.yudisium.toggleActivePeriode', $period->id) }}" method="POST">
+                                                    <form action="{{ route('admin.yudisium.toggleActivePeriode', $period->id) }}" method="POST" class="d-inline">
                                                         @csrf
                                                         @if($period->is_active)
                                                             <button type="submit" class="btn btn-warning btn-sm shadow" title="Nonaktifkan"><i class="fas fa-power-off"></i></button>
                                                         @else
                                                             <button type="submit" class="btn btn-success btn-sm shadow" title="Aktifkan"><i class="fas fa-check-circle"></i></button>
                                                         @endif
+                                                    </form>
+                                                    <form action="{{ route('admin.yudisium.periode.destroy', $period->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus periode ini? Tindakan ini tidak dapat dibatalkan.');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-sm shadow" title="Hapus Periode"><i class="fas fa-trash"></i></button>
                                                     </form>
                                                 </td>
                                             </tr>

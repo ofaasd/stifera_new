@@ -87,6 +87,20 @@ class YudisiumController extends Controller
         return redirect()->back()->with('success', 'Status keaktifan periode berhasil diubah');
     }
 
+    public function destroyPeriode($id)
+    {
+        $periode = \App\Models\YudisiumPeriode::findOrFail($id);
+        
+        // Proteksi: jangan hapus jika sudah ada yang mendaftar
+        if ($periode->pendaftaran()->count() > 0) {
+            return redirect()->back()->withErrors('Periode ini gagal dihapus karena sudah ada mahasiswa mendaftar.');
+        }
+
+        $periode->delete();
+
+        return redirect()->back()->with('success', 'Periode Yudisium berhasil dihapus');
+    }
+
     public function show($id)
     {
         $data['CurrentPage'] = 'content';
