@@ -113,6 +113,11 @@
                                         // key file definition mapping from controller
                                         $uploadedFiles = $pendaftaran->berkas->keyBy('jenis_berkas');
                                     @endphp
+                                    @php
+                                        $reqSertif = ($pendaftaran->mahasiswa->id_program_studi == 1) ? 7 : 11;
+                                        $sertifs = $pendaftaran->berkas->where('jenis_berkas', 'sertifikat_kegiatan');
+                                        if ($sertifs->count() < $reqSertif) $allValid = false;
+                                    @endphp
                                     @foreach($mandatoryFiles as $key => $label)
                                         @php
                                             $berkas = $uploadedFiles->get($key);
@@ -157,6 +162,53 @@
                                                     @endif
                                                 @else
                                                     <span class="text-muted"><i class="fas fa-ban"></i></span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+
+                                    <!-- Sertifikat Kegiatan -->
+                                    @php
+                                        $sIdx = 1;
+                                    @endphp
+                                    @foreach($sertifs as $berkas)
+                                        @php
+                                            $status = $berkas->status_berkas;
+                                            if ($status !== 'valid') $allValid = false;
+                                            $label = 'Sertifikat Kegiatan #' . $sIdx++;
+                                        @endphp
+                                        <tr>
+                                            <td class="align-middle font-weight-bold">
+                                                {{ $label }}
+                                                @if($berkas->catatan_revisi)
+                                                    <div class="text-danger fs-12 mt-1"><i class="fas fa-exclamation-circle"></i> Catatan: {{ $berkas->catatan_revisi }}</div>
+                                                @endif
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                @if($status == 'menunggu')
+                                                    <span class="badge badge-warning">Menunggu</span>
+                                                @elseif($status == 'valid')
+                                                    <span class="badge badge-success">Valid</span>
+                                                @else
+                                                    <span class="badge badge-danger">Ditolak</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                <a href="{{ asset($berkas->file_path) }}" target="_blank" class="btn btn-sm btn-info shadow" title="Lihat PDF"><i class="fas fa-file-pdf"></i></a>
+                                                
+                                                @if($pendaftaran->status_pengajuan != 'lulus_yudisium')
+                                                <!-- Form Valid -->
+                                                <form action="{{ route('admin.yudisium.verifikasiBerkas') }}" method="POST" class="d-inline-block">
+                                                    @csrf
+                                                    <input type="hidden" name="id_berkas" value="{{ $berkas->id }}">
+                                                    <input type="hidden" name="status_berkas" value="valid">
+                                                    <button type="submit" class="btn btn-sm btn-success shadow" title="Validasi"><i class="fas fa-check"></i></button>
+                                                </form>
+                                                
+                                                <!-- Btn Tolak -->
+                                                <button type="button" class="btn btn-sm btn-danger shadow" title="Tolak & Revisi" onclick="setTolakModal({{ $berkas->id }}, '{{ $label }}')" data-bs-toggle="modal" data-bs-target="#modalTolak">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
                                                 @endif
                                             </td>
                                         </tr>

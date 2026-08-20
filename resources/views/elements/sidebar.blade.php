@@ -148,6 +148,9 @@
 									<li>
 										<a href="{{ url('admin/yudisium') }}">Manajemen Yudisium</a>
 									</li>
+									<li>
+										<a href="{{ route('admin.ijazah.index') }}">Manajemen Ijazah & Transkrip</a>
+									</li>
 								@endif
 								@if($isPmbMenu && !$hasSoalPmb)
 									<li>
