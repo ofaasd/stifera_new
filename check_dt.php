@@ -1,9 +1,14 @@
 <?php
-$c = file_get_contents('resources/views/admin/ijazah/cetak_transkrip_depan.blade.php');
+$c = file_get_contents('app/Http/Controllers/PegawaiPertemuanController.php');
 $c = str_replace(
-    "\$dokumen->mahasiswa->yudisiumBerkas()->where('jenis_berkas','skripsi')->first()->nama_berkas ?? 'HUBUNGAN DUKUNGAN KELUARGA DENGAN KEPATUHAN KONSUMSI OBAT PASIEN'",
-    "'HUBUNGAN DUKUNGAN KELUARGA DENGAN KEPATUHAN KONSUMSI OBAT PASIEN'",
+    "->where('mjt.id_dosen', \$biodataId)",
+    "->where(function(\$q) use (\$biodataId) {\n                \$q->where('mjt.id_dosen', \$biodataId)->orWhere('mjt.id_dosen2', \$biodataId);\n            })",
     $c
 );
-file_put_contents('resources/views/admin/ijazah/cetak_transkrip_depan.blade.php', $c);
-echo "Fixed undefined method";
+$c = str_replace(
+    "->where('id_dosen', \$biodataId)",
+    "->where(function(\$q) use (\$biodataId) {\n                \$q->where('id_dosen', \$biodataId)->orWhere('id_dosen2', \$biodataId);\n            })",
+    $c
+);
+file_put_contents('app/Http/Controllers/PegawaiPertemuanController.php', $c);
+echo "Added pengampu 2";

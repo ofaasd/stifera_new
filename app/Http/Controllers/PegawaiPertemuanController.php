@@ -51,7 +51,9 @@ class PegawaiPertemuanController extends Controller
                 'mmk.nama_mata_kuliah',
                 DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen")
             )
-            ->where('mjt.id_dosen', $biodataId)
+            ->where(function($q) use ($biodataId) {
+                $q->where('mjt.id_dosen', $biodataId)->orWhere('mjt.id_dosen2', $biodataId);
+            })
             ->orderByDesc('mjt.id')
             ->get();
 
@@ -81,7 +83,9 @@ class PegawaiPertemuanController extends Controller
                 DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen")
             )
             ->where('mjt.id', (int) $idJadwal)
-            ->where('mjt.id_dosen', $biodataId)   // keamanan: hanya jadwal milik dosen ini
+            ->where(function($q) use ($biodataId) {
+                $q->where('mjt.id_dosen', $biodataId)->orWhere('mjt.id_dosen2', $biodataId);
+            })   // keamanan: hanya jadwal milik dosen ini
             ->first();
 
         if (!$jadwal) {
@@ -121,7 +125,9 @@ class PegawaiPertemuanController extends Controller
 
         $jadwal = DB::table('master_jadwal_temp')
             ->where('id', (int) $idJadwal)
-            ->where('id_dosen', $biodataId)
+            ->where(function($q) use ($biodataId) {
+                $q->where('id_dosen', $biodataId)->orWhere('id_dosen2', $biodataId);
+            })
             ->first();
 
         if (!$jadwal) {
@@ -194,7 +200,9 @@ class PegawaiPertemuanController extends Controller
 
         $jadwal = DB::table('master_jadwal_temp')
             ->where('id', (int) $idJadwal)
-            ->where('id_dosen', $biodataId)
+            ->where(function($q) use ($biodataId) {
+                $q->where('id_dosen', $biodataId)->orWhere('id_dosen2', $biodataId);
+            })
             ->first();
 
         if (!$jadwal) {
@@ -281,7 +289,9 @@ class PegawaiPertemuanController extends Controller
 
         $jadwal = DB::table('master_jadwal_temp')
             ->where('id', (int) $idJadwal)
-            ->where('id_dosen', $biodataId)
+            ->where(function($q) use ($biodataId) {
+                $q->where('id_dosen', $biodataId)->orWhere('id_dosen2', $biodataId);
+            })
             ->first();
 
         if (!$jadwal) {
@@ -366,7 +376,9 @@ class PegawaiPertemuanController extends Controller
                 DB::raw("TRIM(CONCAT(COALESCE(pb2.gelar_depan,''), ' ', COALESCE(pb2.nama_lengkap,''), ' ', COALESCE(pb2.gelar_belakang,''))) as nama_dosen2")
             )
             ->where('mjt.id', (int) $idJadwal)
-            ->where('mjt.id_dosen', $biodataId)
+            ->where(function($q) use ($biodataId) {
+                $q->where('mjt.id_dosen', $biodataId)->orWhere('mjt.id_dosen2', $biodataId);
+            })
             ->first();
 
         if (!$jadwal) {
