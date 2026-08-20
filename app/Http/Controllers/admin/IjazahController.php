@@ -12,11 +12,48 @@ use Illuminate\Support\Facades\DB;
 
 class IjazahController extends Controller
 {
+    private function getCurrentOfficials()
+    {
+        $struktur = DB::table('struktur_pegawai2')->where('id', 1)->first();
+        if (!$struktur)
+            return [];
+
+        $npps = [
+            'ketua_st' => trim($struktur->ketua_st ?? ''),
+            'pembantu_1' => trim($struktur->pembantu_1 ?? ''),
+            'prodi_s1' => trim($struktur->prodi_s1 ?? ''),
+            'prodi_d3' => trim($struktur->prodi_d3 ?? '')
+        ];
+
+        $officials = [];
+        foreach ($npps as $key => $npp) {
+            if ($npp === '') {
+                $officials[$key] = ['nama' => '', 'nip' => ''];
+                continue;
+            }
+            $pegawai = DB::table('pegawai as p')
+                ->leftJoin('pegawai_biodata as pb', 'pb.id_pegawai', '=', 'p.id')
+                ->select(
+                    'pb.nip_pns',
+                    DB::raw("TRIM(CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap, p.nama, ''), ' ', COALESCE(pb.gelar_belakang,''))) as nama_gelar")
+                )
+                ->where('p.npp', $npp)
+                ->first();
+
+            $officials[$key] = [
+                'nama' => $pegawai->nama_gelar ?? '',
+                'nip' => $pegawai->nip_pns ?? ''
+            ];
+        }
+        return $officials;
+    }
+
     public function index()
     {
         $data['CurrentPage'] = 'table-datatable-basic';
         $data['title'] = 'Manajemen Ijazah & Transkrip';
         $data['periodes'] = IjazahPeriode::orderBy('tanggal_wisuda', 'desc')->get();
+        $data['current_officials'] = $this->getCurrentOfficials();
 
         return view('admin.ijazah.index', $data);
     }
@@ -28,7 +65,24 @@ class IjazahController extends Controller
             'tanggal_wisuda' => 'required|date'
         ]);
 
-        $periode = IjazahPeriode::create($request->all());
+        $data = $request->all();
+
+        // Auto-fill dari master pejabat jika masih kosong dari input form
+        $officials = $this->getCurrentOfficials();
+
+        $data['nama_ketua'] = $data['nama_ketua'] ?? ($officials['ketua_st']['nama'] ?? null);
+        $data['nip_ketua'] = $data['nip_ketua'] ?? ($officials['ketua_st']['nip'] ?? null);
+
+        $data['nama_puket_1'] = $data['nama_puket_1'] ?? ($officials['pembantu_1']['nama'] ?? null);
+        $data['nip_puket_1'] = $data['nip_puket_1'] ?? ($officials['pembantu_1']['nip'] ?? null);
+
+        $data['nama_kaprodi_s1'] = $data['nama_kaprodi_s1'] ?? ($officials['prodi_s1']['nama'] ?? null);
+        $data['nip_kaprodi_s1'] = $data['nip_kaprodi_s1'] ?? ($officials['prodi_s1']['nip'] ?? null);
+
+        $data['nama_kaprodi_d3'] = $data['nama_kaprodi_d3'] ?? ($officials['prodi_d3']['nama'] ?? null);
+        $data['nip_kaprodi_d3'] = $data['nip_kaprodi_d3'] ?? ($officials['prodi_d3']['nip'] ?? null);
+
+        $periode = IjazahPeriode::create($data);
 
         return redirect()->back()->with('success', 'Periode Ijazah berhasil ditambahkan.');
     }
@@ -36,7 +90,29 @@ class IjazahController extends Controller
     public function updatePeriode(Request $request, $id)
     {
         $periode = IjazahPeriode::findOrFail($id);
-        $periode->update($request->all());
+        $data = $request->all();
+
+        // Auto-fill dari master pejabat jika direquest kosong
+        $officials = $this->getCurrentOfficials();
+
+        if (empty($data['nama_ketua'])) {
+            $data['nama_ketua'] = $officials['ketua_st']['nama'] ?? null;
+            $data['nip_ketua'] = $officials['ketua_st']['nip'] ?? null;
+        }
+        if (empty($data['nama_puket_1'])) {
+            $data['nama_puket_1'] = $officials['pembantu_1']['nama'] ?? null;
+            $data['nip_puket_1'] = $officials['pembantu_1']['nip'] ?? null;
+        }
+        if (empty($data['nama_kaprodi_s1'])) {
+            $data['nama_kaprodi_s1'] = $officials['prodi_s1']['nama'] ?? null;
+            $data['nip_kaprodi_s1'] = $officials['prodi_s1']['nip'] ?? null;
+        }
+        if (empty($data['nama_kaprodi_d3'])) {
+            $data['nama_kaprodi_d3'] = $officials['prodi_d3']['nama'] ?? null;
+            $data['nip_kaprodi_d3'] = $officials['prodi_d3']['nip'] ?? null;
+        }
+
+        $periode->update($data);
         return redirect()->back()->with('success', 'Setup pejabat penandatangan berhasil diperbarui.');
     }
 
