@@ -36,7 +36,7 @@
                                         <th>No. Ijazah / PIN</th>
                                         <th>No. Transkrip</th>
                                         <th>Predikat</th>
-                                        <th>Aksi</th>
+                                        <th style="text-align: left !important;" class="text-start">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -58,16 +58,11 @@
                                         <td>{{ $d->no_transkrip ?? 'Belum ada' }}</td>
                                         <td>{{ $d->kategori_kelulusan }}</td>
                                         <td>
-                                            <div class="dropdown">
-                                                <button type="button" class="btn btn-success light sharp" data-bs-toggle="dropdown">
-                                                    <svg width="20px" height="20px" viewBox="0 0 24 24" version="1.1"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><rect x="0" y="0" width="24" height="24"/><circle fill="#000000" cx="5" cy="12" r="2"/><circle fill="#000000" cx="12" cy="12" r="2"/><circle fill="#000000" cx="19" cy="12" r="2"/></g></svg>
-                                                </button>
-                                                <div class="dropdown-menu">
-                                                    <a class="dropdown-item text-primary" href="{{ route('admin.ijazah.editPenomoran', $d->id) }}"><i class="fas fa-edit me-2"></i> Input Penomoran</a>
-                                                    <a class="dropdown-item text-success" href="{{ route('admin.ijazah.cetak', $d->id) }}" target="_blank"><i class="fas fa-print me-2"></i> Cetak Ijazah</a>
-                                                    <a class="dropdown-item text-warning" href="{{ route('admin.ijazah.transkrip', ['id' => $d->id, 'jenis' => 'depan']) }}" target="_blank"><i class="fas fa-print me-2"></i> Cetak Transkrip Depan</a>
-                                                    <a class="dropdown-item text-warning" href="{{ route('admin.ijazah.transkrip', ['id' => $d->id, 'jenis' => 'belakang']) }}" target="_blank"><i class="fas fa-print me-2"></i> Cetak Transkrip Belakang</a>
-                                                </div>
+                                            <div class="d-flex flex-column gap-2" style="max-width: 180px;">
+                                                <a class="btn btn-primary btn-sm shadow" href="{{ route('admin.ijazah.editPenomoran', $d->id) }}"><i class="fas fa-edit me-1"></i> Penomoran</a>
+                                                <a class="btn btn-success btn-sm shadow" href="{{ route('admin.ijazah.cetak', $d->id) }}" target="_blank"><i class="fas fa-certificate me-1"></i> Ijazah</a>
+                                                <a class="btn btn-warning btn-sm shadow text-dark" href="{{ route('admin.ijazah.transkrip', ['id' => $d->id, 'jenis' => 'depan']) }}" target="_blank"><i class="fas fa-file-alt me-1"></i> T. Depan</a>
+                                                <a class="btn btn-warning btn-sm shadow text-dark" href="{{ route('admin.ijazah.transkrip', ['id' => $d->id, 'jenis' => 'belakang']) }}" target="_blank"><i class="fas fa-file-alt me-1"></i> T. Belakang</a>
                                             </div>
                                         </td>
                                     </tr>
@@ -88,6 +83,9 @@
     $(document).ready(function() {
         if ($.fn.DataTable) {
             $('#example1').DataTable({
+                columnDefs: [
+                    { targets: -1, orderable: false, className: "text-start" }
+                ],
                 language: {
                     search: "Cari:",
                     lengthMenu: "Tampilkan _MENU_ data",
