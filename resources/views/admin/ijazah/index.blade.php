@@ -66,6 +66,9 @@
                                                     <h5 class="modal-title">Edit Pejabat Periode: {{ $p->nama_periode }}</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                 </div>
+                                                <div class="alert alert-primary m-3 pb-2 pt-2">
+                                                    <i class="fas fa-magic me-2"></i><strong>Tips:</strong> Kosongkan nama pejabat lalu klik simpan untuk mereset dan menarik ulang data pejabat secara otomatis dari <a href="{{ url('pegawai/struktur') }}" class="text-white text-decoration-underline target="_blank">Struktur Pegawai saat ini.</a>
+                                                </div>
                                                 <form action="{{ route('admin.ijazah.updatePeriode', $p->id) }}" method="POST">
                                                     @csrf
                                                     <div class="modal-body">
@@ -133,6 +136,9 @@
             <form action="{{ route('admin.ijazah.storePeriode') }}" method="POST">
                 @csrf
                 <div class="modal-body">
+                    <div class="alert alert-secondary p-2 mb-3 mt-1" style="font-size: 0.9em;">
+                        <i class="fas fa-info-circle me-1"></i> Data pejabat (Ketua ST, Waka I, dan Kaprodi) akan ditarik dan disinkronisasikan <strong>otomatis</strong> dari halaman struktur pegawai terkini saat Anda menekan Simpan.
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Nama Periode</label>
                         <input type="text" name="nama_periode" class="form-control" placeholder="Cth: Wisuda September 2025" required>
