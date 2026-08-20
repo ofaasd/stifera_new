@@ -558,6 +558,17 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('master/matriks', [\App\Http\Controllers\admin\MatriksController::class, 'index'])->name('matriks.index');
     Route::post('master/matriks', [\App\Http\Controllers\admin\MatriksController::class, 'store'])->name('matriks.store');
 
+        // Ijazah Admin Routes
+    Route::get('admin/ijazah', [\App\Http\Controllers\admin\IjazahController::class, 'index'])->name('admin.ijazah.index');
+    Route::post('admin/ijazah/periode', [\App\Http\Controllers\admin\IjazahController::class, 'storePeriode'])->name('admin.ijazah.storePeriode');
+    Route::post('admin/ijazah/periode/{id}/update', [\App\Http\Controllers\admin\IjazahController::class, 'updatePeriode'])->name('admin.ijazah.updatePeriode');
+    Route::delete('admin/ijazah/periode/{id}', [\App\Http\Controllers\admin\IjazahController::class, 'destroyPeriode'])->name('admin.ijazah.periode.destroy');
+    Route::get('admin/ijazah/{id}/show', [\App\Http\Controllers\admin\IjazahController::class, 'showPeriode'])->name('admin.ijazah.show');
+    Route::get('admin/ijazah/penomoran/{id}', [\App\Http\Controllers\admin\IjazahController::class, 'editPenomoran'])->name('admin.ijazah.editPenomoran');
+    Route::post('admin/ijazah/penomoran/{id}', [\App\Http\Controllers\admin\IjazahController::class, 'updatePenomoran'])->name('admin.ijazah.updatePenomoran');
+    Route::get('admin/ijazah/cetak/{id}', [\App\Http\Controllers\admin\IjazahController::class, 'cetakIjazah'])->name('admin.ijazah.cetak');
+    Route::get('admin/ijazah/transkrip/{id}/{jenis}', [\App\Http\Controllers\admin\IjazahController::class, 'cetakTranskrip'])->name('admin.ijazah.transkrip');
+
     // Yudisium Admin Routes
     Route::get('admin/yudisium', [\App\Http\Controllers\admin\YudisiumController::class, 'index'])->name('admin.yudisium.index');
     Route::post('admin/yudisium/{id}/toggle-active', [\App\Http\Controllers\admin\YudisiumController::class, 'toggleActivePeriode'])->name('admin.yudisium.toggleActivePeriode');

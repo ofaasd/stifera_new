@@ -102,33 +102,71 @@ class YudisiumMahasiswaController extends Controller
 
         $idMahasiswa = $mahasiswa->id;
 
-        // Validasi
+        // Cek action (Submit final atau Draft)
+        $isDraft = $request->input('action') === 'draft';
+
         $rules = [];
         $mandatoryKeys = $this->getMandatoryKeys($mahasiswa->id_program_studi);
         $jumlahSertifikat = ($mahasiswa->id_program_studi == 1) ? 7 : 11;
 
-        foreach ($mandatoryKeys as $key => $label) {
-            $rules[$key] = 'required|mimes:pdf,jpg,jpeg,png|max:25600'; // maks 25MB
+        // Ambil pendaftaran existing (kalau ada) buat cek file mana yang sudah diupload
+        $existingPendaftaran = YudisiumPendaftaran::where('id_periode', $activePeriode->id)
+            ->where('id_mahasiswa', $idMahasiswa)
+            ->first();
+
+        $alreadyUploaded = [];
+        $sertifikatUploadedCount = 0;
+        if ($existingPendaftaran) {
+            $berkas = YudisiumBerkas::where('id_pendaftaran', $existingPendaftaran->id)->get();
+            foreach ($berkas as $b) {
+                if ($b->jenis_berkas !== 'sertifikat_kegiatan') {
+                    $alreadyUploaded[] = $b->jenis_berkas;
+                } else {
+                    $sertifikatUploadedCount++;
+                }
+            }
         }
-        $rules['sertifikat_kegiatan'] = 'required|array|min:' . $jumlahSertifikat;
-        $rules['sertifikat_kegiatan.*'] = 'required|mimes:pdf,jpg,jpeg,png|max:25600';
+
+        foreach ($mandatoryKeys as $key => $label) {
+            // Jika final submit dan file belum pernah diupload sebelumnya, maka wajib
+            if (!$isDraft && !in_array($key, $alreadyUploaded)) {
+                $rules[$key] = 'required|mimes:pdf,jpg,jpeg,png|max:25600'; // maks 25MB
+            } else {
+                $rules[$key] = 'nullable|mimes:pdf,jpg,jpeg,png|max:25600';
+            }
+        }
+
+        $sertifSisa = $jumlahSertifikat - $sertifikatUploadedCount;
+        if ($sertifSisa < 0)
+            $sertifSisa = 0;
+
+        if (!$isDraft && $sertifikatUploadedCount < $jumlahSertifikat) {
+            $rules['sertifikat_kegiatan'] = 'required|array|min:' . $sertifSisa;
+        } else {
+            $rules['sertifikat_kegiatan'] = 'nullable|array';
+        }
+        $rules['sertifikat_kegiatan.*'] = 'nullable|mimes:pdf,jpg,jpeg,png|max:25600';
 
         $request->validate($rules, [
             'required' => ':attribute wajib diunggah',
             'mimes' => ':attribute harus berupa file PDF atau JPG/PNG',
             'max' => ':attribute tidak boleh lebih dari 25MB',
-            'sertifikat_kegiatan.min' => 'Anda wajib mengunggah minimal ' . $jumlahSertifikat . ' sertifikat kegiatan'
+            'sertifikat_kegiatan.min' => 'Sisa wajib unggah sertifikat kegiatan: ' . $sertifSisa . ' file'
         ], $mandatoryKeys);
 
-        // Buat Pendaftaran Baru
+        // Buat Pendaftaran Baru atau Ambil
         $pendaftaran = YudisiumPendaftaran::firstOrCreate([
             'id_periode' => $activePeriode->id,
             'id_mahasiswa' => $idMahasiswa,
         ], [
-            'status_pengajuan' => 'menunggu'
+            'status_pengajuan' => $isDraft ? 'draft' : 'menunggu'
         ]);
 
-        // Simpan Berkas Mandatory
+        if (!$isDraft && $pendaftaran->status_pengajuan == 'draft') {
+            $pendaftaran->update(['status_pengajuan' => 'menunggu']);
+        }
+
+        // Simpan Berkas
         $destinationPath = public_path('uploads/yudisium/' . $idMahasiswa);
         if (!file_exists($destinationPath)) {
             mkdir($destinationPath, 0777, true);
@@ -140,16 +178,23 @@ class YudisiumMahasiswaController extends Controller
                 $fileName = time() . '_' . $key . '.' . $file->getClientOriginalExtension();
                 $file->move($destinationPath, $fileName);
 
-                YudisiumBerkas::create([
-                    'id_pendaftaran' => $pendaftaran->id,
-                    'jenis_berkas' => $key,
-                    'file_path' => 'uploads/yudisium/' . $idMahasiswa . '/' . $fileName,
-                    'status_berkas' => 'menunggu'
-                ]);
+                $berkas = YudisiumBerkas::where('id_pendaftaran', $pendaftaran->id)->where('jenis_berkas', $key)->first();
+                if ($berkas) {
+                    if (file_exists(public_path($berkas->file_path)))
+                        unlink(public_path($berkas->file_path));
+                    $berkas->update(['file_path' => 'uploads/yudisium/' . $idMahasiswa . '/' . $fileName]);
+                } else {
+                    YudisiumBerkas::create([
+                        'id_pendaftaran' => $pendaftaran->id,
+                        'jenis_berkas' => $key,
+                        'file_path' => 'uploads/yudisium/' . $idMahasiswa . '/' . $fileName,
+                        'status_berkas' => 'menunggu'
+                    ]);
+                }
             }
         }
 
-        // Simpan Sertifikat Kegiatan (minimal 11 sudah divalidasi)
+        // Simpan Sertifikat Kegiatan Baru (tambahan)
         if ($request->hasFile('sertifikat_kegiatan')) {
             $files = $request->file('sertifikat_kegiatan');
             $count = 0;
@@ -169,10 +214,27 @@ class YudisiumMahasiswaController extends Controller
             }
         }
 
-        // Update overall status to menunggu if it's currently somehow different but we re-uploaded?
-        // Usually, first upload means it's 'menunggu'.
-        $pendaftaran->status_pengajuan = 'menunggu';
-        $pendaftaran->save();
+        // Update Sertifikat Kegiatan Lama (replace)
+        if ($request->hasFile('sertifikat_kegiatan_update')) {
+            $files_update = $request->file('sertifikat_kegiatan_update');
+            foreach ($files_update as $berkas_id => $file) {
+                if ($file && $file->isValid()) {
+                    $oldBerkas = YudisiumBerkas::where('id', $berkas_id)->where('id_pendaftaran', $pendaftaran->id)->first();
+                    if ($oldBerkas) {
+                        if (file_exists(public_path($oldBerkas->file_path)))
+                            @unlink(public_path($oldBerkas->file_path));
+                        $fileName = time() . '_sertifikat_upd_' . $berkas_id . '.' . $file->getClientOriginalExtension();
+                        $file->move($destinationPath, $fileName);
+                        $oldBerkas->update(['file_path' => 'uploads/yudisium/' . $idMahasiswa . '/' . $fileName]);
+                    }
+                }
+            }
+        }
+
+        if (!$isDraft) {
+            $pendaftaran->status_pengajuan = 'menunggu';
+            $pendaftaran->save();
+        }
 
         return redirect()->route('mahasiswa.yudisium.index')->with('success', 'Formulir persyaratan Yudisium berhasil dikirim.');
     }

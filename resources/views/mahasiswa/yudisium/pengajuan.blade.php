@@ -45,7 +45,19 @@
             </div>
         @else
 
-            @if(!$pendaftaran)
+            
+            @php
+                $isDraft = $pendaftaran && $pendaftaran->status_pengajuan == 'draft';
+                $uploadedMandatory = [];
+                $uploadedSertifikatCount = 0;
+                if ($pendaftaran) {
+                    foreach($pendaftaran->berkas as $b) {
+                        if ($b->jenis_berkas === 'sertifikat_kegiatan') $uploadedSertifikatCount++;
+                        else $uploadedMandatory[] = $b->jenis_berkas;
+                    }
+                }
+            @endphp
+            @if(!$pendaftaran || $isDraft)
                 <!-- FORM PERTAMA KALI MENDAFTAR -->
                 <div class="row">
                     <div class="col-12">
@@ -61,9 +73,15 @@
                                     @csrf
                                     <div class="row">
                                         @foreach($mandatoryFiles as $key => $label)
+                                        @php
+                                            $isUploaded = in_array($key, $uploadedMandatory);
+                                        @endphp
                                         <div class="col-md-6 mb-4">
-                                            <label class="form-label font-weight-bold">{{ $label }} <span class="text-danger">*</span></label>
-                                            <input type="file" name="{{ $key }}" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                                            <label class="form-label font-weight-bold">{{ $label }} @if(!$isUploaded) <span class="text-danger">*</span> @else <span class="badge badge-success light ms-1"><i class="fas fa-check"></i> Tersimpan</span> @endif</label>
+                                            <input type="file" name="{{ $key }}" class="form-control" accept=".pdf,.jpg,.jpeg,.png" @if(!$isUploaded) required @endif>
+                                            @if($isUploaded)
+                                                <small class="text-success d-block mt-1">Berkas ini sudah tersimpan di draft. Abaikan jika tidak ingin mengganti.</small>
+                                            @endif
                                         </div>
                                         @endforeach
                                     </div>
@@ -73,15 +91,36 @@
                                     <div class="row">
                                         <div class="col-12 mb-3">
                                             <h4 class="text-primary font-weight-bold">Sertifikat Kegiatan</h4>
-                                            <p class="text-muted" style="font-size: 14px;">Anda diwajibkan untuk mengunggah <strong>minimal 11 Sertifikat Kegiatan</strong>. Anda dapat terus menambah file tambahan jika ada.</p>
+                                            <p class="text-muted" style="font-size: 14px;">Anda diwajibkan untuk mengunggah <strong>minimal {{ $jumlah_sertifikat }} Sertifikat Kegiatan Kegiatan</strong>. Anda dapat terus menambah file tambahan jika ada.</p>
                                         </div>
                                         <div class="col-12">
                                             <div class="row" id="sertifikat-dynamic-zone">
-                                                @for($i = 1; $i <= 11; $i++)
+                                                @php
+                                                    $sisaSertif = $jumlah_sertifikat - $uploadedSertifikatCount;
+                                                    if ($sisaSertif < 0) $sisaSertif = 0;
+                                                @endphp
+                                                
+                                                @if($pendaftaran)
+                                                    @php
+                                                        $uploadedSertifData = $pendaftaran->berkas->where('jenis_berkas', 'sertifikat_kegiatan');
+                                                        $indexSertif = 1;
+                                                    @endphp
+                                                    @foreach($uploadedSertifData as $sertifX)
+                                                    <div class="col-md-6 mb-3 set-dynamic">
+                                                        <label class="form-label font-weight-bold">Sertifikat Kegiatan #{{ $indexSertif++ }} <span class="badge badge-success light ms-1"><i class="fas fa-check"></i> Tersimpan</span></label>
+                                                        <div class="d-flex">
+                                                            <input type="file" name="sertifikat_kegiatan_update[{{ $sertifX->id }}]" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                                                        </div>
+                                                        <small class="text-success mt-1 d-block">Sudah ada file. Upload form ini hanya jika ingin mengganti.</small>
+                                                    </div>
+                                                    @endforeach
+                                                @endif
+
+                                                @for($i = 1; $i <= $sisaSertif; $i++)
                                                 <div class="col-md-6 mb-3 set-dynamic">
-                                                    <label class="form-label font-weight-bold">Sertifikat Kegiatan #{{ $i }} <span class="text-danger">*</span></label>
+                                                    <label class="form-label font-weight-bold">Sertifikat Kegiatan #{{ isset($indexSertif) ? ($indexSertif - 1 + $i) : $i }} <span class="text-danger">*</span></label>
                                                     <div class="d-flex">
-                                                        <input type="file" name="sertifikat_kegiatan[]" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                        <input type="file" name="sertifikat_kegiatan[]" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
                                                     </div>
                                                 </div>
                                                 @endfor
@@ -94,8 +133,9 @@
                                         </div>
                                     </div>
 
-                                    <div class="mt-5 text-end">
-                                        <button type="submit" class="btn btn-primary shadow px-5 fs-16"><i class="fas fa-paper-plane me-2"></i> Ajukan Yudisium</button>
+                                    <div class="mt-5 text-end d-flex justify-content-end">
+                                        <button type="submit" name="action" value="draft" class="btn btn-secondary shadow px-4 fs-16 me-3" formnovalidate><i class="fas fa-save me-2"></i> Simpan sebagai Draft</button>
+                                        <button type="submit" name="action" value="submit" class="btn btn-primary shadow px-5 fs-16" onclick="return confirm('Apakah Anda yakin formulir sudah final dan siap dicek Akademik?');"><i class="fas fa-paper-plane me-2"></i> Ajukan Yudisium Final</button>
                                     </div>
                                 </form>
                             </div>
@@ -275,7 +315,7 @@
 @section('local-js')
 <script>
     $(document).ready(function() {
-        var currentFields = 11;
+        var currentFields = $('.set-dynamic').length;
         
         $('#btn-add-sertifikat').click(function(e) {
             e.preventDefault();

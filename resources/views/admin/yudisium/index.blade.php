@@ -55,7 +55,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @forelse($pendaftars as $index => $pd)
+                                                @foreach($pendaftars as $index => $pd)
                                                 <tr>
                                                     <td class="text-center">{{ $index + 1 }}</td>
                                                     <td class="text-center">{{ $pd->mahasiswa->nim ?? '-' }}</td>
@@ -82,11 +82,7 @@
                                                         </a>
                                                     </td>
                                                 </tr>
-                                                @empty
-                                                <tr>
-                                                    <td colspan="7" class="text-center">Belum ada mahasiswa yang mendaftar pada periode aktif saat ini.</td>
-                                                </tr>
-                                                @endforelse
+                                                @endforeach
                                             </tbody>
                                         </table>
                                     </div>
@@ -224,9 +220,23 @@
 @section('local-js')
 <script>
     $(document).ready(function() {
+        var dtConfig = {
+            language: {
+                search: "Cari:",
+                lengthMenu: "Tampilkan _MENU_ data",
+                info: "Menampilkan _START_ hingga _END_ dari _TOTAL_ entri",
+                paginate: {
+                    first: "Pertama",
+                    last: "Terakhir",
+                    next: "Selanjutnya",
+                    previous: "Sebelumnya"
+                }
+            }
+        };
+        
         if ($.fn.DataTable) {
-            $('#tablePendaftar').DataTable();
-            $('#tablePeriode').DataTable();
+            $('#tablePendaftar').DataTable(dtConfig);
+            $('#tablePeriode').DataTable(dtConfig);
         }
     });
 </script>

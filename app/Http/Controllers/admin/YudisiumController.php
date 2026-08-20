@@ -14,7 +14,7 @@ class YudisiumController extends Controller
 {
     public function index()
     {
-        $data['CurrentPage'] = 'content';
+        $data['CurrentPage'] = 'table-datatable-basic';
         $data['title'] = 'Manajemen Yudisium';
 
         $data['periodes'] = YudisiumPeriode::with('programStudi')->orderBy('tanggal_mulai', 'desc')->get();
@@ -32,7 +32,7 @@ class YudisiumController extends Controller
 
         $data['pendaftars'] = YudisiumPendaftaran::with(['mahasiswa', 'periode.programStudi'])
             ->whereIn('id_periode', $activePeriodes)
-            ->orderBy('created_at', 'desc')
+            ->where('status_pengajuan', '!=', 'draft')->orderBy('created_at', 'desc')
             ->get();
 
         return view('admin.yudisium.index', $data);
@@ -103,7 +103,7 @@ class YudisiumController extends Controller
 
     public function show($id)
     {
-        $data['CurrentPage'] = 'content';
+        $data['CurrentPage'] = 'table-datatable-basic';
         $data['title'] = 'Verifikasi Berkas Yudisium';
 
         $data['pendaftaran'] = YudisiumPendaftaran::with(['mahasiswa', 'berkas', 'periode'])->findOrFail($id);

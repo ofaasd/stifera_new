@@ -111,6 +111,11 @@ class Mahasiswa extends Authenticatable
 		return $this->belongsTo(PegawaiBiodatum::class, 'id_dsn_wali', 'id_pegawai');
 	}
 
+	public function programStudi()
+	{
+		return $this->belongsTo(MasterProgramStudi::class, 'id_program_studi', 'id');
+	}
+
 	public function getAuthPasswordName()
 	{
 		return 'paswd';
