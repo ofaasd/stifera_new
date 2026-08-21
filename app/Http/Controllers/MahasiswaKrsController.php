@@ -55,7 +55,7 @@ class MahasiswaKrsController extends Controller
             'isKrsDisetujuiWali' => $isKrsDisetujuiWali,
             'krsRows' => $krsRows,
             'jadwalTersedia' => $jadwalTersedia,
-            'totalSks' => (int) $krsRows->sum('sks'),
+            'totalSks' => (int) $krsRows->sum('sks') ?? 0,
             'ipsTerakhir' => $ipsTerakhir,
             'batasSks' => $batasSks,
             'jenisTA' => $this->formatJenisSemester((int) ($tahunAktif->jenis ?? 0)),
