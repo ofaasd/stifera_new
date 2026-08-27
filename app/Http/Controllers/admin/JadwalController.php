@@ -178,7 +178,7 @@ class JadwalController extends Controller
         foreach ($preparedRows as $row) {
             $payload = [
                 'id_dosen' => $row['id_dosen'],
-                'id_dosen2' => $row['id_dosen2'],
+                'id_dosen2' => empty($row['id_dosen2']) ? 0 : (int) $row['id_dosen2'],
                 'id_tahun' => $row['id_tahun'],
                 'kode_mata_kuliah' => $row['kode_mata_kuliah'],
                 'hari' => $row['hari'],
@@ -261,7 +261,7 @@ class JadwalController extends Controller
                 'id_tahun' => (int) $jadwal->id_tahun,
                 'kode_mata_kuliah' => $jadwal->kode_mata_kuliah,
                 'id_dosen' => (int) $request->id_dosen,
-                'id_dosen2' => !empty($request->id_dosen2) ? (int) $request->id_dosen2 : null,
+                'id_dosen2' => !empty($request->id_dosen2) ? (int) $request->id_dosen2 : 0,
                 'hari' => $request->hari,
                 'sesi' => $request->sesi,
                 'ruang' => $request->ruang,
@@ -783,7 +783,7 @@ class JadwalController extends Controller
                     'id_tahun' => $idTahun,
                     'kode_mata_kuliah' => $kodeMataKuliah,
                     'id_dosen' => (int) $idDosen,
-                    'id_dosen2' => !empty($idDosen2) ? (int) $idDosen2 : null,
+                    'id_dosen2' => !empty($idDosen2) ? (int) $idDosen2 : 0,
                     'hari' => $hari,
                     'sesi' => $sesi,
                     'ruang' => $ruang,
