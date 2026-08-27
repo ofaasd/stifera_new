@@ -58,7 +58,7 @@
                                                 <td>{{ (int) $row->jenis === 1 ? 'Ganjil' : 'Genap' }}</td>
                                                 <td>{{ (int) $row->is_aktif === 1 ? 'Ya' : 'Tidak' }}</td>
                                                 <td>{{ (int) $row->status === 1 ? 'Aktif' : 'Tidak Aktif' }}</td>
-                                                <td>{{ (int) $row->tipe_mhs === 1 ? 'RPL' : 'Reguler' }}</td>
+                                                <td>{{ (int) $row->tipe_mhs === 1 ? 'Reguler' : 'RPL' }}</td>
                                                 <td>{{ (int) $row->kuesioner === 1 ? 'Ya' : 'Tidak' }}</td>
                                                 <td class="d-flex gap-1">
                                                     <a href="{{ url('master/tahun/' . $row->id . '/edit') }}" class="btn btn-success btn-sm" title="Edit">

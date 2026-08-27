@@ -2,4 +2,8 @@
 require 'vendor/autoload.php';
 $app = require_once 'bootstrap/app.php';
 $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
-print_r(\Illuminate\Support\Facades\Schema::getColumnListing('struktur_pegawai2'));
+$rows = \Illuminate\Support\Facades\DB::table('master_tahun_ajaran')->get();
+foreach ($rows as $r) {
+    if ($r->tipe_mhs == 2)
+        echo "RPL: " . $r->id . ' | ' . $r->id_tahun . ' | ' . $r->awal . '/' . $r->akhir . "\n";
+}
