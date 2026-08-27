@@ -75,8 +75,8 @@
                                         <div class="col-md-3 mb-3">
                                             <label class="form-label">Tipe Mahasiswa <span class="text-danger">*</span></label>
                                             <select class="form-control" name="tipe_mhs" required>
-                                                <option value="0" {{ old('tipe_mhs', (string) $d->tipe_mhs) === '0' ? 'selected' : '' }}>Reguler</option>
-                                                <option value="1" {{ old('tipe_mhs', (string) $d->tipe_mhs) === '1' ? 'selected' : '' }}>RPL</option>
+                                                <option value="1" {{ old('tipe_mhs', (string) $d->tipe_mhs) === '1' ? 'selected' : '' }}>Reguler</option>
+                                                <option value="2" {{ old('tipe_mhs', (string) $d->tipe_mhs) === '2' ? 'selected' : '' }}>RPL</option>
                                             </select>
                                         </div>
                                         <div class="col-md-3 mb-3">

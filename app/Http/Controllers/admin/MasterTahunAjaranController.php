@@ -35,7 +35,7 @@ class MasterTahunAjaranController extends Controller
             'is_delete' => 'nullable|string|max:10',
             'is_aktif' => 'required|integer|in:0,1',
             'status' => 'required|integer|in:0,1',
-            'tipe_mhs' => 'required|integer|in:0,1',
+            'tipe_mhs' => 'required|integer|in:1,2',
             'kuesioner' => 'required|integer|in:0,1',
         ]);
 
@@ -83,7 +83,7 @@ class MasterTahunAjaranController extends Controller
             'is_delete' => 'nullable|string|max:10',
             'is_aktif' => 'required|integer|in:0,1',
             'status' => 'required|integer|in:0,1',
-            'tipe_mhs' => 'required|integer|in:0,1',
+            'tipe_mhs' => 'required|integer|in:1,2',
             'kuesioner' => 'required|integer|in:0,1',
         ]);
 
