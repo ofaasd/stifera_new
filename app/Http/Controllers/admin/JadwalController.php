@@ -137,7 +137,7 @@ class JadwalController extends Controller
                 return strtolower(preg_replace('/\s+/', ' ', $name));
             })->values();
         $data['hariList'] = DB::table('master_hari')->orderBy('id')->get();
-        $data['sesiList'] = DB::table('master_jam')->orderBy('id')->get();
+        $data['sesiList'] = DB::table('master_jam')->orderBy('mulai')->get();
         $data['ruangList'] = DB::table('master_ruang')->orderBy('nama_ruang')->get();
 
         return view('admin.jadwal.input', $data);
@@ -232,7 +232,7 @@ class JadwalController extends Controller
                 return strtolower(preg_replace('/\s+/', ' ', $name));
             })->values();
         $data['hariList'] = DB::table('master_hari')->orderBy('id')->get();
-        $data['sesiList'] = DB::table('master_jam')->orderBy('id')->get();
+        $data['sesiList'] = DB::table('master_jam')->orderBy('mulai')->get();
         $data['ruangList'] = DB::table('master_ruang')->orderBy('nama_ruang')->get();
 
         return view('admin.jadwal.edit', $data);

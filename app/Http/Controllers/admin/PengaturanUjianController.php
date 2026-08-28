@@ -65,7 +65,7 @@ class PengaturanUjianController extends Controller
         $data['CurrentPage'] = 'content';
         $data['jadwal'] = $jadwal;
         $data['pengaturan'] = $pengaturan;
-        $data['jamList'] = DB::table('master_jam')->orderBy('id')->get();
+        $data['jamList'] = DB::table('master_jam')->orderBy('mulai')->get();
 
         return view('admin.ujian.detail', $data);
     }
@@ -189,7 +189,7 @@ class PengaturanUjianController extends Controller
             ->where('id_tahun', (int) $jadwal->id_tahun)
             ->orderBy('nim')
             ->pluck('nim')
-            ->filter(fn ($nim) => trim((string) $nim) !== '')
+            ->filter(fn($nim) => trim((string) $nim) !== '')
             ->values();
 
         if ($pesertaNim->isEmpty()) {
@@ -211,10 +211,10 @@ class PengaturanUjianController extends Controller
         }
 
         $kursiList = collect($validated['no_kursi'])
-            ->map(fn ($v) => (int) $v)
+            ->map(fn($v) => (int) $v)
             ->values();
 
-        if ($kursiList->contains(fn ($v) => $v > $maxKursi)) {
+        if ($kursiList->contains(fn($v) => $v > $maxKursi)) {
             return redirect()->back()->with('error', 'Nomor kursi melebihi jumlah peserta.');
         }
 
@@ -260,7 +260,7 @@ class PengaturanUjianController extends Controller
             ->where('id_tahun', $idTahun)
             ->orderBy('nim')
             ->pluck('nim')
-            ->filter(fn ($nim) => trim((string) $nim) !== '')
+            ->filter(fn($nim) => trim((string) $nim) !== '')
             ->values();
 
         if ($pesertaNim->isEmpty()) {
