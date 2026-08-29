@@ -77,6 +77,17 @@
                                 <div class="small text-muted">
                                     <div>NIM: <span class="fw-semibold">{{ $mahasiswa->nim ?? '-' }}</span></div>
                                     <div>Nama: <span class="fw-semibold">{{ $mahasiswa->nama ?? '-' }}</span></div>
+                                    <div>Tipe Mahasiswa: 
+                                        <span class="fw-semibold">
+                                            @if(($mahasiswa->tipe_mhs ?? 0) == 1)
+                                                Mahasiswa Reguler
+                                            @elseif(($mahasiswa->tipe_mhs ?? 0) == 2)
+                                                Mahasiswa RPL
+                                            @else
+                                                -
+                                            @endif
+                                        </span>
+                                    </div>
                                     <div>
                                         Tahun Ajaran Aktif:
                                         <span class="fw-semibold">
