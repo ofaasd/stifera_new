@@ -93,7 +93,7 @@
                                         <span class="fw-semibold">
                                             @if($tahunAktif)
                                                 {{ ($tahunAktif->awal ?? '-') . '/' . ($tahunAktif->akhir ?? '-') }}
-                                                @if(!empty($jenisTA)) ({{ $jenisTA }}) @endif
+                                                @if(!empty($jenisTA)) ({{ $jenisTA }}) (ID: {{ $tahunAktif->id }}) @endif
                                             @else
                                                 -
                                             @endif
