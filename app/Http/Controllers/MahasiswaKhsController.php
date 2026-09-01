@@ -119,9 +119,11 @@ class MahasiswaKhsController extends Controller
         }
 
         $selectedPair = $questionnaireState['selected_pair'] ?? null;
-        if (!$selectedPair
+        if (
+            !$selectedPair
             || (int) ($selectedPair->id_jadwal ?? 0) !== (int) $id_jadwal
-            || (int) ($selectedPair->id_dosen ?? 0) !== (int) $id_dosen) {
+            || (int) ($selectedPair->id_dosen ?? 0) !== (int) $id_dosen
+        ) {
             return redirect()->route('mahasiswa.khs.index')
                 ->with('error', 'Jadwal dan dosen untuk kuesioner tidak valid.');
         }
@@ -676,7 +678,7 @@ class MahasiswaKhsController extends Controller
         }
 
         if (!$selectedPair) {
-            $selectedPair = $pairsWithStatus->first(fn ($pair) => !(bool) ($pair->is_completed ?? false));
+            $selectedPair = $pairsWithStatus->first(fn($pair) => !(bool) ($pair->is_completed ?? false));
         }
 
         if (!$selectedPair) {
@@ -761,7 +763,7 @@ class MahasiswaKhsController extends Controller
             $dosenIds->push((int) ($row->id_dosen2 ?? 0));
         }
 
-        $dosenIds = $dosenIds->filter(fn ($id) => $id > 0)->unique()->values();
+        $dosenIds = $dosenIds->filter(fn($id) => $id > 0)->unique()->values();
 
         $dosenMap = collect();
         if ($dosenIds->isNotEmpty()) {
