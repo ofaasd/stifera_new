@@ -41,7 +41,7 @@ class MahasiswaKrsController extends Controller
 
         if ($tahunAktif) {
             $krsRows = $this->getKrsRows($mahasiswa->nim, (int) $tahunAktif->id);
-            $jadwalTersedia = $this->getJadwalTersedia($mahasiswa->nim, (int) $tahunAktif->id, (int) ($mahasiswa->tipe_mhs ?? 0));
+            $jadwalTersedia = $this->getJadwalTersedia($mahasiswa, (int) $tahunAktif->id);
             $ipsTerakhir = $this->getIpsTerakhir($mahasiswa->nim, (int) $tahunAktif->id);
             $batasSks = function_exists('sksbatas') ? (int) sksbatas($ipsTerakhir) : 24;
         }
@@ -327,8 +327,12 @@ class MahasiswaKrsController extends Controller
         return collect();
     }
 
-    private function getJadwalTersedia(string $nim, int $idTahun, int $tipeMhs)
+    private function getJadwalTersedia($mahasiswa, int $idTahun)
     {
+        $nim = $mahasiswa->nim;
+        $tipeMhs = (int) ($mahasiswa->tipe_mhs ?? 0);
+        $idProgramStudi = (int) ($mahasiswa->id_program_studi ?? 0);
+
         $sudahDiambil = DB::table('master_krs_temp')
             ->where('nim', $nim)
             ->where('id_tahun', $idTahun)
@@ -357,22 +361,27 @@ class MahasiswaKrsController extends Controller
             )
             ->where('mjt.id_tahun', $idTahun)
             ->where('mjt.status', 1)
-            ->where('mjt.tipe_mhs', $tipeMhs)
-            ->groupBy(
-                'mjt.id',
-                'mjt.kode_mata_kuliah',
-                'mjt.hari',
-                'mjt.sesi',
-                'mjt.ruang',
-                'mjt.kelas',
-                'mjt.rombel',
-                'mjt.kuota_diambil',
-                'mmk.nama_mata_kuliah',
-                'mmk.jumlah_sks',
-                'pb.gelar_depan',
-                'pb.nama_lengkap',
-                'pb.gelar_belakang'
-            )
+            ->where('mjt.tipe_mhs', $tipeMhs);
+
+        if ($idProgramStudi > 0) {
+            $query->where('mmk.id_program_studi', $idProgramStudi);
+        }
+
+        $query->groupBy(
+            'mjt.id',
+            'mjt.kode_mata_kuliah',
+            'mjt.hari',
+            'mjt.sesi',
+            'mjt.ruang',
+            'mjt.kelas',
+            'mjt.rombel',
+            'mjt.kuota_diambil',
+            'mmk.nama_mata_kuliah',
+            'mmk.jumlah_sks',
+            'pb.gelar_depan',
+            'pb.nama_lengkap',
+            'pb.gelar_belakang'
+        )
             ->orderBy('mmk.nama_mata_kuliah');
 
         if ($sudahDiambil->isNotEmpty()) {

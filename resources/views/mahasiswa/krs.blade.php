@@ -135,7 +135,7 @@
                                 @csrf
                                 <div class="col-lg-9">
                                     <label for="id_jadwal" class="form-label">Pilih Jadwal Mata Kuliah</label>
-                                    <select id="id_jadwal" name="id_jadwal" class="form-select" required>
+                                    <select id="id_jadwal" name="id_jadwal" class="form-select select2-jadwal" required>
                                         <option value="">-- Pilih Mata Kuliah --</option>
                                         @foreach($jadwalTersedia as $jadwal)
                                             @php
@@ -244,6 +244,14 @@
 
 @section('local-js')
 <script>
-    
+    $(document).ready(function() {
+        if ($.fn.select2) {
+            $('.select2-jadwal').select2({
+                placeholder: "-- Pilih Mata Kuliah --",
+                allowClear: true,
+                width: '100%'
+            });
+        }
+    });
 </script>
 @endsection
