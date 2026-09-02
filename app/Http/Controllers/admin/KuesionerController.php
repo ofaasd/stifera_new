@@ -516,7 +516,7 @@ class KuesionerController extends Controller
             $sheet->setCellValue('A3', 'Mata Kuliah: ' . $jadwal->kode_mata_kuliah . ' - ' . ($jadwal->nama_mata_kuliah ?? '-'));
             $sheet->mergeCells('A3:G3');
             $tipeKelas = ((int) ($jadwal->kelas ?? 0) === 3) ? 'RPL' : (((int) ($jadwal->kelas ?? 0) === 2) ? 'Karyawan' : 'Reguler');
-            $sheet->setCellValue('A4', 'Kelas / Rombel / Prodi: ' . $tipeKelas . ' ' . ($jadwal->rombel ?? '-') . ' / Program Studi ' . ($jadwal->nama_program_studi ?? '-'));
+            $sheet->setCellValue('A4', 'Kelas / Rombel / Prodi: ' . $tipeKelas . ' ' . ($jadwal->rombel ?? '-') . ' / Program Studi ' . ($jadwal->nama_jurusan ?? '-'));
             $sheet->mergeCells('A4:G4');
         }
         if ($dosen) {
@@ -673,7 +673,7 @@ class KuesionerController extends Controller
                 $sheet->setCellValue('A3', 'Mata Kuliah: ' . $jadwal->kode_mata_kuliah . ' - ' . ($jadwal->nama_mata_kuliah ?? '-'));
                 $sheet->mergeCells('A3:G3');
                 $tipeKelas = ((int) ($jadwal->kelas ?? 0) === 3) ? 'RPL' : (((int) ($jadwal->kelas ?? 0) === 2) ? 'Karyawan' : 'Reguler');
-                $sheet->setCellValue('A4', 'Kelas / Rombel / Prodi: ' . $tipeKelas . ' ' . ($jadwal->rombel ?? '-') . ' / Program Studi ' . ($jadwal->nama_program_studi ?? '-'));
+                $sheet->setCellValue('A4', 'Kelas / Rombel / Prodi: ' . $tipeKelas . ' ' . ($jadwal->rombel ?? '-') . ' / Program Studi ' . ($jadwal->nama_jurusan ?? '-'));
                 $sheet->mergeCells('A4:G4');
             }
             if ($dosen) {
@@ -869,7 +869,7 @@ class KuesionerController extends Controller
     {
         $jadwalFromTemp = DB::table('master_jadwal_temp as mjt')
             ->leftJoin('master_mata_kuliah as mmk_temp', 'mmk_temp.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
-            ->leftJoin('master_program_studi as mps_temp', 'mps_temp.id_program_studi', '=', 'mmk_temp.id_program_studi')
+            ->leftJoin('master_program_studi as mps_temp', 'mps_temp.id', '=', 'mmk_temp.id_program_studi')
             ->select([
                 DB::raw('mjt.id as id_jadwal'),
                 'mjt.id_dosen',
@@ -879,7 +879,7 @@ class KuesionerController extends Controller
                 DB::raw('COALESCE(NULLIF(mmk_temp.nama_mata_kuliah, ""), NULLIF(mjt.kode_mata_kuliah, "")) as nama_mata_kuliah'),
                 DB::raw('NULLIF(mjt.kelas, "") as kelas'),
                 DB::raw('NULLIF(mjt.rombel, "") as rombel'),
-                'mps_temp.nama_program_studi',
+                'mps_temp.nama_jurusan',
                 DB::raw("CONCAT(COALESCE(NULLIF(mjt.kode_jadwal, ''), CONCAT('Jadwal #', mjt.id)), ' - ', COALESCE(NULLIF(mmk_temp.nama_mata_kuliah, ''), NULLIF(mjt.kode_mata_kuliah, ''), 'Mata Kuliah')) as label_jadwal"),
             ])
             ->where('mjt.id_tahun', $idTahun)
@@ -888,7 +888,7 @@ class KuesionerController extends Controller
 
         $jadwalFromHistory = DB::table('master_jadwal as mj')
             ->leftJoin('master_mata_kuliah as mmk_hist', 'mmk_hist.kode_mata_kuliah', '=', 'mj.kode_mata_kuliah')
-            ->leftJoin('master_program_studi as mps_hist', 'mps_hist.id_program_studi', '=', 'mmk_hist.id_program_studi')
+            ->leftJoin('master_program_studi as mps_hist', 'mps_hist.id', '=', 'mmk_hist.id_program_studi')
             ->select([
                 'mj.id_jadwal',
                 'mj.id_dosen',
@@ -898,7 +898,7 @@ class KuesionerController extends Controller
                 DB::raw('COALESCE(NULLIF(mmk_hist.nama_mata_kuliah, ""), NULLIF(mj.kode_mata_kuliah, "")) as nama_mata_kuliah'),
                 DB::raw('NULLIF(mj.kelas, "") as kelas'),
                 DB::raw('NULLIF(mj.rombel, "") as rombel'),
-                'mps_hist.nama_program_studi',
+                'mps_hist.nama_jurusan',
                 DB::raw("CONCAT(COALESCE(NULLIF(mj.kode_jadwal, ''), CONCAT('Jadwal #', mj.id_jadwal)), ' - ', COALESCE(NULLIF(mmk_hist.nama_mata_kuliah, ''), NULLIF(mj.kode_mata_kuliah, ''), 'Mata Kuliah')) as label_jadwal"),
             ])
             ->where('mj.id_tahun', $idTahun)

@@ -65,7 +65,7 @@
         </tr>
         <tr>
             <td style="border: none; padding: 2px;"><strong>Kelas / Rombel / Prodi</strong></td>
-            <td style="border: none; padding: 2px;">: {{ (int)($jadwal->kelas ?? 0) === 3 ? 'RPL' : ((int)($jadwal->kelas ?? 0) === 2 ? 'Karyawan' : 'Reguler') }} {{ $jadwal->rombel ?? '-' }} / Program Studi {{ $jadwal->nama_program_studi ?? '-' }}</td>
+            <td style="border: none; padding: 2px;">: {{ (int)($jadwal->kelas ?? 0) === 3 ? 'RPL' : ((int)($jadwal->kelas ?? 0) === 2 ? 'Karyawan' : 'Reguler') }} {{ $jadwal->rombel ?? '-' }} / Program Studi {{ $jadwal->nama_jurusan ?? '-' }}</td>
         </tr>
         @endif
         @if(isset($dosen))
