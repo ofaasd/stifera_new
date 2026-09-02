@@ -65,7 +65,7 @@
                                 @csrf
 
                                 @php
-                                    $sections = ['regular' => 'Kelas Reguler', 'karyawan' => 'Kelas Karyawan'];
+                                    $sections = ['regular' => 'Kelas Reguler', 'karyawan' => 'Kelas Karyawan', 'rpl' => 'Kelas RPL'];
                                     $rombels = ['a', 'b', 'c'];
                                 @endphp
 
@@ -89,7 +89,7 @@
 
                                                 <div class="col-md-4">
                                                     <label>Dosen:</label>
-                                                    <select name="rows[{{ $sectionKey }}][{{ $rombel }}][id_dosen]" class="form-control">
+                                                    <select name="rows[{{ $sectionKey }}][{{ $rombel }}][id_dosen]" class="form-control select2-dosen">
                                                         <option value="">--Pilih Dosen 1--</option>
                                                         @foreach($dosenList as $d)
                                                             <option value="{{ $d->id }}" {{ (string)old('rows.' . $sectionKey . '.' . $rombel . '.id_dosen', $ex->id_dosen ?? '') === (string)$d->id ? 'selected' : '' }}>
@@ -97,7 +97,7 @@
                                                             </option>
                                                         @endforeach
                                                     </select>
-                                                    <select name="rows[{{ $sectionKey }}][{{ $rombel }}][id_dosen2]" class="form-control mt-1">
+                                                    <select name="rows[{{ $sectionKey }}][{{ $rombel }}][id_dosen2]" class="form-control mt-1 select2-dosen">
                                                         <option value="">--Pilih Dosen 2--</option>
                                                         @foreach($dosenList as $d)
                                                             <option value="{{ $d->id }}" {{ (string)old('rows.' . $sectionKey . '.' . $rombel . '.id_dosen2', $ex->id_dosen2 ?? '') === (string)$d->id ? 'selected' : '' }}>
@@ -143,7 +143,7 @@
                                                 <div class="col-md-1">
                                                     <label>Kelas:</label>
                                                     <select class="form-control" disabled>
-                                                        <option>{{ $sectionKey === 'karyawan' ? 'Karyawan' : 'Reguler' }}</option>
+                                                        <option>{{ $sectionKey === 'rpl' ? 'RPL' : ($sectionKey === 'karyawan' ? 'Karyawan' : 'Reguler') }}</option>
                                                     </select>
                                                 </div>
 
@@ -181,4 +181,17 @@
         </div>
     </div>
 </div>
+
+@section('local-js')
+<script>
+    $(document).ready(function() {
+        if ($.fn.select2) {
+            $('.select2-dosen').select2({
+                placeholder: "--Pilih Dosen--",
+                allowClear: true,
+                width: '100%'
+            });
+        }
+    });
+</script>
 @endsection

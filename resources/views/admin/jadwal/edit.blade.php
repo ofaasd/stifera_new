@@ -31,7 +31,7 @@
                             <div class="mb-3">
                                 <strong>Mata Kuliah:</strong> {{ $mataKuliah->kode_mata_kuliah ?? $jadwal->kode_mata_kuliah }} - {{ $mataKuliah->nama_mata_kuliah ?? '-' }}<br>
                                 <strong>Tahun Ajaran:</strong> {{ $tahun->awal ?? '-' }}/{{ $tahun->akhir ?? '-' }}<br>
-                                <strong>Rombel:</strong> {{ ((int) $jadwal->tipe_mhs === 2 ? 'Karyawan' : 'Reguler') . ' ' . ($jadwal->rombel ?? '-') }}
+                                <strong>Rombel:</strong> {{ ((int) $jadwal->kelas === 3 || (int) $jadwal->tipe_mhs === 2 ? 'RPL' : ((int) $jadwal->kelas === 2 ? 'Karyawan' : 'Reguler')) . ' ' . ($jadwal->rombel ?? '-') }}
                             </div>
 
                             <form method="POST" action="{{ url('master/jadwal/edit/' . $jadwal->id) }}">
@@ -40,7 +40,7 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Dosen 1</label>
-                                        <select name="id_dosen" class="form-control" required>
+                                        <select name="id_dosen" class="form-control select2-dosen" required>
                                             <option value="">-- Pilih Dosen 1 --</option>
                                             @foreach($dosenList as $d)
                                                 <option value="{{ $d->id }}" {{ (string) old('id_dosen', $jadwal->id_dosen) === (string) $d->id ? 'selected' : '' }}>
@@ -51,7 +51,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Dosen 2</label>
-                                        <select name="id_dosen2" class="form-control">
+                                        <select name="id_dosen2" class="form-control select2-dosen">
                                             <option value="">-- Pilih Dosen 2 --</option>
                                             @foreach($dosenList as $d)
                                                 <option value="{{ $d->id }}" {{ (string) old('id_dosen2', $jadwal->id_dosen2) === (string) $d->id ? 'selected' : '' }}>
@@ -122,4 +122,16 @@
         </div>
     </div>
 </div>
+@section('local-js')
+<script>
+    $(document).ready(function() {
+        if ($.fn.select2) {
+            $('.select2-dosen').select2({
+                placeholder: "--Pilih Dosen--",
+                allowClear: true,
+                width: '100%'
+            });
+        }
+    });
+</script>
 @endsection

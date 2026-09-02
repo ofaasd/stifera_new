@@ -2,4 +2,5 @@
 require 'vendor/autoload.php';
 $app = require_once 'bootstrap/app.php';
 $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
-print_r(\Illuminate\Support\Facades\Schema::getColumnListing('master_jam'));
+$rows = \Illuminate\Support\Facades\DB::table('master_tahun_ajaran')->where('tipe_mhs', 1)->orderByDesc('id')->first();
+var_dump($rows->id);

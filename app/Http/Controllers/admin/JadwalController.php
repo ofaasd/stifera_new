@@ -98,36 +98,47 @@ class JadwalController extends Controller
             return redirect('master/jadwal')->with('error', 'Mata kuliah tidak ditemukan.');
         }
 
-        $tahunAktif = DB::table('master_tahun_ajaran')
-            ->where('is_delete', 0)
-            ->where('is_aktif', 1)
-            ->orderByDesc('id')
-            ->first();
+        $tahunReguler = DB::table('master_tahun_ajaran')
+            ->where('is_delete', '0')->where('is_aktif', 1)->where('tipe_mhs', 1)
+            ->orderByDesc('id')->first() ?? DB::table('master_tahun_ajaran')->where('tipe_mhs', 1)->orderByDesc('id')->first();
 
-        if (!$tahunAktif) {
-            $tahunAktif = DB::table('master_tahun_ajaran')->orderByDesc('id')->first();
-        }
+        $tahunRPL = DB::table('master_tahun_ajaran')
+            ->where('is_delete', '0')->where('is_aktif', 1)->where('tipe_mhs', 2)
+            ->orderByDesc('id')->first() ?? DB::table('master_tahun_ajaran')->where('tipe_mhs', 2)->orderByDesc('id')->first();
 
-        if (!$tahunAktif) {
-            return redirect('master/jadwal')->with('error', 'Data tahun ajaran belum tersedia.');
+        if (!$tahunReguler && !$tahunRPL) {
+            return redirect('master/jadwal')->with('error', 'Data tahun ajaran belum tersedia sama sekali.');
         }
 
         $existingRows = DB::table('master_jadwal_temp')
             ->where('kode_mata_kuliah', $kodeMataKuliah)
-            ->where('id_tahun', $tahunAktif->id)
+            ->where(function ($query) use ($tahunReguler, $tahunRPL) {
+                if ($tahunReguler)
+                    $query->orWhere('id_tahun', $tahunReguler->id);
+                if ($tahunRPL)
+                    $query->orWhere('id_tahun', $tahunRPL->id);
+            })
             ->get();
 
         $existingMap = [];
         foreach ($existingRows as $row) {
-            $tipe = ((int) $row->tipe_mhs) === 2 ? 'karyawan' : 'regular';
+            $kelasCode = (int) ($row->kelas ?? 0);
+            if ($kelasCode === 3 || ((int) $row->tipe_mhs) === 2) {
+                // Backward compatibility just in case
+                $tipeStr = 'rpl';
+            } elseif ($kelasCode === 2) {
+                $tipeStr = 'karyawan';
+            } else {
+                $tipeStr = 'regular';
+            }
             $rombel = strtolower((string) ($row->rombel ?? ''));
-            $existingMap[$tipe . '_' . $rombel] = $row;
+            $existingMap[$tipeStr . '_' . $rombel] = $row;
         }
 
         $data['title'] = 'Input Jadwal';
         $data['CurrentPage'] = 'content';
         $data['mataKuliah'] = $mataKuliah;
-        $data['tahunAktif'] = $tahunAktif;
+        $data['tahunAktif'] = $tahunReguler ?? $tahunRPL; // Fallback untuk display di UI (Reguler diprioritaskan)
         $data['existingMap'] = $existingMap;
         $data['dosenList'] = DB::table('pegawai_biodata')
             ->where('status_pegawai', 'aktif')
@@ -145,9 +156,15 @@ class JadwalController extends Controller
 
     public function store(Request $request, string $kodeMataKuliah)
     {
-        $tahunAktif = $this->getTahunAktif();
+        $tahunReguler = DB::table('master_tahun_ajaran')
+            ->where('is_delete', '0')->where('is_aktif', 1)->where('tipe_mhs', 1)
+            ->orderByDesc('id')->first() ?? DB::table('master_tahun_ajaran')->where('tipe_mhs', 1)->orderByDesc('id')->first();
 
-        if (!$tahunAktif) {
+        $tahunRPL = DB::table('master_tahun_ajaran')
+            ->where('is_delete', '0')->where('is_aktif', 1)->where('tipe_mhs', 2)
+            ->orderByDesc('id')->first() ?? DB::table('master_tahun_ajaran')->where('tipe_mhs', 2)->orderByDesc('id')->first();
+
+        if (!$tahunReguler && !$tahunRPL) {
             return redirect()->back()->with('error', 'Tahun ajaran aktif belum tersedia.');
         }
 
@@ -156,7 +173,10 @@ class JadwalController extends Controller
             return redirect()->back()->with('error', 'Tidak ada data jadwal yang dikirim.');
         }
 
-        $preparedRows = $this->prepareRowsForSave($rows, $kodeMataKuliah, (int) $tahunAktif->id);
+        $idTahunReguler = $tahunReguler ? (int) $tahunReguler->id : 0;
+        $idTahunRPL = $tahunRPL ? (int) $tahunRPL->id : 0;
+
+        $preparedRows = $this->prepareRowsForSave($rows, $kodeMataKuliah, $idTahunReguler, $idTahunRPL);
         if (count($preparedRows) === 0) {
             return redirect()->back()->with('error', 'Belum ada baris jadwal yang lengkap untuk disimpan.');
         }
@@ -184,7 +204,7 @@ class JadwalController extends Controller
                 'hari' => $row['hari'],
                 'sesi' => $row['sesi'],
                 'ruang' => $row['ruang'],
-                'kelas' => null,
+                'kelas' => $row['kelas'],
                 'rombel' => $row['rombel'],
                 'kuota_diambil' => $row['kuota_diambil'],
                 'status' => $row['status'],
@@ -256,7 +276,7 @@ class JadwalController extends Controller
 
         $prepared = [
             [
-                'label' => (($jadwal->tipe_mhs == 2) ? 'Karyawan' : 'Reguler') . ' Rombel ' . ($jadwal->rombel ?? '-'),
+                'label' => ((int) $jadwal->kelas === 3 || (int) $jadwal->tipe_mhs === 2 ? 'RPL' : ((int) $jadwal->kelas === 2 ? 'Karyawan' : 'Reguler')) . ' Rombel ' . ($jadwal->rombel ?? '-'),
                 'existing_id' => (int) $jadwal->id,
                 'id_tahun' => (int) $jadwal->id_tahun,
                 'kode_mata_kuliah' => $jadwal->kode_mata_kuliah,
@@ -266,6 +286,7 @@ class JadwalController extends Controller
                 'sesi' => $request->sesi,
                 'ruang' => $request->ruang,
                 'rombel' => $jadwal->rombel,
+                'kelas' => $jadwal->kelas,
                 'tipe_mhs' => (int) $jadwal->tipe_mhs,
                 'status' => (int) $request->status,
                 'kuota_diambil' => (int) $request->input('kuota_diambil', (int) ($jadwal->kuota_diambil ?? 0)),
@@ -729,7 +750,7 @@ class JadwalController extends Controller
     private function getTahunAktif(): ?object
     {
         $tahunAktif = DB::table('master_tahun_ajaran')
-            ->where('is_delete', 0)
+            ->where('is_delete', '0')
             ->where('is_aktif', 1)
             ->orderByDesc('id')
             ->first();
@@ -741,11 +762,11 @@ class JadwalController extends Controller
         return $tahunAktif;
     }
 
-    private function prepareRowsForSave(array $rows, string $kodeMataKuliah, int $idTahun): array
+    private function prepareRowsForSave(array $rows, string $kodeMataKuliah, int $idTahunReguler, int $idTahunRPL): array
     {
         $prepared = [];
 
-        foreach (['regular', 'karyawan'] as $kelasKey) {
+        foreach (['regular', 'karyawan', 'rpl'] as $kelasKey) {
             if (!isset($rows[$kelasKey]) || !is_array($rows[$kelasKey])) {
                 continue;
             }
@@ -768,25 +789,45 @@ class JadwalController extends Controller
                     continue;
                 }
 
-                $tipeMhs = $kelasKey === 'karyawan' ? 2 : 1;
+                $tipeMhs = $kelasKey === 'rpl' ? 2 : 1;
+                $kelasDB = $kelasKey === 'regular' ? 1 : ($kelasKey === 'karyawan' ? 2 : 3);
+
+                $activeIdTahun = $kelasKey === 'rpl' ? $idTahunRPL : $idTahunReguler;
                 $rombel = strtoupper($rombelKey);
                 $existing = DB::table('master_jadwal_temp')
-                    ->where('id_tahun', $idTahun)
+                    ->where('id_tahun', $activeIdTahun)
                     ->where('kode_mata_kuliah', $kodeMataKuliah)
-                    ->where('tipe_mhs', $tipeMhs)
+                    ->where('kelas', $kelasDB)
                     ->where('rombel', $rombel)
                     ->first();
 
+                // Fallback check if existing was saved without kelas but matching tipe_mhs
+                if (!$existing && $kelasDB === 3) {
+                    $existing = DB::table('master_jadwal_temp')
+                        ->where('id_tahun', $activeIdTahun)
+                        ->where('kode_mata_kuliah', $kodeMataKuliah)
+                        ->where('tipe_mhs', 2)
+                        ->where('rombel', $rombel)
+                        ->first();
+                }
+
+                $labelTitle = 'Reguler';
+                if ($kelasKey === 'karyawan')
+                    $labelTitle = 'Karyawan';
+                if ($kelasKey === 'rpl')
+                    $labelTitle = 'RPL';
+
                 $prepared[] = [
-                    'label' => ($kelasKey === 'karyawan' ? 'Karyawan' : 'Reguler') . ' Rombel ' . $rombel,
+                    'label' => $labelTitle . ' Rombel ' . $rombel,
                     'existing_id' => $existing?->id,
-                    'id_tahun' => $idTahun,
+                    'id_tahun' => $activeIdTahun,
                     'kode_mata_kuliah' => $kodeMataKuliah,
                     'id_dosen' => (int) $idDosen,
                     'id_dosen2' => !empty($idDosen2) ? (int) $idDosen2 : 0,
                     'hari' => $hari,
                     'sesi' => $sesi,
                     'ruang' => $ruang,
+                    'kelas' => $kelasDB,
                     'rombel' => $rombel,
                     'tipe_mhs' => $tipeMhs,
                     'status' => $status,
