@@ -21,8 +21,14 @@
                         <i class="fa-solid fa-arrow-left me-1"></i> Kembali
                     </a>
                     <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ url('akademik/kuesioner/rekap/' . $tahun->id . '/export-excel-all') }}" class="btn btn-outline-success">
+                            <i class="fa-solid fa-file-excel me-1"></i> Export Excel All
+                        </a>
                         <a href="{{ $canExport ? url('akademik/kuesioner/rekap/' . $tahun->id . '/export-excel') . ($exportQuery !== '' ? ('?' . $exportQuery) : '') : 'javascript:void(0);' }}" class="btn btn-success {{ $canExport ? '' : 'disabled' }}" {{ $canExport ? '' : 'aria-disabled=true tabindex=-1' }}>
                             <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                        </a>
+                        <a href="{{ url('akademik/kuesioner/rekap/' . $tahun->id . '/export-pdf-all') }}" class="btn btn-outline-danger">
+                            <i class="fa-solid fa-file-pdf me-1"></i> Export PDF All
                         </a>
                         <a href="{{ $canExport ? url('akademik/kuesioner/rekap/' . $tahun->id . '/export-pdf') . ($exportQuery !== '' ? ('?' . $exportQuery) : '') : 'javascript:void(0);' }}" class="btn btn-danger {{ $canExport ? '' : 'disabled' }}" {{ $canExport ? '' : 'aria-disabled=true tabindex=-1' }}>
                             <i class="fa-solid fa-file-pdf me-1"></i> Export PDF

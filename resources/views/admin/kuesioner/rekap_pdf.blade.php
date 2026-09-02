@@ -53,7 +53,28 @@
 </head>
 <body>
     <h3>Rekap Hasil Kuesioner</h3>
-    <p>TA {{ $tahun->awal }}/{{ $tahun->akhir }} ({{ $jenisLabel }}) - {{ $tipeLabel }}</p>
+    <table style="width: 60%; border: none; margin-bottom: 10px;">
+        <tr>
+            <td style="border: none; padding: 2px; width: 100px;"><strong>Tahun Ajaran</strong></td>
+            <td style="border: none; padding: 2px;">: TA {{ $tahun->awal }}/{{ $tahun->akhir }} ({{ $jenisLabel }}) - {{ $tipeLabel }}</td>
+        </tr>
+        @if(isset($jadwal))
+        <tr>
+            <td style="border: none; padding: 2px;"><strong>Mata Kuliah</strong></td>
+            <td style="border: none; padding: 2px;">: {{ $jadwal->kode_mata_kuliah }} - {{ $jadwal->nama_mata_kuliah ?? '-' }}</td>
+        </tr>
+        <tr>
+            <td style="border: none; padding: 2px;"><strong>Kelas / Rombel</strong></td>
+            <td style="border: none; padding: 2px;">: {{ (int)($jadwal->kelas ?? 0) === 3 ? 'RPL' : ((int)($jadwal->kelas ?? 0) === 2 ? 'Karyawan' : 'Reguler') }} {{ $jadwal->rombel ?? '-' }}</td>
+        </tr>
+        @endif
+        @if(isset($dosen))
+        <tr>
+            <td style="border: none; padding: 2px;"><strong>Dosen</strong></td>
+            <td style="border: none; padding: 2px;">: {{ $dosen->nama_dosen ?? '-' }}</td>
+        </tr>
+        @endif
+    </table>
 
     <table>
         <thead>

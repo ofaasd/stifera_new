@@ -275,19 +275,19 @@ class KuesionerController extends Controller
             })
             ->values();
 
-        if ($selectedJadwalId > 0 && !$jadwalOptions->contains(fn ($x) => (int) $x->id_jadwal === $selectedJadwalId)) {
+        if ($selectedJadwalId > 0 && !$jadwalOptions->contains(fn($x) => (int) $x->id_jadwal === $selectedJadwalId)) {
             $selectedJadwalId = 0;
             $selectedDosenId = 0;
         }
 
         $dosenOptions = collect();
         if ($selectedJadwalId > 0) {
-            $jadwalSelected = $jadwalOptions->first(fn ($x) => (int) $x->id_jadwal === $selectedJadwalId);
+            $jadwalSelected = $jadwalOptions->first(fn($x) => (int) $x->id_jadwal === $selectedJadwalId);
 
             $dosenIds = collect([
                 (int) ($jadwalSelected->id_dosen ?? 0),
                 (int) ($jadwalSelected->id_dosen2 ?? 0),
-            ])->filter(fn ($id) => $id > 0)->unique()->values();
+            ])->filter(fn($id) => $id > 0)->unique()->values();
 
             if ($dosenIds->isNotEmpty()) {
                 $dosenOptions = DB::table('pegawai_biodata as pb')
@@ -300,7 +300,7 @@ class KuesionerController extends Controller
                     ->get();
             }
 
-            if ($selectedDosenId > 0 && !$dosenOptions->contains(fn ($x) => (int) $x->id_dosen === $selectedDosenId)) {
+            if ($selectedDosenId > 0 && !$dosenOptions->contains(fn($x) => (int) $x->id_dosen === $selectedDosenId)) {
                 $selectedDosenId = 0;
             }
         }
@@ -341,7 +341,7 @@ class KuesionerController extends Controller
                 if ($jawabanList->isNotEmpty()) {
                     $questionHeaders = $jawabanList
                         ->pluck('no_soal')
-                        ->filter(fn ($value) => trim((string) $value) !== '')
+                        ->filter(fn($value) => trim((string) $value) !== '')
                         ->unique()
                         ->sortBy(function ($value) {
                             return (int) $value;
@@ -349,7 +349,7 @@ class KuesionerController extends Controller
                         ->values();
 
                     $jawabanMatrix = $jawabanList
-                        ->groupBy(fn ($row) => (string) ($row->nim ?? ''))
+                        ->groupBy(fn($row) => (string) ($row->nim ?? ''))
                         ->map(function ($rows) use ($questionHeaders) {
                             $first = $rows->first();
 
@@ -364,7 +364,7 @@ class KuesionerController extends Controller
                             }
 
                             $avg = collect($scores)
-                                ->filter(fn ($nilai) => $nilai !== null)
+                                ->filter(fn($nilai) => $nilai !== null)
                                 ->avg();
 
                             return (object) [
@@ -381,7 +381,7 @@ class KuesionerController extends Controller
 
                     $grandAverage = round((float) $jawabanMatrix
                         ->pluck('avg')
-                        ->filter(fn ($avg) => $avg !== null)
+                        ->filter(fn($avg) => $avg !== null)
                         ->avg(), 2);
                 }
             }
@@ -421,14 +421,14 @@ class KuesionerController extends Controller
 
         $jadwalOptions = $this->getJadwalOptions($tahun, $idTahun);
 
-        if ($selectedJadwalId > 0 && !$jadwalOptions->contains(fn ($x) => (int) $x->id_jadwal === $selectedJadwalId)) {
+        if ($selectedJadwalId > 0 && !$jadwalOptions->contains(fn($x) => (int) $x->id_jadwal === $selectedJadwalId)) {
             $selectedJadwalId = 0;
             $selectedDosenId = 0;
         }
 
         $dosenOptions = $this->getDosenOptions($jadwalOptions, $selectedJadwalId);
 
-        if ($selectedDosenId > 0 && !$dosenOptions->contains(fn ($x) => (int) $x->id_dosen === $selectedDosenId)) {
+        if ($selectedDosenId > 0 && !$dosenOptions->contains(fn($x) => (int) $x->id_dosen === $selectedDosenId)) {
             $selectedDosenId = 0;
         }
 
@@ -559,11 +559,26 @@ class KuesionerController extends Controller
                 ->with('error', 'Silakan pilih jadwal terlebih dahulu sebelum export.');
         }
 
+        $jadwalOptions = $this->getJadwalOptions($tahun, $idTahun);
+
+        $jadwal = null;
+        if ($selectedJadwalId > 0) {
+            $jadwal = $jadwalOptions->first(fn($x) => (int) $x->id_jadwal === $selectedJadwalId);
+        }
+
+        $dosen = null;
+        if ($selectedDosenId > 0) {
+            $dosenOptions = $this->getDosenOptions($jadwalOptions, $selectedJadwalId);
+            $dosen = $dosenOptions->first(fn($x) => (int) $x->id_dosen === $selectedDosenId);
+        }
+
         $rekapData = $this->buildRekapSummary($idTahun, $selectedJadwalId, $selectedDosenId);
         $html = view('admin.kuesioner.rekap_pdf', [
             'tahun' => $tahun,
             'rekapGroups' => $rekapData['rekapGroups'],
             'summary' => $rekapData['summary'],
+            'jadwal' => $jadwal,
+            'dosen' => $dosen,
         ])->render();
 
         $mpdf = new Mpdf([
@@ -579,6 +594,172 @@ class KuesionerController extends Controller
         $mpdf->WriteHTML($html);
 
         return response($mpdf->Output('rekap-kuesioner-' . $idTahun . '.pdf', 'D'))
+            ->header('Content-Type', 'application/pdf');
+    }
+
+    public function exportRekapExcelAll(Request $request, string $id_tahun)
+    {
+        set_time_limit(300); // Allow up to 5 minutes for heavy export
+        ini_set('memory_limit', '512M');
+        $idTahun = (int) $id_tahun;
+        $tahun = MasterTahunAjaran::find($idTahun);
+
+        if (!$tahun) {
+            return redirect()->to(url('akademik/kuesioner'))->with('error', 'Tahun ajaran tidak ditemukan.');
+        }
+
+        $jadwalOptions = $this->getJadwalOptions($tahun, $idTahun);
+
+        $pairs = \Illuminate\Support\Facades\DB::table('tbl_nilai_kuesioner')
+            ->where('id_ta', $idTahun)
+            ->select('id_jadwal', 'id_dosen')
+            ->distinct()
+            ->get();
+
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->removeSheetByIndex(0);
+
+        $jenisLabel = (int) $tahun->jenis === 1 ? 'Ganjil' : ((int) $tahun->jenis === 2 ? 'Genap' : '-');
+        $tipeLabel = (int) $tahun->tipe_mhs === 2 ? 'RPL' : 'Reguler';
+
+        foreach ($pairs as $idx => $pair) {
+            $selectedJadwalId = (int) $pair->id_jadwal;
+            $selectedDosenId = (int) $pair->id_dosen;
+
+            $jadwal = $jadwalOptions->first(fn($x) => (int) $x->id_jadwal === $selectedJadwalId);
+            $dosenOptions = $this->getDosenOptions($jadwalOptions, $selectedJadwalId);
+            $dosen = $dosenOptions->first(fn($x) => (int) $x->id_dosen === $selectedDosenId);
+
+            $rekapData = $this->buildRekapSummary($idTahun, $selectedJadwalId, $selectedDosenId);
+
+            $sheetName = substr(($jadwal->kode_mata_kuliah ?? 'Mk') . '-' . ($dosen->nama_dosen ?? 'Dosen'), 0, 30);
+            // safe sheet name
+            $sheetName = preg_replace('/[*\:\/\\\?\[\]]/', '', $sheetName);
+
+            $sheet = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, $sheetName);
+            $spreadsheet->addSheet($sheet, $idx);
+
+            $sheet->setCellValue('A1', 'Rekap Hasil Kuesioner');
+            $sheet->mergeCells('A1:G1');
+            $sheet->setCellValue('A2', 'TA ' . $tahun->awal . '/' . $tahun->akhir . ' (' . $jenisLabel . ') - ' . $tipeLabel);
+            $sheet->mergeCells('A2:G2');
+
+            if ($jadwal) {
+                $sheet->setCellValue('A3', 'Mata Kuliah: ' . $jadwal->kode_mata_kuliah . ' - ' . ($jadwal->nama_mata_kuliah ?? '-'));
+                $sheet->mergeCells('A3:G3');
+            }
+            if ($dosen) {
+                $sheet->setCellValue('A4', 'Dosen: ' . ($dosen->nama_dosen ?? '-'));
+                $sheet->mergeCells('A4:G4');
+            }
+
+            $sheet->fromArray([
+                ['Soal', 'Sangat Tidak Setuju', 'Tidak Setuju', 'Setuju', 'Sangat Setuju', 'Total Jawaban', 'Rata-rata'],
+            ], null, 'A6');
+
+            $rowIndex = 7;
+            foreach ($rekapData['rekapGroups'] as $group) {
+                $sheet->setCellValue('A' . $rowIndex, $group['label']);
+                $sheet->mergeCells('A' . $rowIndex . ':G' . $rowIndex);
+                $rowIndex++;
+
+                foreach ($group['items'] as $item) {
+                    $sheet->fromArray([
+                        [
+                            'Q' . $item->no_soal . ' - ' . $item->soal,
+                            (int) $item->count_sts,
+                            (int) $item->count_ts,
+                            (int) $item->count_s,
+                            (int) $item->count_ss,
+                            (int) $item->total_jawaban,
+                            (float) $item->rata_nilai,
+                        ],
+                    ], null, 'A' . $rowIndex);
+                    $rowIndex++;
+                }
+            }
+
+            $sheet->fromArray([
+                ['Jumlah', (int) $rekapData['summary']['count_sts'], (int) $rekapData['summary']['count_ts'], (int) $rekapData['summary']['count_s'], (int) $rekapData['summary']['count_ss'], (int) $rekapData['summary']['total_jawaban'], ''],
+                ['Rata-rata', '', '', '', '', '', (float) $rekapData['summary']['rata_nilai']],
+            ], null, 'A' . $rowIndex);
+
+            foreach (range('A', 'G') as $column) {
+                $sheet->getColumnDimension($column)->setAutoSize(true);
+            }
+        }
+
+        if ($spreadsheet->getSheetCount() == 0) {
+            $sheet = $spreadsheet->createSheet();
+            $sheet->setCellValue('A1', 'Tidak ada data kuesioner');
+            $spreadsheet->setActiveSheetIndex(0);
+        }
+
+        $filename = 'rekap-kuesioner-all-' . $idTahun . '.xlsx';
+        $tempFile = tempnam(sys_get_temp_dir(), 'rekap_kuesioner_all_');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
+    }
+
+    public function exportRekapPdfAll(Request $request, string $id_tahun)
+    {
+        set_time_limit(300); // Allow up to 5 minutes for heavy export
+        ini_set('memory_limit', '512M');
+        $idTahun = (int) $id_tahun;
+        $tahun = MasterTahunAjaran::find($idTahun);
+
+        if (!$tahun) {
+            return redirect()->to(url('akademik/kuesioner'))->with('error', 'Tahun ajaran tidak ditemukan.');
+        }
+
+        $jadwalOptions = $this->getJadwalOptions($tahun, $idTahun);
+
+        $pairs = \Illuminate\Support\Facades\DB::table('tbl_nilai_kuesioner')
+            ->where('id_ta', $idTahun)
+            ->select('id_jadwal', 'id_dosen')
+            ->distinct()
+            ->get();
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4-L',
+            'default_font' => 'dejavusans',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
+
+        if ($pairs->isEmpty()) {
+            $mpdf->WriteHTML('<h3>Tidak ada data kuesioner.</h3>');
+        } else {
+            foreach ($pairs as $idx => $pair) {
+                $selectedJadwalId = (int) $pair->id_jadwal;
+                $selectedDosenId = (int) $pair->id_dosen;
+
+                $jadwal = $jadwalOptions->first(fn($x) => (int) $x->id_jadwal === $selectedJadwalId);
+                $dosenOptions = $this->getDosenOptions($jadwalOptions, $selectedJadwalId);
+                $dosen = $dosenOptions->first(fn($x) => (int) $x->id_dosen === $selectedDosenId);
+
+                $rekapData = $this->buildRekapSummary($idTahun, $selectedJadwalId, $selectedDosenId);
+                $html = view('admin.kuesioner.rekap_pdf', [
+                    'tahun' => $tahun,
+                    'rekapGroups' => $rekapData['rekapGroups'],
+                    'summary' => $rekapData['summary'],
+                    'jadwal' => $jadwal,
+                    'dosen' => $dosen,
+                ])->render();
+
+                if ($idx > 0) {
+                    $mpdf->AddPage();
+                }
+                $mpdf->WriteHTML($html);
+            }
+        }
+
+        return response($mpdf->Output('rekap-kuesioner-all-' . $idTahun . '.pdf', 'D'))
             ->header('Content-Type', 'application/pdf');
     }
 
@@ -665,6 +846,7 @@ class KuesionerController extends Controller
                 'mjt.id_dosen',
                 'mjt.id_dosen2',
                 DB::raw('NULLIF(mjt.kode_jadwal, "") as kode_jadwal'),
+                'mjt.kode_mata_kuliah',
                 DB::raw('COALESCE(NULLIF(mmk_temp.nama_mata_kuliah, ""), NULLIF(mjt.kode_mata_kuliah, "")) as nama_mata_kuliah'),
                 DB::raw('NULLIF(mjt.kelas, "") as kelas'),
                 DB::raw('NULLIF(mjt.rombel, "") as rombel'),
@@ -681,6 +863,7 @@ class KuesionerController extends Controller
                 'mj.id_dosen',
                 'mj.id_dosen2',
                 DB::raw('NULLIF(mj.kode_jadwal, "") as kode_jadwal'),
+                'mj.kode_mata_kuliah',
                 DB::raw('COALESCE(NULLIF(mmk_hist.nama_mata_kuliah, ""), NULLIF(mj.kode_mata_kuliah, "")) as nama_mata_kuliah'),
                 DB::raw('NULLIF(mj.kelas, "") as kelas'),
                 DB::raw('NULLIF(mj.rombel, "") as rombel'),
@@ -707,7 +890,7 @@ class KuesionerController extends Controller
             return collect();
         }
 
-        $jadwalSelected = $jadwalOptions->first(fn ($x) => (int) $x->id_jadwal === $selectedJadwalId);
+        $jadwalSelected = $jadwalOptions->first(fn($x) => (int) $x->id_jadwal === $selectedJadwalId);
 
         if (!$jadwalSelected) {
             return collect();
@@ -716,7 +899,7 @@ class KuesionerController extends Controller
         $dosenIds = collect([
             (int) ($jadwalSelected->id_dosen ?? 0),
             (int) ($jadwalSelected->id_dosen2 ?? 0),
-        ])->filter(fn ($id) => $id > 0)->unique()->values();
+        ])->filter(fn($id) => $id > 0)->unique()->values();
 
         if ($dosenIds->isEmpty()) {
             return collect();

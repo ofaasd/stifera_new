@@ -2,9 +2,12 @@
 require 'vendor/autoload.php';
 $app = require_once 'bootstrap/app.php';
 $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
-$rows = \Illuminate\Support\Facades\DB::select("DESCRIBE `mahasiswa`");
-$columns = [];
-foreach ($rows as $row) {
-    $columns[] = $row->Field;
+$idTahun = 21;
+$pairs = \Illuminate\Support\Facades\DB::table('tbl_nilai_kuesioner')
+    ->where('id_ta', $idTahun)
+    ->select('id_jadwal', 'id_dosen')
+    ->distinct()
+    ->get();
+foreach ($pairs as $p) {
+    echo $p->id_jadwal . " - " . $p->id_dosen . "\n";
 }
-print_r(array_intersect(['id_program_studi', 'program_studi', 'prodi'], $columns));
