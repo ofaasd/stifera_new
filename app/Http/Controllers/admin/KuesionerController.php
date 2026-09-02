@@ -509,28 +509,69 @@ class KuesionerController extends Controller
         $jenisLabel = (int) $tahun->jenis === 1 ? 'Ganjil' : ((int) $tahun->jenis === 2 ? 'Genap' : '-');
         $tipeLabel = (int) $tahun->tipe_mhs === 2 ? 'RPL' : 'Reguler';
 
-        $sheet->setCellValue('A1', 'Rekap Hasil Kuesioner');
-        $sheet->mergeCells('A1:G1');
-        $sheet->setCellValue('A2', 'TA ' . $tahun->awal . '/' . $tahun->akhir . ' (' . $jenisLabel . ') - ' . $tipeLabel);
-        $sheet->mergeCells('A2:G2');
+        $logoPath = public_path(config('dz.site_level.logo', 'images/logo/logo.png'));
+        if (file_exists($logoPath)) {
+            $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+            $drawing->setName('Logo');
+            $drawing->setDescription('Logo');
+            $drawing->setPath($logoPath);
+            $drawing->setCoordinates('A1');
+            $drawing->setHeight(70);
+            $drawing->setOffsetX(10);
+            $drawing->setOffsetY(10);
+            $drawing->setWorksheet($sheet);
+        }
 
-        if ($jadwal) {
-            $sheet->setCellValue('A3', 'Mata Kuliah: ' . $jadwal->kode_mata_kuliah . ' - ' . ($jadwal->nama_mata_kuliah ?? '-'));
-            $sheet->mergeCells('A3:G3');
-            $tipeKelas = ((int) ($jadwal->kelas ?? 0) === 3) ? 'RPL' : (((int) ($jadwal->kelas ?? 0) === 2) ? 'Karyawan' : 'Reguler');
-            $sheet->setCellValue('A4', 'Kelas / Rombel / Prodi: ' . $tipeKelas . ' ' . ($jadwal->rombel ?? '-') . ' / Program Studi ' . ($jadwal->nama_jurusan ?? '-'));
-            $sheet->mergeCells('A4:G4');
-        }
-        if ($dosen) {
-            $sheet->setCellValue('A5', 'Dosen: ' . ($dosen->nama_dosen ?? '-'));
-            $sheet->mergeCells('A5:G5');
-        }
+        $sheet->setCellValue('B1', 'SEKOLAH TINGGI ILMU FARMASI NUSAPUTERA');
+        $sheet->mergeCells('B1:G1');
+        $sheet->getStyle('B1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('B1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getRowDimension(1)->setRowHeight(25);
+
+        $sheet->setCellValue('B2', 'Jalan Medoho 3 No.2, Telp/ Fax (024)6747012 Semarang');
+        $sheet->mergeCells('B2:G2');
+        $sheet->setCellValue('B3', 'E-mail : stiferanusaputera@gmail.com');
+        $sheet->mergeCells('B3:G3');
+        $sheet->setCellValue('B4', 'Website: https://www.stifera.ac.id');
+        $sheet->mergeCells('B4:G4');
+
+        $sheet->setCellValue('A6', 'REKAP HASIL KUESIONER');
+        $sheet->mergeCells('A6:G6');
+        $sheet->getStyle('A6')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('A6')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $dosenName = isset($dosen) ? strtoupper($dosen->nama_dosen) : '-';
+        $taLabel = $tahun->awal . '/' . $tahun->akhir;
+        $sheet->setCellValue('A8', 'Nama Dosen');
+        $sheet->setCellValue('B8', ':');
+        $sheet->setCellValue('C8', $dosenName);
+        $sheet->mergeCells('C8:D8');
+        $sheet->setCellValue('E8', 'Tahun Ajaran');
+        $sheet->setCellValue('F8', ':');
+        $sheet->setCellValue('G8', $taLabel);
+
+        $mkLabel = isset($jadwal) ? ($jadwal->kode_mata_kuliah . ' - ' . ($jadwal->nama_mata_kuliah ?? '-')) : '-';
+        $semesterLabel = $jenisLabel . ' (' . $tipeLabel . ')';
+        $sheet->setCellValue('A9', 'Mata Kuliah');
+        $sheet->setCellValue('B9', ':');
+        $sheet->setCellValue('C9', $mkLabel);
+        $sheet->mergeCells('C9:D9');
+        $sheet->setCellValue('E9', 'Semester');
+        $sheet->setCellValue('F9', ':');
+        $sheet->setCellValue('G9', $semesterLabel);
+
+        $tipeKelas = isset($jadwal) ? (((int) ($jadwal->kelas ?? 0) === 3) ? 'RPL' : (((int) ($jadwal->kelas ?? 0) === 2) ? 'Karyawan' : 'Reguler')) : '';
+        $prodiLabel = isset($jadwal) ? ($tipeKelas . ' ' . ($jadwal->rombel ?? '-') . ' / Program Studi ' . ($jadwal->nama_jurusan ?? '-')) : '-';
+        $sheet->setCellValue('A10', 'Kelas/Rombel/Prodi');
+        $sheet->setCellValue('B10', ':');
+        $sheet->setCellValue('C10', $prodiLabel);
+        $sheet->mergeCells('C10:G10');
 
         $sheet->fromArray([
             ['Soal', 'Sangat Tidak Setuju', 'Tidak Setuju', 'Setuju', 'Sangat Setuju', 'Total Jawaban', 'Rata-rata'],
-        ], null, 'A7');
+        ], null, 'A12');
 
-        $rowIndex = 8;
+        $rowIndex = 13;
         foreach ($rekapData['rekapGroups'] as $group) {
             $sheet->setCellValue('A' . $rowIndex, $group['label']);
             $sheet->mergeCells('A' . $rowIndex . ':G' . $rowIndex);
@@ -668,28 +709,69 @@ class KuesionerController extends Controller
             $sheet = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, $sheetName);
             $spreadsheet->addSheet($sheet, $idx);
 
-            $sheet->setCellValue('A1', 'Rekap Hasil Kuesioner');
-            $sheet->mergeCells('A1:G1');
-            $sheet->setCellValue('A2', 'TA ' . $tahun->awal . '/' . $tahun->akhir . ' (' . $jenisLabel . ') - ' . $tipeLabel);
-            $sheet->mergeCells('A2:G2');
+            $logoPath = public_path(config('dz.site_level.logo', 'images/logo/logo.png'));
+            if (file_exists($logoPath)) {
+                $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+                $drawing->setName('Logo');
+                $drawing->setDescription('Logo');
+                $drawing->setPath($logoPath);
+                $drawing->setCoordinates('A1');
+                $drawing->setHeight(70);
+                $drawing->setOffsetX(10);
+                $drawing->setOffsetY(10);
+                $drawing->setWorksheet($sheet);
+            }
 
-            if ($jadwal) {
-                $sheet->setCellValue('A3', 'Mata Kuliah: ' . $jadwal->kode_mata_kuliah . ' - ' . ($jadwal->nama_mata_kuliah ?? '-'));
-                $sheet->mergeCells('A3:G3');
-                $tipeKelas = ((int) ($jadwal->kelas ?? 0) === 3) ? 'RPL' : (((int) ($jadwal->kelas ?? 0) === 2) ? 'Karyawan' : 'Reguler');
-                $sheet->setCellValue('A4', 'Kelas / Rombel / Prodi: ' . $tipeKelas . ' ' . ($jadwal->rombel ?? '-') . ' / Program Studi ' . ($jadwal->nama_jurusan ?? '-'));
-                $sheet->mergeCells('A4:G4');
-            }
-            if ($dosen) {
-                $sheet->setCellValue('A5', 'Dosen: ' . ($dosen->nama_dosen ?? '-'));
-                $sheet->mergeCells('A5:G5');
-            }
+            $sheet->setCellValue('B1', 'SEKOLAH TINGGI ILMU FARMASI NUSAPUTERA');
+            $sheet->mergeCells('B1:G1');
+            $sheet->getStyle('B1')->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle('B1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+            $sheet->getRowDimension(1)->setRowHeight(25);
+
+            $sheet->setCellValue('B2', 'Jalan Medoho 3 No.2, Telp/ Fax (024)6747012 Semarang');
+            $sheet->mergeCells('B2:G2');
+            $sheet->setCellValue('B3', 'E-mail : stiferanusaputera@gmail.com');
+            $sheet->mergeCells('B3:G3');
+            $sheet->setCellValue('B4', 'Website: https://www.stifera.ac.id');
+            $sheet->mergeCells('B4:G4');
+
+            $sheet->setCellValue('A6', 'REKAP HASIL KUESIONER');
+            $sheet->mergeCells('A6:G6');
+            $sheet->getStyle('A6')->getFont()->setBold(true)->setSize(12);
+            $sheet->getStyle('A6')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            $dosenName = isset($dosen) ? strtoupper($dosen->nama_dosen) : '-';
+            $taLabel = $tahun->awal . '/' . $tahun->akhir;
+            $sheet->setCellValue('A8', 'Nama Dosen');
+            $sheet->setCellValue('B8', ':');
+            $sheet->setCellValue('C8', $dosenName);
+            $sheet->mergeCells('C8:D8');
+            $sheet->setCellValue('E8', 'Tahun Ajaran');
+            $sheet->setCellValue('F8', ':');
+            $sheet->setCellValue('G8', $taLabel);
+
+            $mkLabel = isset($jadwal) ? ($jadwal->kode_mata_kuliah . ' - ' . ($jadwal->nama_mata_kuliah ?? '-')) : '-';
+            $semesterLabel = $jenisLabel . ' (' . $tipeLabel . ')';
+            $sheet->setCellValue('A9', 'Mata Kuliah');
+            $sheet->setCellValue('B9', ':');
+            $sheet->setCellValue('C9', $mkLabel);
+            $sheet->mergeCells('C9:D9');
+            $sheet->setCellValue('E9', 'Semester');
+            $sheet->setCellValue('F9', ':');
+            $sheet->setCellValue('G9', $semesterLabel);
+
+            $tipeKelas = isset($jadwal) ? (((int) ($jadwal->kelas ?? 0) === 3) ? 'RPL' : (((int) ($jadwal->kelas ?? 0) === 2) ? 'Karyawan' : 'Reguler')) : '';
+            $prodiLabel = isset($jadwal) ? ($tipeKelas . ' ' . ($jadwal->rombel ?? '-') . ' / Program Studi ' . ($jadwal->nama_jurusan ?? '-')) : '-';
+            $sheet->setCellValue('A10', 'Kelas/Rombel/Prodi');
+            $sheet->setCellValue('B10', ':');
+            $sheet->setCellValue('C10', $prodiLabel);
+            $sheet->mergeCells('C10:G10');
 
             $sheet->fromArray([
                 ['Soal', 'Sangat Tidak Setuju', 'Tidak Setuju', 'Setuju', 'Sangat Setuju', 'Total Jawaban', 'Rata-rata'],
-            ], null, 'A7');
+            ], null, 'A12');
 
-            $rowIndex = 8;
+            $rowIndex = 13;
             foreach ($rekapData['rekapGroups'] as $group) {
                 $sheet->setCellValue('A' . $rowIndex, $group['label']);
                 $sheet->mergeCells('A' . $rowIndex . ':G' . $rowIndex);
