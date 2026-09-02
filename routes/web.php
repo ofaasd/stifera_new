@@ -412,6 +412,7 @@ Route::middleware('auth:mahasiswa')->group(function () {
     Route::get('/mhs/krs', [MahasiswaKrsController::class, 'index'])->name('mahasiswa.krs.index');
     Route::get('/mhs/input_krs', [MahasiswaKrsController::class, 'index'])->name('mahasiswa.krs.input');
     Route::post('/mhs/krs', [MahasiswaKrsController::class, 'store'])->name('mahasiswa.krs.store');
+    Route::delete('/mhs/krs/{id}', [MahasiswaKrsController::class, 'destroy'])->name('mahasiswa.krs.destroy');
     Route::get('/mhs/krs/download', [MahasiswaKrsController::class, 'download'])->name('mahasiswa.krs.download');
     Route::get('/mhs/khs', [MahasiswaKhsController::class, 'index'])->name('mahasiswa.khs.index');
     Route::get('/mhs/khs/kuesioner/{id_jadwal}/{id_dosen}', [MahasiswaKhsController::class, 'kuesionerForm'])->name('mahasiswa.khs.kuesioner.form');
@@ -558,7 +559,7 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('master/matriks', [\App\Http\Controllers\admin\MatriksController::class, 'index'])->name('matriks.index');
     Route::post('master/matriks', [\App\Http\Controllers\admin\MatriksController::class, 'store'])->name('matriks.store');
 
-        // Ijazah Admin Routes
+    // Ijazah Admin Routes
     Route::get('admin/ijazah', [\App\Http\Controllers\admin\IjazahController::class, 'index'])->name('admin.ijazah.index');
     Route::post('admin/ijazah/periode', [\App\Http\Controllers\admin\IjazahController::class, 'storePeriode'])->name('admin.ijazah.storePeriode');
     Route::post('admin/ijazah/periode/{id}/update', [\App\Http\Controllers\admin\IjazahController::class, 'updatePeriode'])->name('admin.ijazah.updatePeriode');
