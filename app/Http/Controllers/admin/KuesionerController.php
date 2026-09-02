@@ -487,6 +487,19 @@ class KuesionerController extends Controller
                 ->with('error', 'Silakan pilih jadwal terlebih dahulu sebelum export.');
         }
 
+        $jadwalOptions = $this->getJadwalOptions($tahun, $idTahun);
+
+        $jadwal = null;
+        if ($selectedJadwalId > 0) {
+            $jadwal = $jadwalOptions->first(fn($x) => (int) $x->id_jadwal === $selectedJadwalId);
+        }
+
+        $dosen = null;
+        if ($selectedDosenId > 0) {
+            $dosenOptions = $this->getDosenOptions($jadwalOptions, $selectedJadwalId);
+            $dosen = $dosenOptions->first(fn($x) => (int) $x->id_dosen === $selectedDosenId);
+        }
+
         $rekapData = $this->buildRekapSummary($idTahun, $selectedJadwalId, $selectedDosenId);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -499,11 +512,23 @@ class KuesionerController extends Controller
         $sheet->setCellValue('A2', 'TA ' . $tahun->awal . '/' . $tahun->akhir . ' (' . $jenisLabel . ') - ' . $tipeLabel);
         $sheet->mergeCells('A2:G2');
 
+        if ($jadwal) {
+            $sheet->setCellValue('A3', 'Mata Kuliah: ' . $jadwal->kode_mata_kuliah . ' - ' . ($jadwal->nama_mata_kuliah ?? '-'));
+            $sheet->mergeCells('A3:G3');
+            $tipeKelas = ((int) ($jadwal->kelas ?? 0) === 3) ? 'RPL' : (((int) ($jadwal->kelas ?? 0) === 2) ? 'Karyawan' : 'Reguler');
+            $sheet->setCellValue('A4', 'Kelas / Rombel / Prodi: ' . $tipeKelas . ' ' . ($jadwal->rombel ?? '-') . ' / Program Studi ' . ($jadwal->nama_program_studi ?? '-'));
+            $sheet->mergeCells('A4:G4');
+        }
+        if ($dosen) {
+            $sheet->setCellValue('A5', 'Dosen: ' . ($dosen->nama_dosen ?? '-'));
+            $sheet->mergeCells('A5:G5');
+        }
+
         $sheet->fromArray([
             ['Soal', 'Sangat Tidak Setuju', 'Tidak Setuju', 'Setuju', 'Sangat Setuju', 'Total Jawaban', 'Rata-rata'],
-        ], null, 'A4');
+        ], null, 'A7');
 
-        $rowIndex = 5;
+        $rowIndex = 8;
         foreach ($rekapData['rekapGroups'] as $group) {
             $sheet->setCellValue('A' . $rowIndex, $group['label']);
             $sheet->mergeCells('A' . $rowIndex . ':G' . $rowIndex);
@@ -583,7 +608,7 @@ class KuesionerController extends Controller
 
         $mpdf = new Mpdf([
             'mode' => 'utf-8',
-            'format' => 'A4-L',
+            'format' => 'A4-P',
             'default_font' => 'dejavusans',
             'margin_left' => 10,
             'margin_right' => 10,
@@ -647,17 +672,20 @@ class KuesionerController extends Controller
             if ($jadwal) {
                 $sheet->setCellValue('A3', 'Mata Kuliah: ' . $jadwal->kode_mata_kuliah . ' - ' . ($jadwal->nama_mata_kuliah ?? '-'));
                 $sheet->mergeCells('A3:G3');
+                $tipeKelas = ((int) ($jadwal->kelas ?? 0) === 3) ? 'RPL' : (((int) ($jadwal->kelas ?? 0) === 2) ? 'Karyawan' : 'Reguler');
+                $sheet->setCellValue('A4', 'Kelas / Rombel / Prodi: ' . $tipeKelas . ' ' . ($jadwal->rombel ?? '-') . ' / Program Studi ' . ($jadwal->nama_program_studi ?? '-'));
+                $sheet->mergeCells('A4:G4');
             }
             if ($dosen) {
-                $sheet->setCellValue('A4', 'Dosen: ' . ($dosen->nama_dosen ?? '-'));
-                $sheet->mergeCells('A4:G4');
+                $sheet->setCellValue('A5', 'Dosen: ' . ($dosen->nama_dosen ?? '-'));
+                $sheet->mergeCells('A5:G5');
             }
 
             $sheet->fromArray([
                 ['Soal', 'Sangat Tidak Setuju', 'Tidak Setuju', 'Setuju', 'Sangat Setuju', 'Total Jawaban', 'Rata-rata'],
-            ], null, 'A6');
+            ], null, 'A7');
 
-            $rowIndex = 7;
+            $rowIndex = 8;
             foreach ($rekapData['rekapGroups'] as $group) {
                 $sheet->setCellValue('A' . $rowIndex, $group['label']);
                 $sheet->mergeCells('A' . $rowIndex . ':G' . $rowIndex);
@@ -724,7 +752,7 @@ class KuesionerController extends Controller
 
         $mpdf = new Mpdf([
             'mode' => 'utf-8',
-            'format' => 'A4-L',
+            'format' => 'A4-P',
             'default_font' => 'dejavusans',
             'margin_left' => 10,
             'margin_right' => 10,
@@ -841,6 +869,7 @@ class KuesionerController extends Controller
     {
         $jadwalFromTemp = DB::table('master_jadwal_temp as mjt')
             ->leftJoin('master_mata_kuliah as mmk_temp', 'mmk_temp.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
+            ->leftJoin('master_program_studi as mps_temp', 'mps_temp.id_program_studi', '=', 'mmk_temp.id_program_studi')
             ->select([
                 DB::raw('mjt.id as id_jadwal'),
                 'mjt.id_dosen',
@@ -850,6 +879,7 @@ class KuesionerController extends Controller
                 DB::raw('COALESCE(NULLIF(mmk_temp.nama_mata_kuliah, ""), NULLIF(mjt.kode_mata_kuliah, "")) as nama_mata_kuliah'),
                 DB::raw('NULLIF(mjt.kelas, "") as kelas'),
                 DB::raw('NULLIF(mjt.rombel, "") as rombel'),
+                'mps_temp.nama_program_studi',
                 DB::raw("CONCAT(COALESCE(NULLIF(mjt.kode_jadwal, ''), CONCAT('Jadwal #', mjt.id)), ' - ', COALESCE(NULLIF(mmk_temp.nama_mata_kuliah, ''), NULLIF(mjt.kode_mata_kuliah, ''), 'Mata Kuliah')) as label_jadwal"),
             ])
             ->where('mjt.id_tahun', $idTahun)
@@ -858,6 +888,7 @@ class KuesionerController extends Controller
 
         $jadwalFromHistory = DB::table('master_jadwal as mj')
             ->leftJoin('master_mata_kuliah as mmk_hist', 'mmk_hist.kode_mata_kuliah', '=', 'mj.kode_mata_kuliah')
+            ->leftJoin('master_program_studi as mps_hist', 'mps_hist.id_program_studi', '=', 'mmk_hist.id_program_studi')
             ->select([
                 'mj.id_jadwal',
                 'mj.id_dosen',
@@ -867,6 +898,7 @@ class KuesionerController extends Controller
                 DB::raw('COALESCE(NULLIF(mmk_hist.nama_mata_kuliah, ""), NULLIF(mj.kode_mata_kuliah, "")) as nama_mata_kuliah'),
                 DB::raw('NULLIF(mj.kelas, "") as kelas'),
                 DB::raw('NULLIF(mj.rombel, "") as rombel'),
+                'mps_hist.nama_program_studi',
                 DB::raw("CONCAT(COALESCE(NULLIF(mj.kode_jadwal, ''), CONCAT('Jadwal #', mj.id_jadwal)), ' - ', COALESCE(NULLIF(mmk_hist.nama_mata_kuliah, ''), NULLIF(mj.kode_mata_kuliah, ''), 'Mata Kuliah')) as label_jadwal"),
             ])
             ->where('mj.id_tahun', $idTahun)
