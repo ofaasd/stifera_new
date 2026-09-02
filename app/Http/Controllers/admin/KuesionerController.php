@@ -632,9 +632,9 @@ class KuesionerController extends Controller
 
             $rekapData = $this->buildRekapSummary($idTahun, $selectedJadwalId, $selectedDosenId);
 
-            $sheetName = substr(($jadwal->kode_mata_kuliah ?? 'Mk') . '-' . ($dosen->nama_dosen ?? 'Dosen'), 0, 30);
-            // safe sheet name
-            $sheetName = preg_replace('/[*\:\/\\\?\[\]]/', '', $sheetName);
+            $baseName = ($jadwal->kode_mata_kuliah ?? 'Mk') . '-' . ($dosen->nama_dosen ?? 'Ds');
+            $baseName = preg_replace('/[*\:\/\\\?\[\]]/', '', $baseName);
+            $sheetName = substr($baseName, 0, 20) . '-' . $selectedJadwalId . '-' . $selectedDosenId;
 
             $sheet = new \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet($spreadsheet, $sheetName);
             $spreadsheet->addSheet($sheet, $idx);
