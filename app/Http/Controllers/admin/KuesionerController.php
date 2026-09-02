@@ -500,6 +500,8 @@ class KuesionerController extends Controller
             $dosen = $dosenOptions->first(fn($x) => (int) $x->id_dosen === $selectedDosenId);
         }
 
+        $this->applyFallbacks($jadwal, $dosen, $selectedJadwalId, $selectedDosenId);
+
         $rekapData = $this->buildRekapSummary($idTahun, $selectedJadwalId, $selectedDosenId);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -655,6 +657,8 @@ class KuesionerController extends Controller
             $dosenOptions = $this->getDosenOptions($jadwalOptions, $selectedJadwalId);
             $dosen = $dosenOptions->first(fn($x) => (int) $x->id_dosen === $selectedDosenId);
 
+            $this->applyFallbacks($jadwal, $dosen, $selectedJadwalId, $selectedDosenId);
+
             $rekapData = $this->buildRekapSummary($idTahun, $selectedJadwalId, $selectedDosenId);
 
             $baseName = ($jadwal->kode_mata_kuliah ?? 'Mk') . '-' . ($dosen->nama_dosen ?? 'Ds');
@@ -771,6 +775,8 @@ class KuesionerController extends Controller
                 $dosenOptions = $this->getDosenOptions($jadwalOptions, $selectedJadwalId);
                 $dosen = $dosenOptions->first(fn($x) => (int) $x->id_dosen === $selectedDosenId);
 
+                $this->applyFallbacks($jadwal, $dosen, $selectedJadwalId, $selectedDosenId);
+
                 $rekapData = $this->buildRekapSummary($idTahun, $selectedJadwalId, $selectedDosenId);
                 $html = view('admin.kuesioner.rekap_pdf', [
                     'tahun' => $tahun,
@@ -869,6 +875,7 @@ class KuesionerController extends Controller
     {
         $jadwalFromTemp = DB::table('master_jadwal_temp as mjt')
             ->leftJoin('master_mata_kuliah as mmk_temp', 'mmk_temp.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
+            ->leftJoin('program_studi as ps_temp', 'ps_temp.id', '=', 'mmk_temp.id_program_studi')
             ->leftJoin('master_program_studi as mps_temp', 'mps_temp.id', '=', 'mmk_temp.id_program_studi')
             ->select([
                 DB::raw('mjt.id as id_jadwal'),
@@ -879,7 +886,7 @@ class KuesionerController extends Controller
                 DB::raw('COALESCE(NULLIF(mmk_temp.nama_mata_kuliah, ""), NULLIF(mjt.kode_mata_kuliah, "")) as nama_mata_kuliah'),
                 DB::raw('NULLIF(mjt.kelas, "") as kelas'),
                 DB::raw('NULLIF(mjt.rombel, "") as rombel'),
-                'mps_temp.nama_jurusan',
+                DB::raw("COALESCE(ps_temp.nama_jurusan, mps_temp.nama_jurusan) as nama_jurusan"),
                 DB::raw("CONCAT(COALESCE(NULLIF(mjt.kode_jadwal, ''), CONCAT('Jadwal #', mjt.id)), ' - ', COALESCE(NULLIF(mmk_temp.nama_mata_kuliah, ''), NULLIF(mjt.kode_mata_kuliah, ''), 'Mata Kuliah')) as label_jadwal"),
             ])
             ->where('mjt.id_tahun', $idTahun)
@@ -888,6 +895,7 @@ class KuesionerController extends Controller
 
         $jadwalFromHistory = DB::table('master_jadwal as mj')
             ->leftJoin('master_mata_kuliah as mmk_hist', 'mmk_hist.kode_mata_kuliah', '=', 'mj.kode_mata_kuliah')
+            ->leftJoin('program_studi as ps_hist', 'ps_hist.id', '=', 'mmk_hist.id_program_studi')
             ->leftJoin('master_program_studi as mps_hist', 'mps_hist.id', '=', 'mmk_hist.id_program_studi')
             ->select([
                 'mj.id_jadwal',
@@ -898,7 +906,7 @@ class KuesionerController extends Controller
                 DB::raw('COALESCE(NULLIF(mmk_hist.nama_mata_kuliah, ""), NULLIF(mj.kode_mata_kuliah, "")) as nama_mata_kuliah'),
                 DB::raw('NULLIF(mj.kelas, "") as kelas'),
                 DB::raw('NULLIF(mj.rombel, "") as rombel'),
-                'mps_hist.nama_jurusan',
+                DB::raw("COALESCE(ps_hist.nama_jurusan, mps_hist.nama_jurusan) as nama_jurusan"),
                 DB::raw("CONCAT(COALESCE(NULLIF(mj.kode_jadwal, ''), CONCAT('Jadwal #', mj.id_jadwal)), ' - ', COALESCE(NULLIF(mmk_hist.nama_mata_kuliah, ''), NULLIF(mj.kode_mata_kuliah, ''), 'Mata Kuliah')) as label_jadwal"),
             ])
             ->where('mj.id_tahun', $idTahun)
@@ -945,5 +953,54 @@ class KuesionerController extends Controller
             ->whereIn('pb.id', $dosenIds->all())
             ->orderBy('nama_dosen')
             ->get();
+    }
+
+    private function applyFallbacks(&$jadwal, &$dosen, int $selectedJadwalId, int $selectedDosenId): void
+    {
+        if (!$jadwal && $selectedJadwalId > 0) {
+            $jadwal = DB::table('master_jadwal_temp as mjt')
+                ->leftJoin('master_mata_kuliah as mmk_temp', 'mmk_temp.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
+                ->leftJoin('program_studi as ps_temp', 'ps_temp.id', '=', 'mmk_temp.id_program_studi')
+                ->leftJoin('master_program_studi as mps_temp', 'mps_temp.id', '=', 'mmk_temp.id_program_studi')
+                ->select([
+                    DB::raw('mjt.id as id_jadwal'),
+                    DB::raw('NULLIF(mjt.kode_jadwal, "") as kode_jadwal'),
+                    'mjt.kode_mata_kuliah',
+                    DB::raw('COALESCE(NULLIF(mmk_temp.nama_mata_kuliah, ""), NULLIF(mjt.kode_mata_kuliah, "")) as nama_mata_kuliah'),
+                    DB::raw('NULLIF(mjt.kelas, "") as kelas'),
+                    DB::raw('NULLIF(mjt.rombel, "") as rombel'),
+                    DB::raw("COALESCE(ps_temp.nama_jurusan, mps_temp.nama_jurusan) as nama_jurusan")
+                ])
+                ->where('mjt.id', $selectedJadwalId)
+                ->first();
+
+            if (!$jadwal) {
+                $jadwal = DB::table('master_jadwal as mj')
+                    ->leftJoin('master_mata_kuliah as mmk_hist', 'mmk_hist.kode_mata_kuliah', '=', 'mj.kode_mata_kuliah')
+                    ->leftJoin('program_studi as ps_hist', 'ps_hist.id', '=', 'mmk_hist.id_program_studi')
+                    ->leftJoin('master_program_studi as mps_hist', 'mps_hist.id', '=', 'mmk_hist.id_program_studi')
+                    ->select([
+                        'mj.id_jadwal',
+                        DB::raw('NULLIF(mj.kode_jadwal, "") as kode_jadwal'),
+                        'mj.kode_mata_kuliah',
+                        DB::raw('COALESCE(NULLIF(mmk_hist.nama_mata_kuliah, ""), NULLIF(mj.kode_mata_kuliah, "")) as nama_mata_kuliah'),
+                        DB::raw('NULLIF(mj.kelas, "") as kelas'),
+                        DB::raw('NULLIF(mj.rombel, "") as rombel'),
+                        DB::raw("COALESCE(ps_hist.nama_jurusan, mps_hist.nama_jurusan) as nama_jurusan")
+                    ])
+                    ->where('mj.id_jadwal', $selectedJadwalId)
+                    ->first();
+            }
+        }
+
+        if (!$dosen && $selectedDosenId > 0) {
+            $dosen = DB::table('pegawai_biodata as pb')
+                ->select([
+                    'pb.id as id_dosen',
+                    DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen")
+                ])
+                ->where('pb.id', $selectedDosenId)
+                ->first();
+        }
     }
 }
