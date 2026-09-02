@@ -197,7 +197,7 @@
                                         <th>Sesi</th>
                                         <th>Ruang</th>
                                         <th class="dosen-column">Dosen</th>
-                                        <td width="1"></td>
+                                        <th style="width: 80px;" class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -214,7 +214,17 @@
                                             <td>{{ $row->sesi ?? '-' }}</td>
                                             <td>{{ $ruangKrs }}</td>
                                             <td class="dosen-column">{{ trim($row->nama_dosen ?? '-') }}</td>
-                                            <td></td>
+                                            <td class="text-center">
+                                                @if(!$isKrsDisetujuiWali)
+                                                    <form method="POST" action="{{ route('mahasiswa.krs.destroy', $row->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan mata kuliah ini?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-sm shadow-sm" title="Hapus">
+                                                            <i class="fa fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </td>
                                         </tr>
                                     @empty
                                         <tr>

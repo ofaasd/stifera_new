@@ -77,7 +77,7 @@ class MahasiswaKrsController extends Controller
 
         $tahunAktif = $this->getTahunAktifByTipe((int) ($mahasiswa->tipe_mhs ?? 0));
         if (!$tahunAktif) {
-            return redirect()->to(url('mhs/krs'))->with('error', 'Tahun ajaran aktif tidak ditemukan.');
+            return redirect()->to(url('mhs/input_krs'))->with('error', 'Tahun ajaran aktif tidak ditemukan.');
         }
 
         $isKrsDiizinkan = DB::table('master_keuangan_mhs')
@@ -87,7 +87,7 @@ class MahasiswaKrsController extends Controller
             ->exists();
 
         if (!$isKrsDiizinkan) {
-            return redirect()->to(url('mhs/krs'))->with('error', 'Input KRS belum diizinkan oleh admin keuangan.');
+            return redirect()->to(url('mhs/input_krs'))->with('error', 'Input KRS belum diizinkan oleh admin keuangan.');
         }
 
         $isKrsDisetujuiWali = DB::table('master_krs_temp')
@@ -97,7 +97,7 @@ class MahasiswaKrsController extends Controller
             ->exists();
 
         if ($isKrsDisetujuiWali) {
-            return redirect()->to(url('mhs/krs'))->with('error', 'KRS Anda sudah disetujui dosen wali, sehingga tidak dapat menambah mata kuliah lagi.');
+            return redirect()->to(url('mhs/input_krs'))->with('error', 'KRS Anda sudah disetujui dosen wali, sehingga tidak dapat menambah mata kuliah lagi.');
         }
 
         $idJadwal = (int) $request->input('id_jadwal');
@@ -112,7 +112,7 @@ class MahasiswaKrsController extends Controller
             ->first();
 
         if (!$jadwal) {
-            return redirect()->to(url('mhs/krs'))->with('error', 'Jadwal tidak ditemukan atau tidak aktif.');
+            return redirect()->to(url('mhs/input_krs'))->with('error', 'Jadwal tidak ditemukan atau tidak aktif.');
         }
 
         $sudahAda = DB::table('master_krs_temp')
@@ -122,7 +122,7 @@ class MahasiswaKrsController extends Controller
             ->exists();
 
         if ($sudahAda) {
-            return redirect()->to(url('mhs/krs'))->with('error', 'Mata kuliah tersebut sudah ada di KRS Anda.');
+            return redirect()->to(url('mhs/input_krs'))->with('error', 'Mata kuliah tersebut sudah ada di KRS Anda.');
         }
 
         $kuotaMaks = (int) ($jadwal->kuota_diambil ?? 0);
@@ -133,7 +133,7 @@ class MahasiswaKrsController extends Controller
                 ->count();
 
             if ($totalDiambil >= $kuotaMaks) {
-                return redirect()->to(url('mhs/krs'))->with('error', 'Kuota mata kuliah tersebut sudah penuh.');
+                return redirect()->to(url('mhs/input_krs'))->with('error', 'Kuota mata kuliah tersebut sudah penuh.');
             }
         }
 
@@ -146,7 +146,7 @@ class MahasiswaKrsController extends Controller
         $sksBaru = (int) ($jadwal->jumlah_sks ?? 0);
 
         if (($totalSksSaatIni + $sksBaru) > $batasSks) {
-            return redirect()->to(url('mhs/krs'))->with('error', 'Total SKS melebihi batas pengambilan SKS Anda. Batas maksimal semester ini adalah ' . $batasSks . ' SKS.');
+            return redirect()->to(url('mhs/input_krs'))->with('error', 'Total SKS melebihi batas pengambilan SKS Anda. Batas maksimal semester ini adalah ' . $batasSks . ' SKS.');
         }
 
         DB::table('master_krs_temp')->insert([
@@ -164,7 +164,54 @@ class MahasiswaKrsController extends Controller
             'log_date' => now(),
         ]);
 
-        return redirect()->to(url('mhs/krs'))->with('status', 'Input KRS berhasil disimpan.');
+        return redirect()->to(url('mhs/input_krs'))->with('status', 'Input KRS berhasil disimpan.');
+    }
+
+    public function destroy($id)
+    {
+        $mahasiswa = Auth::guard('mahasiswa')->user();
+        if (!$mahasiswa) {
+            return redirect()->route('mahasiswa.login');
+        }
+
+        $tahunAktif = $this->getTahunAktifByTipe((int) ($mahasiswa->tipe_mhs ?? 0));
+        if (!$tahunAktif) {
+            return redirect()->to(url('mhs/input_krs'))->with('error', 'Tahun ajaran aktif tidak ditemukan.');
+        }
+
+        $isKrsDiizinkan = DB::table('master_keuangan_mhs')
+            ->where('id_mahasiswa', (int) $mahasiswa->id)
+            ->where('id_tahun_ajaran', (int) $tahunAktif->id)
+            ->where('krs', 1)
+            ->exists();
+
+        if (!$isKrsDiizinkan) {
+            return redirect()->to(url('mhs/input_krs'))->with('error', 'KRS belum diizinkan oleh admin keuangan.');
+        }
+
+        $isKrsDisetujuiWali = DB::table('master_krs_temp')
+            ->where('nim', $mahasiswa->nim)
+            ->where('id_tahun', (int) $tahunAktif->id)
+            ->where('is_publish', 1)
+            ->exists();
+
+        if ($isKrsDisetujuiWali) {
+            return redirect()->to(url('mhs/input_krs'))->with('error', 'KRS Anda sudah disetujui dosen wali, sehingga tidak dapat membatalkan mata kuliah.');
+        }
+
+        $krs = DB::table('master_krs_temp')
+            ->where('id', (int) $id)
+            ->where('nim', $mahasiswa->nim)
+            ->where('id_tahun', (int) $tahunAktif->id)
+            ->first();
+
+        if (!$krs) {
+            return redirect()->to(url('mhs/input_krs'))->with('error', 'Mata kuliah tidak ditemukan di KRS Anda.');
+        }
+
+        DB::table('master_krs_temp')->where('id', (int) $id)->delete();
+
+        return redirect()->to(url('mhs/input_krs'))->with('status', 'Mata kuliah berhasil dihapus dari KRS.');
     }
 
     public function download()
@@ -259,22 +306,22 @@ class MahasiswaKrsController extends Controller
         if ($tahun && $tahun->is_aktif == 1) {
             //gunakan jadwal temp
             return DB::table('master_krs_temp as mkt')
-            ->leftJoin('master_jadwal_temp as mjt', function ($join) use ($idTahun) {
-                $join->on('mjt.id', '=', 'mkt.id_jadwal')
-                    ->where('mjt.id_tahun', '=', $idTahun);
-            })
-            ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
-            ->leftJoin('pegawai_biodata as pb', 'pb.id', '=', 'mkt.id_dosen')
-            ->select(
-                'mkt.*',
-                'mmk.nama_mata_kuliah',
-                'mjt.kode_mata_kuliah',
-                DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen")
-            )
-            ->where('mkt.nim', $nim)
-            ->where('mkt.id_tahun', $idTahun)
-            ->orderBy('mkt.id')
-            ->get();
+                ->leftJoin('master_jadwal_temp as mjt', function ($join) use ($idTahun) {
+                    $join->on('mjt.id', '=', 'mkt.id_jadwal')
+                        ->where('mjt.id_tahun', '=', $idTahun);
+                })
+                ->leftJoin('master_mata_kuliah as mmk', 'mmk.kode_mata_kuliah', '=', 'mjt.kode_mata_kuliah')
+                ->leftJoin('pegawai_biodata as pb', 'pb.id', '=', 'mkt.id_dosen')
+                ->select(
+                    'mkt.*',
+                    'mmk.nama_mata_kuliah',
+                    'mjt.kode_mata_kuliah',
+                    DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen")
+                )
+                ->where('mkt.nim', $nim)
+                ->where('mkt.id_tahun', $idTahun)
+                ->orderBy('mkt.id')
+                ->get();
         }
 
         return collect();
