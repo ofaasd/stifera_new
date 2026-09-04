@@ -191,10 +191,10 @@
                                                             <td>{{ $krs->kode_mata_kuliah }}</td>
                                                             <td>{{ $krs->mata_kuliah }}</td>
                                                             <td><center>{{ $krs->jumlah_sks }}</center></td>
-                                                            <td><center>{{ round($krs->ntugas, 2) }}</center></td>
-                                                            <td><center>{{ round($krs->nuts, 2) }}</center></td>
-                                                            <td><center>{{ round($krs->nuas, 2) }}</center></td>
-                                                            <td><center>{{ round($krs->nakhir, 2) }}</center></td>
+                                                            <td><center>{{ is_numeric($krs->ntugas) ? round($krs->ntugas, 2) : '-' }}</center></td>
+                                                            <td><center>{{ is_numeric($krs->nuts) ? round($krs->nuts, 2) : '-' }}</center></td>
+                                                            <td><center>{{ is_numeric($krs->nuas) ? round($krs->nuas, 2) : '-' }}</center></td>
+                                                            <td><center>{{ is_numeric($krs->nakhir) ? round($krs->nakhir, 2) : '-' }}</center></td>
                                                             <td>
                                                                 <center>
                                                                     @switch($nhuruf_)
@@ -284,10 +284,10 @@
                                                             <td>{{ $krs->kode_mata_kuliah }}</td>
                                                             <td>{{ $krs->mata_kuliah }}</td>
                                                             <td><center>{{ $krs->jumlah_sks ?? 0 }}</center></td>
-                                                            <td><center>{{ round($krs->ntugas, 2) }}</center></td>
-                                                            <td><center>{{ round($krs->nuts, 2) }}</center></td>
-                                                            <td><center>{{ round($krs->nuas, 2) }}</center></td>
-                                                            <td><center>{{ round($krs->nakhir, 2) }}</center></td>
+                                                            <td><center>{{ is_numeric($krs->ntugas) ? round($krs->ntugas, 2) : '-' }}</center></td>
+                                                            <td><center>{{ is_numeric($krs->nuts) ? round($krs->nuts, 2) : '-' }}</center></td>
+                                                            <td><center>{{ is_numeric($krs->nuas) ? round($krs->nuas, 2) : '-' }}</center></td>
+                                                            <td><center>{{ is_numeric($krs->nakhir) ? round($krs->nakhir, 2) : '-' }}</center></td>
                                                             <td>
                                                                 <center>
                                                                     @switch($nhuruf_)
