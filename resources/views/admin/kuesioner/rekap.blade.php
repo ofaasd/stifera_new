@@ -20,19 +20,50 @@
                     <a href="{{ url('akademik/kuesioner') }}" class="btn btn-primary">
                         <i class="fa-solid fa-arrow-left me-1"></i> Kembali
                     </a>
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ url('akademik/kuesioner/rekap/' . $tahun->id . '/export-excel-all') }}" class="btn btn-outline-success">
-                            <i class="fa-solid fa-file-excel me-1"></i> Export Excel All
-                        </a>
-                        <a href="{{ $canExport ? url('akademik/kuesioner/rekap/' . $tahun->id . '/export-excel') . ($exportQuery !== '' ? ('?' . $exportQuery) : '') : 'javascript:void(0);' }}" class="btn btn-success {{ $canExport ? '' : 'disabled' }}" {{ $canExport ? '' : 'aria-disabled=true tabindex=-1' }}>
-                            <i class="fa-solid fa-file-excel me-1"></i> Export Excel
-                        </a>
-                        <a href="{{ url('akademik/kuesioner/rekap/' . $tahun->id . '/export-pdf-all') }}" class="btn btn-outline-danger">
-                            <i class="fa-solid fa-file-pdf me-1"></i> Export PDF All
-                        </a>
-                        <a href="{{ $canExport ? url('akademik/kuesioner/rekap/' . $tahun->id . '/export-pdf') . ($exportQuery !== '' ? ('?' . $exportQuery) : '') : 'javascript:void(0);' }}" class="btn btn-danger {{ $canExport ? '' : 'disabled' }}" {{ $canExport ? '' : 'aria-disabled=true tabindex=-1' }}>
-                            <i class="fa-solid fa-file-pdf me-1"></i> Export PDF
-                        </a>
+                    <div class="d-flex flex-column align-items-end gap-2">
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ url('akademik/kuesioner/rekap/' . $tahun->id . '/export-excel-all') }}" class="btn btn-outline-success">
+                                <i class="fa-solid fa-file-excel me-1"></i> Export Excel All
+                            </a>
+                            <a href="{{ $canExport ? url('akademik/kuesioner/rekap/' . $tahun->id . '/export-excel') . ($exportQuery !== '' ? ('?' . $exportQuery) : '') : 'javascript:void(0);' }}" class="btn btn-success {{ $canExport ? '' : 'disabled' }}" {{ $canExport ? '' : 'aria-disabled=true tabindex=-1' }}>
+                                <i class="fa-solid fa-file-excel me-1"></i> Export Excel
+                            </a>
+                            <a href="{{ url('akademik/kuesioner/rekap/' . $tahun->id . '/export-pdf-all') }}" class="btn btn-outline-danger">
+                                <i class="fa-solid fa-file-pdf me-1"></i> Export PDF All
+                            </a>
+                            <a href="{{ $canExport ? url('akademik/kuesioner/rekap/' . $tahun->id . '/export-pdf') . ($exportQuery !== '' ? ('?' . $exportQuery) : '') : 'javascript:void(0);' }}" class="btn btn-danger {{ $canExport ? '' : 'disabled' }}" {{ $canExport ? '' : 'aria-disabled=true tabindex=-1' }}>
+                                <i class="fa-solid fa-file-pdf me-1"></i> Export PDF
+                            </a>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mt-1">
+                            <div class="dropdown">
+                                <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-briefcase me-1"></i> Export S-1 Farmasi
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item text-danger" href="{{ url('akademik/kuesioner/rekap/' . $tahun->id . '/export-prodi/pdf/s1') }}"><i class="fa-solid fa-file-pdf me-2"></i>PDF Format</a></li>
+                                    <li><a class="dropdown-item text-success" href="{{ url('akademik/kuesioner/rekap/' . $tahun->id . '/export-prodi/excel/s1') }}"><i class="fa-solid fa-file-excel me-2"></i>Excel Format</a></li>
+                                </ul>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-briefcase me-1"></i> Export D-III Farmasi
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item text-danger" href="{{ url('akademik/kuesioner/rekap/' . $tahun->id . '/export-prodi/pdf/d3') }}"><i class="fa-solid fa-file-pdf me-2"></i>PDF Format</a></li>
+                                    <li><a class="dropdown-item text-success" href="{{ url('akademik/kuesioner/rekap/' . $tahun->id . '/export-prodi/excel/d3') }}"><i class="fa-solid fa-file-excel me-2"></i>Excel Format</a></li>
+                                </ul>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-building-columns me-1"></i> Export UPPS
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item text-danger" href="{{ url('akademik/kuesioner/rekap/' . $tahun->id . '/export-prodi/pdf/upps') }}"><i class="fa-solid fa-file-pdf me-2"></i>PDF Format</a></li>
+                                    <li><a class="dropdown-item text-success" href="{{ url('akademik/kuesioner/rekap/' . $tahun->id . '/export-prodi/excel/upps') }}"><i class="fa-solid fa-file-excel me-2"></i>Excel Format</a></li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
