@@ -510,6 +510,8 @@ Route::middleware('auth:admin')->group(function () {
     Route::get('/akademik/kuesioner/rekap/{id_tahun}/export-excel-all', [KuesionerController::class, 'exportRekapExcelAll']);
     Route::get('/akademik/kuesioner/rekap/{id_tahun}/export-pdf', [KuesionerController::class, 'exportRekapPdf']);
     Route::get('/akademik/kuesioner/rekap/{id_tahun}/export-pdf-all', [KuesionerController::class, 'exportRekapPdfAll']);
+    Route::get('/akademik/kuesioner/rekap/{id_tahun}/export-prodi/pdf/{prodi}', [KuesionerController::class, 'exportRekapProdiPdf']);
+    Route::get('/akademik/kuesioner/rekap/{id_tahun}/export-prodi/excel/{prodi}', [KuesionerController::class, 'exportRekapProdiExcel']);
 
     // Data Support Download
     Route::get('/data', [DataSupportController::class, 'index'])->name('data-support');

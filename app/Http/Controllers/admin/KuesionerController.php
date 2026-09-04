@@ -879,7 +879,225 @@ class KuesionerController extends Controller
             ->header('Content-Type', 'application/pdf');
     }
 
-    private function buildRekapSummary(int $idTahun, int $selectedJadwalId = 0, int $selectedDosenId = 0): array
+    public function exportRekapProdiPdf(Request $request, string $id_tahun, string $prodi)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '512M');
+        $idTahun = (int) $id_tahun;
+        $tahun = MasterTahunAjaran::find($idTahun);
+
+        if (!$tahun) {
+            return redirect()->to(url('akademik/kuesioner'))->with('error', 'Tahun ajaran tidak ditemukan.');
+        }
+
+        $jadwalOptions = $this->getJadwalOptions($tahun, $idTahun);
+
+        $prodiLabel = 'UPPS (Gabungan Kampus)';
+        $jadwals = $jadwalOptions;
+
+        if ($prodi === 's1') {
+            $prodiLabel = 'Program Studi S-1 Farmasi';
+            $jadwals = $jadwalOptions->filter(function ($x) {
+                return (stripos($x->nama_jurusan, 'S1') !== false || stripos($x->nama_jurusan, 'S 1') !== false);
+            });
+        } elseif ($prodi === 'd3' || $prodi === 'd-iii') {
+            $prodiLabel = 'Program Studi D-III Farmasi';
+            $jadwals = $jadwalOptions->filter(function ($x) {
+                return (stripos($x->nama_jurusan, 'D III') !== false || stripos($x->nama_jurusan, 'D3') !== false);
+            });
+        }
+
+        $jadwalIds = $jadwals->pluck('id_jadwal')->filter(fn($id) => (int) $id > 0)->unique()->all();
+
+        $rekapData = $this->buildRekapSummary($idTahun, $jadwalIds, 0);
+
+        $pseudoJadwal = (object) [
+            'kode_mata_kuliah' => 'Semua',
+            'nama_mata_kuliah' => 'Keseluruhan Mata Kuliah',
+            'kelas' => '',
+            'rombel' => '',
+            'nama_jurusan' => ltrim(str_replace('Program Studi', '', $prodiLabel))
+        ];
+
+        $pseudoDosen = (object) [
+            'nama_dosen' => 'SELURUH DOSEN (' . count($jadwalIds) . ' JADWAL)'
+        ];
+
+        $html = view('admin.kuesioner.rekap_pdf', [
+            'tahun' => $tahun,
+            'rekapGroups' => $rekapData['rekapGroups'],
+            'summary' => $rekapData['summary'],
+            'jadwal' => $pseudoJadwal,
+            'dosen' => $pseudoDosen,
+        ])->render();
+
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4-P',
+            'default_font' => 'dejavusans',
+            'margin_left' => 10,
+            'margin_right' => 10,
+            'margin_top' => 10,
+            'margin_bottom' => 10,
+        ]);
+
+        $mpdf->WriteHTML($html);
+
+        return response($mpdf->Output('rekap-kuesioner-' . $prodi . '-' . $idTahun . '.pdf', 'D'))
+            ->header('Content-Type', 'application/pdf');
+    }
+
+    public function exportRekapProdiExcel(Request $request, string $id_tahun, string $prodi)
+    {
+        set_time_limit(300);
+        ini_set('memory_limit', '512M');
+        $idTahun = (int) $id_tahun;
+        $tahun = MasterTahunAjaran::find($idTahun);
+
+        if (!$tahun) {
+            return redirect()->to(url('akademik/kuesioner'))->with('error', 'Tahun ajaran tidak ditemukan.');
+        }
+
+        $jadwalOptions = $this->getJadwalOptions($tahun, $idTahun);
+
+        $prodiLabel = 'UPPS (Gabungan Kampus)';
+        $jadwals = $jadwalOptions;
+
+        if ($prodi === 's1') {
+            $prodiLabel = 'Program Studi S-1 Farmasi';
+            $jadwals = $jadwalOptions->filter(function ($x) {
+                return (stripos($x->nama_jurusan, 'S1') !== false || stripos($x->nama_jurusan, 'S 1') !== false);
+            });
+        } elseif ($prodi === 'd3' || $prodi === 'd-iii') {
+            $prodiLabel = 'Program Studi D-III Farmasi';
+            $jadwals = $jadwalOptions->filter(function ($x) {
+                return (stripos($x->nama_jurusan, 'D III') !== false || stripos($x->nama_jurusan, 'D3') !== false);
+            });
+        }
+
+        $jadwalIds = $jadwals->pluck('id_jadwal')->filter(fn($id) => (int) $id > 0)->unique()->all();
+
+        $rekapData = $this->buildRekapSummary($idTahun, $jadwalIds, 0);
+
+        $jadwal = (object) [
+            'kode_mata_kuliah' => 'Keseluruhan',
+            'nama_mata_kuliah' => 'Semua Mata Kuliah',
+            'kelas' => '',
+            'rombel' => '',
+            'nama_jurusan' => ltrim(str_replace('Program Studi', '', $prodiLabel))
+        ];
+
+        $dosen = (object) [
+            'nama_dosen' => 'SELURUH DOSEN (' . count($jadwalIds) . ' JADWAL)'
+        ];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $jenisLabel = (int) $tahun->jenis === 1 ? 'Ganjil' : ((int) $tahun->jenis === 2 ? 'Genap' : '-');
+        $tipeLabel = (int) $tahun->tipe_mhs === 2 ? 'RPL' : 'Reguler';
+
+        $logoPath = public_path(config('dz.site_level.logo', 'images/logo/logo.png'));
+        if (file_exists($logoPath)) {
+            $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+            $drawing->setName('Logo');
+            $drawing->setDescription('Logo');
+            $drawing->setPath($logoPath);
+            $drawing->setCoordinates('A1');
+            $drawing->setHeight(70);
+            $drawing->setOffsetX(10);
+            $drawing->setOffsetY(10);
+            $drawing->setWorksheet($sheet);
+        }
+
+        $sheet->setCellValue('B1', 'SEKOLAH TINGGI ILMU FARMASI NUSAPUTERA');
+        $sheet->mergeCells('B1:G1');
+        $sheet->getStyle('B1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('B1')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+        $sheet->getRowDimension(1)->setRowHeight(25);
+
+        $sheet->setCellValue('B2', 'Jalan Medoho 3 No.2, Telp/ Fax (024)6747012 Semarang');
+        $sheet->mergeCells('B2:G2');
+        $sheet->setCellValue('B3', 'E-mail : stiferanusaputera@gmail.com');
+        $sheet->mergeCells('B3:G3');
+        $sheet->setCellValue('B4', 'Website: https://www.stifera.ac.id');
+        $sheet->mergeCells('B4:G4');
+
+        $sheet->setCellValue('A6', 'REKAP HASIL KUESIONER ' . strtoupper($prodi));
+        $sheet->mergeCells('A6:G6');
+        $sheet->getStyle('A6')->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('A6')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $dosenName = strtoupper($dosen->nama_dosen);
+        $taLabel = $tahun->awal . '/' . $tahun->akhir;
+        $sheet->setCellValue('A8', 'Nama Dosen');
+        $sheet->setCellValue('B8', ':');
+        $sheet->setCellValue('C8', $dosenName);
+        $sheet->mergeCells('C8:D8');
+        $sheet->setCellValue('E8', 'Tahun Ajaran');
+        $sheet->setCellValue('F8', ':');
+        $sheet->setCellValue('G8', $taLabel);
+
+        $mkLabel = $jadwal->kode_mata_kuliah . ' - ' . $jadwal->nama_mata_kuliah;
+        $semesterLabel = $jenisLabel . ' (' . $tipeLabel . ')';
+        $sheet->setCellValue('A9', 'Mata Kuliah');
+        $sheet->setCellValue('B9', ':');
+        $sheet->setCellValue('C9', $mkLabel);
+        $sheet->mergeCells('C9:D9');
+        $sheet->setCellValue('E9', 'Semester');
+        $sheet->setCellValue('F9', ':');
+        $sheet->setCellValue('G9', $semesterLabel);
+
+        $prodiLabelDisplay = $prodiLabel;
+        $sheet->setCellValue('A10', 'Kelas/Rombel/Prodi');
+        $sheet->setCellValue('B10', ':');
+        $sheet->setCellValue('C10', $prodiLabelDisplay);
+        $sheet->mergeCells('C10:G10');
+
+        $sheet->fromArray([
+            ['Soal', 'Sangat Tidak Setuju', 'Tidak Setuju', 'Setuju', 'Sangat Setuju', 'Total Jawaban', 'Rata-rata'],
+        ], null, 'A12');
+
+        $rowIndex = 13;
+        foreach ($rekapData['rekapGroups'] as $group) {
+            $sheet->setCellValue('A' . $rowIndex, $group['label']);
+            $sheet->mergeCells('A' . $rowIndex . ':G' . $rowIndex);
+            $rowIndex++;
+
+            foreach ($group['items'] as $item) {
+                $sheet->fromArray([
+                    [
+                        'Q' . $item->no_soal . ' - ' . $item->soal,
+                        (int) $item->count_sts,
+                        (int) $item->count_ts,
+                        (int) $item->count_s,
+                        (int) $item->count_ss,
+                        (int) $item->total_jawaban,
+                        (float) $item->rata_nilai,
+                    ],
+                ], null, 'A' . $rowIndex);
+                $rowIndex++;
+            }
+        }
+
+        $sheet->fromArray([
+            ['Jumlah', (int) $rekapData['summary']['count_sts'], (int) $rekapData['summary']['count_ts'], (int) $rekapData['summary']['count_s'], (int) $rekapData['summary']['count_ss'], (int) $rekapData['summary']['total_jawaban'], ''],
+            ['Rata-rata', '', '', '', '', '', (float) $rekapData['summary']['rata_nilai']],
+        ], null, 'A' . $rowIndex);
+
+        foreach (range('A', 'G') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        $filename = 'rekap-kuesioner-' . $prodi . '-' . $idTahun . '.xlsx';
+        $tempFile = tempnam(sys_get_temp_dir(), 'rekap_kuesioner_' . $prodi . '_');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempFile);
+
+        return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
+    }
+
+    private function buildRekapSummary(int $idTahun, $selectedJadwalId = 0, int $selectedDosenId = 0): array
     {
         $rekapList = TblSoalKuesioner::query()
             ->from('tbl_soal_kuesioner as sk')
@@ -888,7 +1106,13 @@ class KuesionerController extends Controller
 
                 $join->where('nk.id_ta', '=', $idTahun);
 
-                if ($selectedJadwalId > 0) {
+                if (is_array($selectedJadwalId)) {
+                    if (!empty($selectedJadwalId)) {
+                        $join->whereIn('nk.id_jadwal', $selectedJadwalId);
+                    } else {
+                        $join->where('nk.id_jadwal', '=', -1); // empty results
+                    }
+                } elseif ($selectedJadwalId > 0) {
                     $join->where('nk.id_jadwal', '=', $selectedJadwalId);
                 }
 
