@@ -144,19 +144,29 @@
 
     function resizeCanvas() {
         const ratio = Math.max(window.devicePixelRatio || 1, 1);
-        const w = wrapper.offsetWidth;
-        const h = 220;
-        canvas.width  = w * ratio;
-        canvas.height = h * ratio;
+        canvas.width  = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
         canvas.getContext('2d').scale(ratio, ratio);
-        canvas.style.width  = w + 'px';
-        canvas.style.height = h + 'px';
+        
+        // Simpan data lama agar tidak hilang jika di-resize (misal mutar layar HP)
+        const isEmpty = pad.isEmpty();
+        const data = pad.toData();
         pad.clear();
-        btnSubmit.disabled = true;
-        hint.textContent = 'Belum ada tanda tangan';
+        if (!isEmpty) {
+            pad.fromData(data);
+        } else {
+            // Baru set disbaled & default hint jika benar-benar kosong
+            btnSubmit.disabled = true;
+            hint.textContent = 'Belum ada tanda tangan';
+            hint.className = 'text-muted small align-self-center ms-auto';
+        }
     }
 
+    // Eksekusi resize saat halaman baru di-load dan jika orientasi layar diganti
     window.addEventListener('resize', resizeCanvas);
+    
+    // Kadang browser butuh delay rendering di peranti bergerak
+    setTimeout(resizeCanvas, 200);
     resizeCanvas();
 
     pad.addEventListener('endStroke', function () {
