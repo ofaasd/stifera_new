@@ -26,20 +26,32 @@ class PegawaiSuratIzinController extends Controller
             $to = $tmp;
         }
 
+        $query = SuratIzin::query()
+            ->from('surat_izin as si')
+            ->leftJoin('ref_kategori_surat as rks', 'rks.id', '=', 'si.id_kategori')
+            ->leftJoin('pegawai as p', 'p.id', '=', 'si.id_dosen')
+            ->select('si.*', 'rks.nama as kategori_nama', 'p.nama as nama_pengirim')
+            ->whereBetween('si.tgl_surat', [$from, $to])
+            ->orderBy('si.tgl_surat', 'desc')
+            ->orderBy('si.id', 'desc');
+
+        $s2 = \Illuminate\Support\Facades\DB::table('struktur_pegawai2')->first();
+        $isPimpinan = false;
+        if ($s2 && in_array($pegawai->npp, [$s2->ketua_st, $s2->pembantu_1, $s2->pembantu_2, $s2->pembantu_3])) {
+            $isPimpinan = true;
+        }
+
+        if (!$isPimpinan) {
+            $query->where('si.id_dosen', (int) $pegawai->id);
+        }
+
         return view('pegawai.surat_izin.index', [
             'title' => 'Surat Izin Tidak Masuk',
             'CurrentPage' => 'content',
             'tanggal_awal' => $from,
             'tanggal_akhir' => $to,
-            'suratList' => SuratIzin::query()
-                ->from('surat_izin as si')
-                ->leftJoin('ref_kategori_surat as rks', 'rks.id', '=', 'si.id_kategori')
-                ->select('si.*', 'rks.nama as kategori_nama')
-                ->where('si.id_dosen', (int) $pegawai->id)
-                ->whereBetween('si.tgl_surat', [$from, $to])
-                ->orderBy('si.tgl_surat', 'desc')
-                ->orderBy('si.id', 'desc')
-                ->get(),
+            'isPimpinan' => $isPimpinan,
+            'suratList' => $query->get(),
         ]);
     }
 
@@ -173,6 +185,20 @@ class PegawaiSuratIzinController extends Controller
         $surat->delete();
 
         return redirect('pegawai/SuratIzin/index2')->with('status', 'Surat izin berhasil dihapus.');
+    }
+
+    public function toggleValidasi(string $id)
+    {
+        $pegawai = Auth::guard('pegawai')->user();
+        $s2 = \Illuminate\Support\Facades\DB::table('struktur_pegawai2')->first();
+        if (!$s2 || !in_array($pegawai->npp, [$s2->ketua_st, $s2->pembantu_1, $s2->pembantu_2, $s2->pembantu_3])) {
+            abort(403);
+        }
+
+        $surat = SuratIzin::findOrFail($id);
+        $surat->update(['izin_ka_jenjang' => $surat->izin_ka_jenjang == 1 ? 0 : 1]);
+
+        return back()->with('status', 'Status validasi berhasil diubah.');
     }
 
     private function validateRequest(Request $request, bool $isCreate): array

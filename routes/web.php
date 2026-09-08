@@ -210,6 +210,7 @@ Route::middleware('auth:pegawai,admin')->group(function () {
     Route::get('/pegawai/SuratIzin/{id}/edit2', [PegawaiSuratIzinController::class, 'edit'])->name('pegawai.surat-izin.edit2');
     Route::put('/pegawai/SuratIzin/{id}/update2', [PegawaiSuratIzinController::class, 'update'])->name('pegawai.surat-izin.update2');
     Route::delete('/pegawai/SuratIzin/{id}/delete2', [PegawaiSuratIzinController::class, 'destroy'])->name('pegawai.surat-izin.delete2');
+    Route::post('/pegawai/SuratIzin/{id}/validasi', [PegawaiSuratIzinController::class, 'toggleValidasi'])->name('pegawai.surat-izin.validasi-toggle');
 
     Route::get('/pegawai/MeninggalkanPekerjaan', [PegawaiMeninggalkanPekerjaanController::class, 'index'])->name('pegawai.meninggalkan-pekerjaan.index');
     Route::get('/pegawai/MeninggalkanPekerjaan/create', [PegawaiMeninggalkanPekerjaanController::class, 'create'])->name('pegawai.meninggalkan-pekerjaan.create');
@@ -217,6 +218,7 @@ Route::middleware('auth:pegawai,admin')->group(function () {
     Route::get('/pegawai/MeninggalkanPekerjaan/{id}/edit', [PegawaiMeninggalkanPekerjaanController::class, 'edit'])->name('pegawai.meninggalkan-pekerjaan.edit');
     Route::put('/pegawai/MeninggalkanPekerjaan/{id}', [PegawaiMeninggalkanPekerjaanController::class, 'update'])->name('pegawai.meninggalkan-pekerjaan.update');
     Route::delete('/pegawai/MeninggalkanPekerjaan/{id}', [PegawaiMeninggalkanPekerjaanController::class, 'destroy'])->name('pegawai.meninggalkan-pekerjaan.destroy');
+    Route::post('/pegawai/MeninggalkanPekerjaan/{id}/validasi', [PegawaiMeninggalkanPekerjaanController::class, 'toggleValidasi'])->name('pegawai.meninggalkan-pekerjaan.validasi-toggle');
 
     Route::get('/pegawai/berkasPendukung', [PegawaiBerkasPendukungController::class, 'index'])->name('pegawai.berkas-pendukung.index');
     Route::post('/pegawai/berkasPendukung/{jenis}', [PegawaiBerkasPendukungController::class, 'store'])->name('pegawai.berkas-pendukung.store');

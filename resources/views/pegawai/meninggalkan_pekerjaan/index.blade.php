@@ -1,23 +1,26 @@
 @extends('layouts.default', ['CurrentPage' => $CurrentPage])
 
 @section('content')
-    <div class="content-body">
+    <style>
+    .table td { white-space: normal !important; word-break: break-word !important; }
+    .table th { white-space: nowrap !important; }
+    .table th:first-child { width: 50px; }
+    .table th:last-child { min-width: 120px; }
+</style>
+<div class="content-body">
         <div class="container">
             <div class="row">
                 <div class="col-xl-12">
-                    <div class="mb-4 pb-3 d-flex gap-2 flex-wrap">
-                        <a href="{{ url('pegawai/MeninggalkanPekerjaan/create') }}" class="btn btn-success btn-round">
-                            <i class="fa-solid fa-plus me-1"></i> Tambah
-                        </a>
-                    </div>
+                    <div class="mb-4 pb-3">
+							<a href="{{ url('pegawai/MeninggalkanPekerjaan/create') }}" class="btn btn-primary bg-primary">
+								<i class="fa-solid fa-plus me-1"></i> Tambah Data
+							</a>
+						</div>
 
-                    <div class="filter cm-content-box box-primary mb-3">
-                        <div class="content-title SlideToolHeader">
-                            <div class="cpa">
+                    <div class="card mb-3">
+                        <div class="card-header border-bottom"><h4 class="card-title">
                                 <i class="fa-solid fa-filter me-1"></i>Filter Tanggal
-                            </div>
-                        </div>
-                        <div class="cm-content-body form excerpt p-3">
+                            </h4></div><div class="card-body p-3">
                             <form method="GET" action="{{ url('pegawai/MeninggalkanPekerjaan') }}" class="row g-2 align-items-end">
                                 <div class="col-md-3">
                                     <label class="form-label">Tanggal Awal</label>
@@ -37,9 +40,8 @@
                         </div>
                     </div>
 
-                    <div class="filter cm-content-box box-primary">
-                        <div class="content-title SlideToolHeader">
-                            <div class="cpa">
+                    <div class="card">
+                        <div class="card-header border-bottom"><h4 class="card-title">
                                 <i class="fa-solid fa-file-lines me-1"></i>{{ $title }}
                             </div>
                         </div>
@@ -57,11 +59,14 @@
                                 </div>
                             @endif
 
-                            <div class="card-body pb-4" style="overflow-x: scroll;">
-                                <table id="order-table" class="table table-striped table-bordered nowrap">
-                                    <thead>
+                            <div class="table-responsive">
+                                <table id="order-table" class="table table-bordered table-striped">
+                                    <thead class="bg-primary text-white text-center">
                                         <tr>
                                             <th>No</th>
+                                            @if($isPimpinan ?? false)
+                                                <th>Pegawai</th>
+                                            @endif
                                             <th>Tanggal Mulai</th>
                                             <th>Waktu Mulai</th>
                                             <th>Tanggal Selesai</th>
@@ -78,6 +83,9 @@
                                         @foreach($izinList as $row)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
+                                                @if($isPimpinan ?? false)
+                                                    <td>{{ $row->nama_pengirim ?? '-' }}</td>
+                                                @endif
                                                 <td>{{ $row->tanggal ? \Carbon\Carbon::parse($row->tanggal)->format('Y-m-d') : '-' }}</td>
                                                 <td>{{ $row->waktu_mulai ? \Carbon\Carbon::parse($row->waktu_mulai)->format('H:i:s') : '-' }}</td>
                                                 <td>{{ $row->tanggal_selesai ? \Carbon\Carbon::parse($row->tanggal_selesai)->format('Y-m-d') : '-' }}</td>
@@ -96,6 +104,14 @@
                                                     @endif
                                                 </td>
                                                 <td class="d-flex gap-1">
+                                                    @if($isPimpinan ?? false)
+                                                        <form action="{{ route('pegawai.meninggalkan-pekerjaan.validasi-toggle', $row->id) }}" method="POST">
+                                                            @csrf
+                                                            <button type="submit" class="btn {{ $row->izin_ka_jenjang == 1 ? 'btn-warning' : 'btn-success' }} btn-sm" title="{{ $row->izin_ka_jenjang == 1 ? 'Batal Setuju' : 'Setujui' }}">
+                                                                <i class="fa {{ $row->izin_ka_jenjang == 1 ? 'fa-times' : 'fa-check' }}"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                     <a href="{{ url('pegawai/MeninggalkanPekerjaan/' . $row->id . '/edit') }}" class="btn btn-success btn-sm" title="Edit">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
@@ -124,7 +140,6 @@
     <script>
         $(document).ready(function () {
             $('#order-table').DataTable({
-                responsive: true,
             });
         });
     </script>

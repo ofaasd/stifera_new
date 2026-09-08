@@ -26,20 +26,32 @@ class PegawaiMeninggalkanPekerjaanController extends Controller
             $to = $tmp;
         }
 
+        $query = IzinMeninggalkanPekerjaan::query()
+            ->from('izin_meninggalkan_pekerjaan as imp')
+            ->leftJoin('ref_kategori_surat as rks', 'rks.id', '=', 'imp.id_kategori')
+            ->leftJoin('pegawai as p', 'p.id', '=', 'imp.id_dosen')
+            ->select('imp.*', 'rks.nama as kategori_nama', 'p.nama as nama_pengirim')
+            ->whereBetween('imp.tanggal', [$from, $to])
+            ->orderBy('imp.tanggal', 'desc')
+            ->orderBy('imp.id', 'desc');
+
+        $s2 = \Illuminate\Support\Facades\DB::table('struktur_pegawai2')->first();
+        $isPimpinan = false;
+        if ($s2 && in_array($pegawai->npp, [$s2->ketua_st, $s2->pembantu_1, $s2->pembantu_2, $s2->pembantu_3])) {
+            $isPimpinan = true;
+        }
+
+        if (!$isPimpinan) {
+            $query->where('imp.id_dosen', (int) $pegawai->id);
+        }
+
         return view('pegawai.meninggalkan_pekerjaan.index', [
             'title' => 'Surat Izin Meninggalkan Pekerjaan',
             'CurrentPage' => 'content',
             'tanggal_awal' => $from,
             'tanggal_akhir' => $to,
-            'izinList' => IzinMeninggalkanPekerjaan::query()
-                ->from('izin_meninggalkan_pekerjaan as imp')
-                ->leftJoin('ref_kategori_surat as rks', 'rks.id', '=', 'imp.id_kategori')
-                ->select('imp.*', 'rks.nama as kategori_nama')
-                ->where('imp.id_dosen', (int) $pegawai->id)
-                ->whereBetween('imp.tanggal', [$from, $to])
-                ->orderBy('imp.tanggal', 'desc')
-                ->orderBy('imp.id', 'desc')
-                ->get(),
+            'isPimpinan' => $isPimpinan,
+            'izinList' => $query->get(),
         ]);
     }
 
