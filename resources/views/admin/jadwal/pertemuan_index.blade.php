@@ -24,26 +24,20 @@
                     </a>
                 </div>
 
-                <div class="filter cm-content-box box-primary">
-                    <div class="content-title SlideToolHeader">
-                        <div class="cpa">
-                            <i class="fa-solid fa-list-check me-1"></i>{{ $title }}
-                        </div>
-                        <div class="tools">
-                            <a href="javascript:void(0);" class="expand handle"><i class="fal fa-angle-down"></i></a>
-                        </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title"><i class="fa-solid fa-list-check me-1"></i>{{ $title }}</h4>
                     </div>
-                    <div class="cm-content-body form excerpt">
-                        <div class="card-body pb-4">
+                    <div class="card-body pb-4">
                             <div class="table-responsive">
-                                <table id="table-setting-pertemuan" class="table table-striped table-bordered nowrap">
-                                    <thead>
+                                <table id="table-setting-pertemuan" class="table table-bordered table-striped">
+                                    <thead class="bg-primary text-white text-center">
                                         <tr>
                                             <th>No</th>
                                             <th>Kode</th>
-                                            <th>Nama</th>
-                                            <th>Pengampu</th>
-                                            <th>Hari, Jam</th>
+                                            <th style="max-width: 200px; white-space: normal;">Nama</th>
+                                            <th style="max-width: 200px; white-space: normal;">Pengampu</th>
+                                            <th style="max-width: 150px; white-space: normal;">Hari, Jam</th>
                                             <th>RPS / KP</th>
                                             <th>Aksi</th>
                                         </tr>
@@ -53,9 +47,9 @@
                                             <tr>
                                                 <td>{{ $idx + 1 }}</td>
                                                 <td>{{ $row->kode_mata_kuliah }}</td>
-                                                <td>{{ $row->nama_mata_kuliah ?? '-' }}</td>
-                                                <td>{{ trim($row->nama_dosen ?? '-') }}</td>
-                                                <td>{{ $row->hari }}, {{ $row->sesi }} {{ $row->ruang }}</td>
+                                                <td style="white-space: normal; word-break: break-word; max-width: 200px;">{{ $row->nama_mata_kuliah ?? '-' }}</td>
+                                                <td style="white-space: normal; word-break: break-word; max-width: 200px;">{{ trim($row->nama_dosen ?? '-') }}</td>
+                                                <td style="white-space: normal; word-break: break-word; max-width: 150px;">{{ $row->hari }}, {{ $row->sesi }} {{ $row->ruang }}</td>
                                                 <td>
                                                     @if(!empty($row->rps))
                                                         <a href="{{ asset('assets/files/' . $row->rps) }}" class="badge badge-success" target="_blank">Ada</a>
@@ -84,7 +78,6 @@
                                 </table>
                             </div>
                         </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -96,8 +89,19 @@
 <script>
     $(document).ready(function () {
         $('#table-setting-pertemuan').DataTable({
-            responsive: true,
-            pageLength: 25
+            pageLength: 25,
+            language: {
+                paginate: {
+                    next: '>',
+                    previous: '<'
+                },
+                lengthMenu: "Tampilkan _MENU_ data per halaman",
+                zeroRecords: "Data tidak ditemukan",
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+                infoEmpty: "Data kosong",
+                infoFiltered: "(disaring dari _MAX_ total entri)",
+                search: "Cari:"
+            }
         });
     });
 </script>

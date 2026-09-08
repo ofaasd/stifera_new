@@ -10,17 +10,11 @@
 						<div class="mb-4 pb-3">
 							<a href="{{url('master/matakuliah/create')}}" class="btn btn-success btn-round"><font style="color: white;">TAMBAH MATA KULIAH</font></a>
 						</div>
-						<div class="filter cm-content-box box-primary">
-							<div class="content-title SlideToolHeader">
-								<div class="cpa">
-									<i class="fa-solid fa-file-lines me-1"></i>{{ $title }}
-								</div>
-								<div class="tools">
-									<a href="javascript:void(0);" class="expand handle"><i
-											class="fal fa-angle-down"></i></a>
-								</div>
+						<div class="card">
+							<div class="card-header">
+								<h4 class="card-title"><i class="fa-solid fa-file-lines me-1"></i>{{ $title }}</h4>
 							</div>
-							<div class="cm-content-body form excerpt" style="overflow-x:scroll">
+							<div class="card-body pb-4">
                                 @if(session('status'))
                                     <div class="alert alert-success">
                                         {{ session('status') }}
@@ -31,19 +25,19 @@
                                         {{ session('errors') }}
                                     </div>
                                 @endif
-								<div class="card-body pb-4">
-									<table id="order-table" class="table table-striped table-bordered nowrap">
-                                        <thead>
+                                <div class="table-responsive">
+									<table id="order-table" class="table table-bordered table-striped">
+                                        <thead class="bg-primary text-white text-center">
                                             <tr>
-                                                <th width="5">No</th>
-                                                <th width="20px">Kode</th>
-                                                <th>Nama Mata Kuliah</th>
-                                                <th width="10px">T/P</th>
-                                                <th width="10px">SKS</th>
-                                                <th width="10px">Smt</th>
-                                                <th width="20px">Kelompok Mata Kuliah</th>
-                                                <th width="20px">Rumpun Mata Kuliah</th>
-                                                <th width="20px">Status</th>
+                                                <th style="width: 5px;">No</th>
+                                                <th style="width: 40px;">Kode</th>
+                                                <th style="min-width: 200px; white-space: normal;">Nama Mata Kuliah</th>
+                                                <th style="width: 10px;">T/P</th>
+                                                <th style="width: 10px;">SKS</th>
+                                                <th style="width: 10px;">Smt</th>
+                                                <th style="max-width: 100px; white-space: normal;">Kelompok</th>
+                                                <th style="max-width: 100px; white-space: normal;">Rumpun</th>
+                                                <th style="width: 20px;">Status</th>
                                                 <th>Aksi</th>
                                             </tr>
                                         </thead>
@@ -52,14 +46,13 @@
                                                 <tr>
                                                     <td>{{ $loop->iteration }}</td>
                                                     <td>{{ $a->kode_mata_kuliah }}</td>
-                                                    <td>{{ $a->nama_mata_kuliah }} / {{ $a->nama_mata_kuliah_eng }}</td>
+                                                    <td style="white-space: normal; word-break: break-word; min-width: 200px;">{{ $a->nama_mata_kuliah }} / {{ $a->nama_mata_kuliah_eng }}</td>
                                                     <td>{{ $a->tp }}</td>
                                                     <td>{{ $a->jumlah_sks }}</td>
                                                     <td>{{ $a->semester }}</td>
                                                     
-                                                    <td>{{ $kelompok_matakuliah[$a->kelompok_mata_kuliah] ?? '-' }}</td>
-                                                    
-                                                    <td>{{ $a->rumpun }}</td>
+                                                    <td style="white-space: normal; word-break: break-word; max-width: 100px;">{{ $kelompok_matakuliah[$a->kelompok_mata_kuliah] ?? '-' }}</td>
+                                                    <td style="white-space: normal; word-break: break-word; max-width: 100px;">{{ $a->rumpun }}</td>
                                                     <td>
                                                         @if($a->is_aktif == 1)
                                                             <a href="{{ url('master/matakuliah/update_togle_matkul/'.$a->id) }}" class="btn btn-success">AKTIF</a>
@@ -89,8 +82,7 @@
                                             </tr>
                                         </tfoot>
                                     </table>
-								</div>
-							</div>
+                                </div>
 						</div>
 					</div>
 				</div>
@@ -100,7 +92,14 @@
 @section('local-js')
     <script type="text/javascript">
     $(document).ready(function() {
-        $('#order-table').DataTable();
+        $('#order-table').DataTable({
+            language: {
+                paginate: {
+                    next: '>',
+                    previous: '<'
+                }
+            }
+        });
     });
 </script>
 @endsection

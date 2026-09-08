@@ -129,19 +129,19 @@
                                 <table class="table table-bordered table-hover align-middle mb-0">
                                     <thead class="table-light">
                                         <tr>
-                                            <th style="width:50px;">No</th>
-                                            <th style="width:120px;">Kode MK</th>
-                                            <th>Mata Kuliah</th>
-                                            <th style="width:70px;" class="text-center">SKS</th>
-                                            <th style="width:150px;">Dosen Pengampu</th>
-                                            <th style="width:140px;">Jadwal</th>
-                                            <th style="width:90px;" class="text-center">Pertemuan</th>
-                                            <th style="width:100px;" class="text-center">Hadir</th>
-                                            <th style="width:80px;" class="text-center">Izin</th>
-                                            <th style="width:80px;" class="text-center">Alfa</th>
-                                            <th style="width:160px;">% Kehadiran</th>
-                                            <th style="width:140px;" class="text-center">Aksi Absen</th>
-                                            <th style="width:90px;" class="text-center">Detail</th>
+                                            <th style="width:30px;">No</th>
+                                            <th style="max-width:90px; white-space: normal; word-break: break-all;">Kode MK</th>
+                                            <th style="min-width:140px; white-space: normal;">Mata Kuliah</th>
+                                            <th style="width:40px;" class="text-center">SKS</th>
+                                            <th style="max-width:140px; white-space: normal; word-break: break-word;">Dosen Pengampu</th>
+                                            <th style="max-width:120px; white-space: normal; word-break: break-word;">Jadwal</th>
+                                            <th style="width:80px;" class="text-center">Tatap<br>Muka</th>
+                                            <th style="width:60px;" class="text-center">Hadir</th>
+                                            <th style="width:60px;" class="text-center">Izin</th>
+                                            <th style="width:60px;" class="text-center">Alfa</th>
+                                            <th style="min-width:100px;">% Hadir</th>
+                                            <th style="width:90px;" class="text-center">Aksi</th>
+                                            <th style="width:60px;" class="text-center">Detail</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -153,13 +153,13 @@
                                             @endphp
                                             <tr class="course-row">
                                                 <td>{{ $idx + 1 }}</td>
-                                                <td>{{ $krs->kode_mata_kuliah ?? '-' }}</td>
-                                                <td>{{ $krs->nama_mata_kuliah ?? '-' }}</td>
+                                                <td style="max-width:90px; white-space: normal; word-break: break-all;">{{ $krs->kode_mata_kuliah ?? '-' }}</td>
+                                                <td style="white-space: normal; word-break: break-word;">{{ $krs->nama_mata_kuliah ?? '-' }}</td>
                                                 <td class="text-center">{{ (int)($krs->jumlah_sks ?? 0) }}</td>
-                                                <td>{{ $krs->nama_dosen ?? '-' }}</td>
-                                                <td>
+                                                <td style="max-width:140px; white-space: normal; word-break: break-word;">{{ $krs->nama_dosen ?? '-' }}</td>
+                                                <td style="max-width:120px; white-space: normal; word-break: break-word;" class="small">
                                                     {{ $krs->hari ?? '-' }}<br>
-                                                    <span class="text-muted small">{{ $krs->sesi ?? '-' }} / {{ $krs->ruang ?? '-' }}</span>
+                                                    <span class="text-muted">{{ $krs->sesi ?? '-' }} / {{ $krs->ruang ?? '-' }}</span>
                                                 </td>
                                                 <td class="text-center">{{ $item['total_pertemuan'] }}</td>
                                                 <td class="text-center">

@@ -18,14 +18,9 @@
                     </div>
                 @endif
 
-                <div class="filter cm-content-box box-primary">
-                    <div class="content-title SlideToolHeader">
-                        <div class="cpa">
-                            <i class="fa-solid fa-clipboard-list me-1"></i>Kartu Rencana Studi (KRS)
-                        </div>
-                        <div class="tools">
-                            <a href="javascript:void(0);" class="expand handle"><i class="fal fa-angle-down"></i></a>
-                        </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title"><i class="fa-solid fa-clipboard-list me-1"></i>Kartu Rencana Studi (KRS)</h4>
                     </div>
 
                     @if(!empty($traceSqlEnabled) && !empty($traceSqlData))
@@ -50,8 +45,7 @@
                         </div>
                     @endif
 
-                    <div class="cm-content-body form excerpt">
-                        <div class="card-body pb-4">
+                    <div class="card-body pb-4">
                             <ul class="nav nav-tabs mb-3" id="krsTab" role="tablist">
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link active" id="reguler-tab" data-bs-toggle="tab" data-bs-target="#reguler-pane" type="button" role="tab">Reguler</button>
@@ -104,13 +98,13 @@
                                     @endif
 
                                     <div class="table-responsive">
-                                        <table id="table-krs-reguler" class="table table-bordered table-hover">
-                                            <thead>
+                                        <table id="table-krs-reguler" class="table table-bordered table-striped">
+                                            <thead class="bg-primary text-white text-center">
                                                 <tr>
-                                                    <th>No</th>
+                                                    <th style="width: 50px;">No</th>
                                                     <th>Tahun Ajaran</th>
                                                     <th>NIM</th>
-                                                    <th>Nama Mahasiswa</th>
+                                                    <th style="min-width: 150px; white-space: normal;">Nama Mahasiswa</th>
                                                     <th>Jumlah KRS</th>
                                                     <th>Status Keuangan</th>
                                                     <th>Aksi</th>
@@ -128,8 +122,8 @@
                                                     <tr>
                                                         <td>{{ $idx + 1 }}</td>
                                                         <td>{{ $taReguler }}</td>
-                                                        <td>{{ $row->nim }}</td>
-                                                        <td>{{ $row->nama_mhs ?? '-' }}</td>
+                                                        <td class="text-center">{{ $row->nim }}</td>
+                                                        <td style="white-space: normal; word-break: break-word; min-width: 150px;">{{ $row->nama_mhs ?? '-' }}</td>
                                                         @php
                                                             $totalSks = (int) ($row->total_sks ?? 0);
                                                             $isBelumKrs = ((int) ($row->total_krs ?? 0) === 0);
@@ -192,13 +186,13 @@
                                     @endif
 
                                     <div class="table-responsive">
-                                        <table id="table-krs-rpl" class="table table-bordered table-hover">
-                                            <thead>
+                                        <table id="table-krs-rpl" class="table table-bordered table-striped">
+                                            <thead class="bg-primary text-white text-center">
                                                 <tr>
-                                                    <th>No</th>
+                                                    <th style="width: 50px;">No</th>
                                                     <th>Tahun Ajaran</th>
                                                     <th>NIM</th>
-                                                    <th>Nama Mahasiswa</th>
+                                                    <th style="min-width: 150px; white-space: normal;">Nama Mahasiswa</th>
                                                     <th>Jumlah KRS</th>
                                                     <th>Status Keuangan</th>
                                                     <th>Aksi</th>
@@ -216,8 +210,8 @@
                                                     <tr>
                                                         <td>{{ $idx + 1 }}</td>
                                                         <td>{{ $taRpl }}</td>
-                                                        <td>{{ $row->nim }}</td>
-                                                        <td>{{ $row->nama_mhs ?? '-' }}</td>
+                                                        <td class="text-center">{{ $row->nim }}</td>
+                                                        <td style="white-space: normal; word-break: break-word; min-width: 150px;">{{ $row->nama_mhs ?? '-' }}</td>
                                                         @php
                                                             $totalSks = (int) ($row->total_sks ?? 0);
                                                             $isBelumKrs = ((int) ($row->total_krs ?? 0) === 0);
@@ -239,7 +233,6 @@
                                 </div>
 
                             </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -263,7 +256,6 @@
             }
 
             return $table.DataTable({
-                responsive: true,
                 pageLength: 10,
                 lengthChange: true,
                 searching: true,
@@ -281,8 +273,8 @@
                     infoEmpty: 'Tidak ada data',
                     zeroRecords: 'Data tidak ditemukan',
                     paginate: {
-                        next: 'Berikutnya',
-                        previous: 'Sebelumnya'
+                        next: '>',
+                        previous: '<'
                     }
                 }
             });
