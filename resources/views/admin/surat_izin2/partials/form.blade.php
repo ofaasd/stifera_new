@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-md-6 mb-3">
         <label class="form-label">Pengirim (Dosen) <span class="text-danger">*</span></label>
-        <select class="form-control" name="id_dosen" required>
+        <select class="form-control" name="id_dosen" {{ isset($d) ? 'disabled' : 'required' }}>
             <option value="">Pilih Pengirim</option>
             @foreach($pegawaiList as $pegawai)
                 <option value="{{ $pegawai->id }}" {{ (string) old('id_dosen', $d->id_dosen ?? '') === (string) $pegawai->id ? 'selected' : '' }}>

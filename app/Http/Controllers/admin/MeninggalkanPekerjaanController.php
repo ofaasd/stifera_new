@@ -108,7 +108,6 @@ class MeninggalkanPekerjaanController extends Controller
         }
 
         $izin->update([
-            'id_dosen' => (int) $validated['id_dosen'],
             'tanggal' => $validated['tanggal'],
             'tanggal_selesai' => $validated['tanggal_selesai'],
             'waktu_mulai' => $validated['waktu_mulai'] . ':00',
@@ -146,7 +145,7 @@ class MeninggalkanPekerjaanController extends Controller
     private function validateRequest(Request $request, bool $isCreate): array
     {
         $validated = $request->validate([
-            'id_dosen' => 'required|integer|exists:pegawai,id',
+            'id_dosen' => ($isCreate ? 'required' : 'nullable') . '|integer|exists:pegawai,id',
             'tanggal' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal',
             'waktu_mulai' => 'required|date_format:H:i',

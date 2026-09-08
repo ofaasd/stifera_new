@@ -111,7 +111,6 @@ class SuratIzin2Controller extends Controller
         }
 
         $surat->update([
-            'id_dosen' => (int) $validated['id_dosen'],
             'tgl_surat' => $validated['tgl_surat'],
             'perihal' => trim($validated['perihal']),
             'keterangan' => trim($validated['keterangan']),
@@ -150,7 +149,7 @@ class SuratIzin2Controller extends Controller
     private function validateRequest(Request $request, bool $isCreate): array
     {
         $rules = [
-            'id_dosen' => 'required|integer|exists:pegawai,id',
+            'id_dosen' => ($isCreate ? 'required' : 'nullable') . '|integer|exists:pegawai,id',
             'tgl_surat' => 'required|date',
             'perihal' => 'required|string|max:120',
             'keterangan' => 'required|string',
