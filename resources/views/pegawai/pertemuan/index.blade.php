@@ -94,8 +94,8 @@
             pageLength: 25,
             language: {
                 paginate: {
-                    next: '<i class="fa-solid fa-angle-right"></i>',
-                    previous: '<i class="fa-solid fa-angle-left"></i>' 
+                    next: '>'fa-solid fa-angle-right"></i>',
+                    previous: '<'fa-solid fa-angle-left"></i>' 
                 }
             }
         });

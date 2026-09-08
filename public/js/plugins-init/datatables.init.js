@@ -51,8 +51,8 @@ let dataSet = [
         } ,
 		language: {
 			paginate: {
-			   next: '<i class="fa-solid fa-angle-right"></i>',
-			  previous: '<i class="fa-solid fa-angle-left"></i>' 
+			   next: '>',
+			  previous: '<' 
 			}
 		  }
     });
@@ -63,8 +63,8 @@ let dataSet = [
 		pageLength:10,
 		language: {
 			paginate: {
-				next: '<i class="fa-solid fa-angle-right"></i>',
-			   previous: '<i class="fa-solid fa-angle-left"></i>' 
+				next: '>',
+			   previous: '<' 
 			}
 		}
 	}); 
@@ -91,8 +91,8 @@ let dataSet = [
         lengthChange:false ,
 		language: {
 			paginate: {
-				next: '<i class="fa-solid fa-angle-right"></i>',
-				previous: '<i class="fa-solid fa-angle-left"></i>' 
+				next: '>',
+				previous: '<' 
 			}
 			
 		},
@@ -102,8 +102,8 @@ let dataSet = [
         responsive: true,
 		language: {
 			paginate: {
-				next: '<i class="fa fa-angle-double-right" aria-hidden="true"></i>',
-			  previous: '<i class="fa fa-angle-double-left" aria-hidden="true"></i>' 
+				next: '>',
+			  previous: '<' 
 			}
 		}
     });
@@ -122,8 +122,8 @@ let dataSet = [
         lengthChange:false ,
 		language: {
 			paginate: {
-				next: '<i class="fa-solid fa-angle-right"></i>',
-				previous: '<i class="fa-solid fa-angle-left"></i>' 
+				next: '>',
+				previous: '<' 
 			}
 			
 		},
@@ -144,8 +144,8 @@ let dataSet = [
         lengthChange:false ,
 		language: {
 			paginate: {
-				next: '<i class="fa-solid fa-angle-right"></i>',
-				previous: '<i class="fa-solid fa-angle-left"></i>' 
+				next: '>',
+				previous: '<' 
 			}
 			
 		},
@@ -167,8 +167,8 @@ let dataSet = [
         lengthChange:false ,
 		language: {
 			paginate: {
-				next: '<i class="fa-solid fa-angle-right"></i>',
-				previous: '<i class="fa-solid fa-angle-left"></i>' 
+				next: '>',
+				previous: '<' 
 			},
 			'search' : ' <i class="fa-solid fa-magnifying-glass"></i>',
 			searchPlaceholder: "Search..."
@@ -192,8 +192,8 @@ let dataSet = [
         lengthChange:false ,
 		language: {
 			paginate: {
-				next: '<i class="fa-solid fa-angle-right"></i>',
-				previous: '<i class="fa-solid fa-angle-left"></i>' 
+				next: '>',
+				previous: '<' 
 			}
 			
 		},
@@ -214,8 +214,8 @@ let dataSet = [
         lengthChange:false ,
 		language: {
 			paginate: {
-				next: '<i class="fa-solid fa-angle-right"></i>',
-				previous: '<i class="fa-solid fa-angle-left"></i>' 
+				next: '>',
+				previous: '<' 
 			}
 			
 		},
@@ -236,8 +236,8 @@ let dataSet = [
         lengthChange:false ,
 		language: {
 			paginate: {
-				next: '<i class="fa-solid fa-angle-right"></i>',
-				previous: '<i class="fa-solid fa-angle-left"></i>' 
+				next: '>',
+				previous: '<' 
 			}
 			
 		},
@@ -258,8 +258,8 @@ let dataSet = [
         lengthChange:false ,
 		language: {
 			paginate: {
-				next: '<i class="fa-solid fa-angle-right"></i>',
-				previous: '<i class="fa-solid fa-angle-left"></i>' 
+				next: '>',
+				previous: '<' 
 			}
 			
 		},
@@ -280,8 +280,8 @@ let dataSet = [
         lengthChange:false ,
 		language: {
 			paginate: {
-				next: '<i class="fa-solid fa-angle-right"></i>',
-				previous: '<i class="fa-solid fa-angle-left"></i>' 
+				next: '>',
+				previous: '<' 
 			}
 			
 		},
@@ -302,8 +302,8 @@ let dataSet = [
         lengthChange:false ,
 		language: {
 			paginate: {
-				next: '<i class="fa-solid fa-angle-right"></i>',
-				previous: '<i class="fa-solid fa-angle-left"></i>' 
+				next: '>',
+				previous: '<' 
 			}
 			
 		},
@@ -328,8 +328,8 @@ let dataSet = [
 		},
 		language: {
 			paginate: {
-				next: '<i class="fa-solid fa-angle-right"></i>',
-				previous: '<i class="fa-solid fa-angle-left"></i>' 
+				next: '>',
+				previous: '<' 
 			}
 			
 		},
@@ -350,8 +350,8 @@ let dataSet = [
         lengthChange:false ,
 		language: {
 			paginate: {
-				next: '<i class="fa-solid fa-angle-right"></i>',
-				previous: '<i class="fa-solid fa-angle-left"></i>' 
+				next: '>',
+				previous: '<' 
 			}
 			
 		},
@@ -365,8 +365,8 @@ let dataSet = [
         lengthChange:false ,
 		language: {
 			paginate: {
-				next: '<i class="fa-solid fa-angle-right"></i>',
-				previous: '<i class="fa-solid fa-angle-left"></i>' 
+				next: '>',
+				previous: '<' 
 			}
 			
 		},
@@ -455,8 +455,8 @@ let dataSet = [
 		lengthChange:false ,
 		language: {
 			paginate: {
-			  next: '<i class="fa-solid fa-angle-right"></i>',
-			  previous: '<i class="fa-solid fa-angle-left"></i>' 
+			  next: '>',
+			  previous: '<' 
 			}
 		  }
 		
@@ -471,8 +471,8 @@ let dataSet = [
 			lengthChange:false ,
 			language: {
 			paginate: {
-			  next: '<i class="fa-solid fa-angle-right"></i>',
-			  previous: '<i class="fa-solid fa-angle-left"></i>' 
+			  next: '>',
+			  previous: '<' 
 			}
 		  }
 			
@@ -488,8 +488,8 @@ let dataSet = [
 		lengthChange:false ,
 		language: {
 			paginate: {
-			   next: '<i class="fa-solid fa-angle-right"></i>',
-			  previous: '<i class="fa-solid fa-angle-left"></i>' 
+			   next: '>',
+			  previous: '<' 
 			}
 		  }
 		
@@ -500,8 +500,8 @@ let dataSet = [
 	var table = $('#dataTable1, #dataTable2, #dataTable3, #dataTable4,  #example3, #example4').DataTable({
 		language: {
 			paginate: {
-			  next: '<i class="fa-solid fa-angle-right"></i>',
-			  previous: '<i class="fa-solid fa-angle-left"></i>' 
+			  next: '>',
+			  previous: '<' 
 			}
 		  }
 	});
@@ -515,8 +515,8 @@ let dataSet = [
 		lengthChange:false ,
 		language: {
 			paginate: {
-			  next: '<i class="fa-solid fa-angle-right"></i>',
-			  previous: '<i class="fa-solid fa-angle-left"></i>' 
+			  next: '>',
+			  previous: '<' 
 			}
 		  }
 	});

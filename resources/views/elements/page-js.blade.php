@@ -23,8 +23,19 @@ loadScripts(config('dz.pagelevel.' . $CurrentPage . '.js.bottom'));
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-steps/1.1.0/jquery.steps.min.js"></script>
 <script>
   feather.replace();
+  
+  if (typeof $.fn.dataTable !== 'undefined') {
+      $.extend(true, $.fn.dataTable.defaults, {
+          language: {
+              paginate: {
+                  previous: '<',
+                  next: '>'
+              }
+          }
+      });
+  }
+
   $(document).ready(function() {
     // $(".js-example-basic-single").select2();
   });
- 
 </script>

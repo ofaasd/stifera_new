@@ -169,8 +169,8 @@
                     paginate: {
                         first: "Pertama",
                         last: "Terakhir",
-                        next: ">",
-                        previous: "<"
+                        next: '>',
+                        previous: '<'
                     }
                 }
             });
