@@ -17,7 +17,7 @@ class PegawaiSuratIzinController extends Controller
             abort(403);
         }
 
-        $from = $request->input('tanggal_awal', now()->startOfMonth()->toDateString());
+        $from = $request->input('tanggal_awal', now()->subMonths(3)->toDateString());
         $to = $request->input('tanggal_akhir', now()->toDateString());
 
         if (strtotime($to) < strtotime($from)) {

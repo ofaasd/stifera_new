@@ -58,18 +58,16 @@
                             @endif
 
                             <div class="card-body pb-4" style="overflow-x: scroll;">
-                                <table id="order-table" class="table table-striped table-bordered nowrap">
+                                <table id="order-table" class="table table-striped table-bordered">
                                     <thead>
                                         <tr>
                                             <th>No</th>
                                             <th>Nama</th>
-                                            <th>Tanggal Mulai</th>
-                                            <th>Waktu Mulai</th>
-                                            <th>Tanggal Selesai</th>
-                                            <th>Waktu Selesai</th>
+                                            <th>Tanggal & Waktu Mulai</th>
+                                            <th>Tanggal & Waktu Selesai</th>
                                             <th>Keperluan</th>
-                                            <th>Izin KA Jenjang</th>
-                                            <th>Izin Manager SDM</th>
+                                            <th>Izin Ketua STIFERA</th>
+                                            <th>Izin Puket SDM</th>
                                             <th>Kategori</th>
                                             <th>Lampiran</th>
                                             <th>Aksi</th>
@@ -80,10 +78,14 @@
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $row->nama_pengirim ?? '-' }}</td>
-                                                <td>{{ $row->tanggal ? \Carbon\Carbon::parse($row->tanggal)->format('Y-m-d') : '-' }}</td>
-                                                <td>{{ $row->waktu_mulai ? \Carbon\Carbon::parse($row->waktu_mulai)->format('H:i:s') : '-' }}</td>
-                                                <td>{{ $row->tanggal_selesai ? \Carbon\Carbon::parse($row->tanggal_selesai)->format('Y-m-d') : '-' }}</td>
-                                                <td>{{ $row->waktu_selesai ? \Carbon\Carbon::parse($row->waktu_selesai)->format('H:i:s') : '-' }}</td>
+                                                <td>
+                                                    {{ $row->tanggal ? \Carbon\Carbon::parse($row->tanggal)->format('Y-m-d') : '-' }}<br>
+                                                    <small>{{ $row->waktu_mulai ? \Carbon\Carbon::parse($row->waktu_mulai)->format('H:i') : '-' }}</small>
+                                                </td>
+                                                <td>
+                                                    {{ $row->tanggal_selesai ? \Carbon\Carbon::parse($row->tanggal_selesai)->format('Y-m-d') : '-' }}<br>
+                                                    <small>{{ $row->waktu_selesai ? \Carbon\Carbon::parse($row->waktu_selesai)->format('H:i') : '-' }}</small>
+                                                </td>
                                                 <td>{{ $row->keperluan }}</td>
                                                 <td>{{ (int) $row->izin_ka_jenjang === 1 ? 'Disetujui' : 'Belum Disetujui' }}</td>
                                                 <td>{{ (int) $row->izin_mgr_sdm === 1 ? 'Disetujui' : 'Belum Disetujui' }}</td>
@@ -97,7 +99,8 @@
                                                         -
                                                     @endif
                                                 </td>
-                                                <td class="d-flex gap-1">
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-1 justify-content-center" style="max-width: 80px; margin: 0 auto;">
                                                     <a href="{{ url('simpeg/MeninggalkanPekerjaan/' . $row->id . '/edit') }}" class="btn btn-success btn-sm" title="Edit">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
@@ -108,6 +111,7 @@
                                                             <i class="fa fa-trash"></i>
                                                         </button>
                                                     </form>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @endforeach

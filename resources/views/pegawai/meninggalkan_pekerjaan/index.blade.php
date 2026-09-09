@@ -3,9 +3,9 @@
 @section('content')
     <style>
     .table td { white-space: normal !important; word-break: break-word !important; }
-    .table th { white-space: nowrap !important; }
+    .table th { white-space: normal !important; word-break: break-word !important; }
     .table th:first-child { width: 50px; }
-    .table th:last-child { min-width: 120px; }
+    .table th:last-child { width: 90px; }
 </style>
 <div class="content-body">
         <div class="container">
@@ -17,18 +17,25 @@
 							</a>
 						</div>
 
-                    <div class="card mb-3">
-                        <div class="card-header border-bottom"><h4 class="card-title">
+                    <div class="card mb-3 h-auto" style="height: auto;">
+                        <div class="card-header border-bottom">
+                            <h4 class="card-title">
                                 <i class="fa-solid fa-filter me-1"></i>Filter Tanggal
-                            </h4></div><div class="card-body p-3">
-                            <form method="GET" action="{{ url('pegawai/MeninggalkanPekerjaan') }}" class="row g-2 align-items-end">
-                                <div class="col-md-3">
-                                    <label class="form-label">Tanggal Awal</label>
-                                    <input type="date" class="form-control" name="tanggal_awal" value="{{ $tanggal_awal }}" required>
+                            </h4>
+                        </div>
+                        <div class="card-body p-3">
+                            <form method="GET" action="{{ url('pegawai/MeninggalkanPekerjaan') }}" class="row g-2 align-items-center">
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Tanggal Awal</span>
+                                        <input type="date" class="form-control" name="tanggal_awal" value="{{ $tanggal_awal }}" required>
+                                    </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Tanggal Akhir</label>
-                                    <input type="date" class="form-control" name="tanggal_akhir" value="{{ $tanggal_akhir }}" required>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Tanggal Akhir</span>
+                                        <input type="date" class="form-control" name="tanggal_akhir" value="{{ $tanggal_akhir }}" required>
+                                    </div>
                                 </div>
                                 <div class="col-md-2">
                                     <button type="submit" class="btn btn-primary w-100">Filter</button>
@@ -41,11 +48,12 @@
                     </div>
 
                     <div class="card">
-                        <div class="card-header border-bottom"><h4 class="card-title">
+                        <div class="card-header border-bottom">
+                            <h4 class="card-title">
                                 <i class="fa-solid fa-file-lines me-1"></i>{{ $title }}
-                            </div>
+                            </h4>
                         </div>
-                        <div class="cm-content-body form excerpt">
+                        <div class="card-body">
                             @if(session('status'))
                                 <div class="alert alert-success alert-dismissible fade show mx-3 mt-3">
                                     {{ session('status') }}
@@ -67,13 +75,11 @@
                                             @if($isPimpinan ?? false)
                                                 <th>Pegawai</th>
                                             @endif
-                                            <th>Tanggal Mulai</th>
-                                            <th>Waktu Mulai</th>
-                                            <th>Tanggal Selesai</th>
-                                            <th>Waktu Selesai</th>
+                                            <th>Tanggal & Waktu Mulai</th>
+                                            <th>Tanggal & Waktu Selesai</th>
                                             <th>Keperluan</th>
-                                            <th>Izin KA Jenjang</th>
-                                            <th>Izin Manager SDM</th>
+                                            <th>Izin Ketua STIFERA</th>
+                                            <th>Izin Puket SDM</th>
                                             <th>Kategori</th>
                                             <th>Lampiran</th>
                                             <th>Aksi</th>
@@ -86,10 +92,14 @@
                                                 @if($isPimpinan ?? false)
                                                     <td>{{ $row->nama_pengirim ?? '-' }}</td>
                                                 @endif
-                                                <td>{{ $row->tanggal ? \Carbon\Carbon::parse($row->tanggal)->format('Y-m-d') : '-' }}</td>
-                                                <td>{{ $row->waktu_mulai ? \Carbon\Carbon::parse($row->waktu_mulai)->format('H:i:s') : '-' }}</td>
-                                                <td>{{ $row->tanggal_selesai ? \Carbon\Carbon::parse($row->tanggal_selesai)->format('Y-m-d') : '-' }}</td>
-                                                <td>{{ $row->waktu_selesai ? \Carbon\Carbon::parse($row->waktu_selesai)->format('H:i:s') : '-' }}</td>
+                                                <td>
+                                                    {{ $row->tanggal ? \Carbon\Carbon::parse($row->tanggal)->format('Y-m-d') : '-' }}<br>
+                                                    <small>{{ $row->waktu_mulai ? \Carbon\Carbon::parse($row->waktu_mulai)->format('H:i') : '-' }}</small>
+                                                </td>
+                                                <td>
+                                                    {{ $row->tanggal_selesai ? \Carbon\Carbon::parse($row->tanggal_selesai)->format('Y-m-d') : '-' }}<br>
+                                                    <small>{{ $row->waktu_selesai ? \Carbon\Carbon::parse($row->waktu_selesai)->format('H:i') : '-' }}</small>
+                                                </td>
                                                 <td>{{ $row->keperluan }}</td>
                                                 <td>{{ (int) $row->izin_ka_jenjang === 1 ? 'Disetujui' : 'Belum Disetujui' }}</td>
                                                 <td>{{ (int) $row->izin_mgr_sdm === 1 ? 'Disetujui' : 'Belum Disetujui' }}</td>
@@ -103,7 +113,8 @@
                                                         -
                                                     @endif
                                                 </td>
-                                                <td class="d-flex gap-1">
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-1 justify-content-center" style="max-width: 80px; margin: 0 auto;">
                                                     @if($isPimpinan ?? false)
                                                         <form action="{{ route('pegawai.meninggalkan-pekerjaan.validasi-toggle', $row->id) }}" method="POST">
                                                             @csrf
@@ -122,6 +133,7 @@
                                                             <i class="fa fa-trash"></i>
                                                         </button>
                                                     </form>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -140,6 +152,8 @@
     <script>
         $(document).ready(function () {
             $('#order-table').DataTable({
+                responsive: true,
+                autoWidth: false
             });
         });
     </script>

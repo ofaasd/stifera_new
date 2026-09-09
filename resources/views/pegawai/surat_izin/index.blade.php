@@ -3,9 +3,9 @@
 @section('content')
     <style>
     .table td { white-space: normal !important; word-break: break-word !important; }
-    .table th { white-space: nowrap !important; }
+    .table th { white-space: normal !important; word-break: break-word !important; }
     .table th:first-child { width: 50px; }
-    .table th:last-child { min-width: 120px; }
+    .table th:last-child { width: 90px; }
 </style>
 <div class="content-body">
         <div class="container">
@@ -17,18 +17,25 @@
 							</a>
 						</div>
 
-                    <div class="card mb-3">
-                        <div class="card-header border-bottom"><h4 class="card-title">
+                    <div class="card mb-3 h-auto" style="height: auto;">
+                        <div class="card-header border-bottom">
+                            <h4 class="card-title">
                                 <i class="fa-solid fa-filter me-1"></i>Filter Tanggal
-                            </h4></div><div class="card-body p-3">
-                            <form method="GET" action="{{ url('pegawai/SuratIzin/index2') }}" class="row g-2 align-items-end">
-                                <div class="col-md-3">
-                                    <label class="form-label">Tanggal Awal</label>
-                                    <input type="date" class="form-control" name="tanggal_awal" value="{{ $tanggal_awal }}" required>
+                            </h4>
+                        </div>
+                        <div class="card-body p-3">
+                            <form method="GET" action="{{ url('pegawai/SuratIzin/index2') }}" class="row g-2 align-items-center">
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Tanggal Awal</span>
+                                        <input type="date" class="form-control" name="tanggal_awal" value="{{ $tanggal_awal }}" required>
+                                    </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Tanggal Akhir</label>
-                                    <input type="date" class="form-control" name="tanggal_akhir" value="{{ $tanggal_akhir }}" required>
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Tanggal Akhir</span>
+                                        <input type="date" class="form-control" name="tanggal_akhir" value="{{ $tanggal_akhir }}" required>
+                                    </div>
                                 </div>
                                 <div class="col-md-2">
                                     <button type="submit" class="btn btn-primary w-100">Filter</button>
@@ -41,11 +48,12 @@
                     </div>
 
                     <div class="card">
-                        <div class="card-header border-bottom"><h4 class="card-title">
+                        <div class="card-header border-bottom">
+                            <h4 class="card-title">
                                 <i class="fa-solid fa-file-lines me-1"></i>{{ $title }}
-                            </div>
+                            </h4>
                         </div>
-                        <div class="cm-content-body form excerpt">
+                        <div class="card-body">
                             @if(session('status'))
                                 <div class="alert alert-success alert-dismissible fade show mx-3 mt-3">
                                     {{ session('status') }}
@@ -70,8 +78,8 @@
                                             <th>Tanggal Surat</th>
                                             <th>Perihal</th>
                                             <th>Keterangan</th>
-                                            <th>Manager SDM</th>
-                                            <th>KA Jenjang</th>
+                                            <th>Izin Puket SDM</th>
+                                            <th>Izin Ketua STIFERA</th>
                                             <th>Kategori</th>
                                             <th>File Surat</th>
                                             <th>Aksi</th>
@@ -99,7 +107,8 @@
                                                         -
                                                     @endif
                                                 </td>
-                                                <td class="d-flex gap-1">
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-1 justify-content-center" style="max-width: 80px; margin: 0 auto;">
                                                     @if($isPimpinan ?? false)
                                                         <form action="{{ route('pegawai.surat-izin.validasi-toggle', $row->id) }}" method="POST">
                                                             @csrf
@@ -118,6 +127,7 @@
                                                             <i class="fa fa-trash"></i>
                                                         </button>
                                                     </form>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -136,6 +146,8 @@
     <script>
         $(document).ready(function () {
             $('#order-table').DataTable({
+                responsive: true,
+                autoWidth: false
             });
         });
     </script>

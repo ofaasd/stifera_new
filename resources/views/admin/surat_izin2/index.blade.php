@@ -58,7 +58,7 @@
                             @endif
 
                             <div class="card-body pb-4" style="overflow-x: scroll;">
-                                <table id="order-table" class="table table-striped table-bordered nowrap">
+                                <table id="order-table" class="table table-striped table-bordered">
                                     <thead>
                                         <tr>
                                             <th>No</th>
@@ -66,8 +66,8 @@
                                             <th>Tanggal Surat</th>
                                             <th>Perihal</th>
                                             <th>Keterangan</th>
-                                            <th>Manager SDM</th>
-                                            <th>KA Jenjang</th>
+                                            <th>Izin Puket SDM</th>
+                                            <th>Izin Ketua STIFERA</th>
                                             <th>Kategori</th>
                                             <th>File Surat</th>
                                             <th>Aksi</th>
@@ -93,7 +93,8 @@
                                                         -
                                                     @endif
                                                 </td>
-                                                <td class="d-flex gap-1">
+                                                <td>
+                                                    <div class="d-flex flex-wrap gap-1 justify-content-center" style="max-width: 80px; margin: 0 auto;">
                                                     <a href="{{ url('simpeg/SuratIzin2/' . $row->id . '/edit') }}" class="btn btn-success btn-sm" title="Edit">
                                                         <i class="fa fa-edit"></i>
                                                     </a>
@@ -104,6 +105,7 @@
                                                             <i class="fa fa-trash"></i>
                                                         </button>
                                                     </form>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @endforeach

@@ -17,7 +17,7 @@ class PegawaiMeninggalkanPekerjaanController extends Controller
             abort(403);
         }
 
-        $from = $request->input('tanggal_awal', now()->startOfMonth()->toDateString());
+        $from = $request->input('tanggal_awal', now()->subMonths(3)->toDateString());
         $to = $request->input('tanggal_akhir', now()->toDateString());
 
         if (strtotime($to) < strtotime($from)) {
@@ -182,6 +182,20 @@ class PegawaiMeninggalkanPekerjaanController extends Controller
         $izin->delete();
 
         return redirect('pegawai/MeninggalkanPekerjaan')->with('status', 'Izin meninggalkan pekerjaan berhasil dihapus.');
+    }
+
+    public function toggleValidasi(string $id)
+    {
+        $pegawai = Auth::guard('pegawai')->user();
+        $s2 = \Illuminate\Support\Facades\DB::table('struktur_pegawai2')->first();
+        if (!$s2 || !in_array($pegawai->npp, [$s2->ketua_st, $s2->pembantu_1, $s2->pembantu_2, $s2->pembantu_3])) {
+            abort(403);
+        }
+
+        $izin = IzinMeninggalkanPekerjaan::findOrFail($id);
+        $izin->update(['izin_ka_jenjang' => $izin->izin_ka_jenjang == 1 ? 0 : 1]);
+
+        return back()->with('status', 'Status validasi berhasil diubah.');
     }
 
     private function validateRequest(Request $request, bool $isCreate): array
