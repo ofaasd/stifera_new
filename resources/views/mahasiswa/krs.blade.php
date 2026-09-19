@@ -182,7 +182,14 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h5 class="mb-0">Daftar KRS Terinput</h5>
-                            <span class="badge bg-primary">Total SKS: {{ $totalSks }}</span>
+                            <div>
+                                @if($isKrsDisetujuiWali)
+                                    <span class="badge bg-success me-1"><i class="fa fa-check-circle me-1"></i>Sudah Divalidasi</span>
+                                @else
+                                    <span class="badge bg-warning text-dark me-1"><i class="fa fa-clock me-1"></i>Belum Divalidasi</span>
+                                @endif
+                                <span class="badge bg-primary">Total SKS: {{ $totalSks }}</span>
+                            </div>
                         </div>
 
                         <div class="table-responsive">
@@ -197,7 +204,9 @@
                                         <th>Sesi</th>
                                         <th>Ruang</th>
                                         <th class="dosen-column">Dosen</th>
-                                        <th style="width: 80px;" class="text-center">Aksi</th>
+                                        @if(!$isKrsDisetujuiWali)
+                                            <th style="width: 80px;" class="text-center">Aksi</th>
+                                        @endif
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -214,21 +223,23 @@
                                             <td>{{ $row->sesi ?? '-' }}</td>
                                             <td>{{ $ruangKrs }}</td>
                                             <td class="dosen-column">{{ trim($row->nama_dosen ?? '-') }}</td>
-                                            <td class="text-center">
-                                                @if(!$isKrsDisetujuiWali)
-                                                    <form method="POST" action="{{ route('mahasiswa.krs.destroy', $row->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan mata kuliah ini?');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-sm shadow-sm" title="Hapus">
-                                                            <i class="fa fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                @endif
-                                            </td>
+                                            @if(!$isKrsDisetujuiWali)
+                                                <td class="text-center">
+                                                    @if((int) ($row->is_publish ?? 0) === 0)
+                                                        <form method="POST" action="{{ route('mahasiswa.krs.destroy', $row->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan mata kuliah ini?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-danger btn-sm shadow-sm" title="Hapus">
+                                                                <i class="fa fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                </td>
+                                            @endif
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="9" class="text-center text-muted">Belum ada mata kuliah di KRS Anda.</td>
+                                            <td colspan="{{ !$isKrsDisetujuiWali ? 9 : 8 }}" class="text-center text-muted">Belum ada mata kuliah di KRS Anda.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

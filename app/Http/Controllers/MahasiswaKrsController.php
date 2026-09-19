@@ -206,12 +206,16 @@ class MahasiswaKrsController extends Controller
             ->first();
 
         if (!$krs) {
-            return redirect()->to(url('mhs/input_krs'))->with('error', 'Mata kuliah tidak ditemukan di KRS Anda.');
+            return redirect()->back()->with('error', 'Mata kuliah tidak ditemukan di KRS Anda.');
+        }
+
+        if ((int) ($krs->is_publish ?? 0) === 1) {
+            return redirect()->back()->with('error', 'Mata kuliah ini sudah disetujui dosen wali, sehingga tidak dapat dibatalkan.');
         }
 
         DB::table('master_krs_temp')->where('id', (int) $id)->delete();
 
-        return redirect()->to(url('mhs/input_krs'))->with('status', 'Mata kuliah berhasil dihapus dari KRS.');
+        return redirect()->back()->with('status', 'Mata kuliah berhasil dihapus dari KRS.');
     }
 
     public function download()
