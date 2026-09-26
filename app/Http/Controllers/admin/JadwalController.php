@@ -847,6 +847,10 @@ class JadwalController extends Controller
 
         for ($i = 0; $i < count($rows); $i++) {
             for ($j = $i + 1; $j < count($rows); $j++) {
+                if ($rows[$i]['id_tahun'] !== $rows[$j]['id_tahun']) {
+                    continue;
+                }
+
                 if ($rows[$i]['hari'] !== $rows[$j]['hari'] || $rows[$i]['sesi'] !== $rows[$j]['sesi']) {
                     continue;
                 }
