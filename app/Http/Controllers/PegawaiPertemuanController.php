@@ -516,6 +516,8 @@ class PegawaiPertemuanController extends Controller
             'margin_bottom' => 10,
         ]);
 
+		ini_set('pcre.backtrack_limit', 5000000); 
+
         $mpdf->WriteHTML($html);
         $filename = 'absensi_dosen_' . ($jadwal->kode_mata_kuliah ?? 'jadwal') . '_' . now()->format('Ymd_His') . '.pdf';
 
