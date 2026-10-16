@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class PengaturanUjianController extends Controller
@@ -393,54 +395,82 @@ class PengaturanUjianController extends Controller
 
     public function generateTokenPengawas(Request $request)
     {
-        $request->validate([
-            'id_jadwal' => ['required', 'integer'],
-            'jenis' => ['required', 'in:uts,uas'],
-        ]);
+        try {
+            $request->validate([
+                'id_jadwal' => ['required', 'integer'],
+                'jenis' => ['required', 'in:uts,uas'],
+            ]);
 
-        $idJadwal = (int) $request->input('id_jadwal');
-        $jenis = strtolower($request->input('jenis'));
+            $idJadwal = (int) $request->input('id_jadwal');
+            $jenis = strtolower($request->input('jenis'));
 
-        $jadwal = DB::table('master_jadwal_temp')->where('id', $idJadwal)->first();
-        if (!$jadwal) {
-            return response()->json(['success' => false, 'message' => 'Data jadwal tidak ditemukan.'], 404);
-        }
+            $jadwal = DB::table('master_jadwal_temp')->where('id', $idJadwal)->first();
+            if (!$jadwal) {
+                return response()->json(['success' => false, 'message' => 'Data jadwal kuliah tidak ditemukan.'], 404);
+            }
 
-        $pengaturan = DB::table('tbl_jadwal_ujian')
-            ->where('id_jadwal', $idJadwal)
-            ->where('ta', (int) $jadwal->id_tahun)
-            ->first();
+            $tokenCol = $jenis === 'uts' ? 'token_pengawas_uts' : 'token_pengawas_uas';
 
-        $tokenCol = $jenis === 'uts' ? 'token_pengawas_uts' : 'token_pengawas_uas';
-        $token = $pengaturan?->$tokenCol;
+            // Validasi apakah migration database sudah dijalankan
+            if (!Schema::hasColumn('tbl_jadwal_ujian', $tokenCol)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Kolom database '{$tokenCol}' belum ditemukan. Silakan jalankan perintah 'php artisan migrate' di server Anda terlebih dahulu."
+                ], 500);
+            }
 
-        if (empty($token)) {
-            $token = Str::random(40);
-            if ($pengaturan) {
-                DB::table('tbl_jadwal_ujian')
-                    ->where('id', $pengaturan->id)
-                    ->update([
+            $pengaturan = DB::table('tbl_jadwal_ujian')
+                ->where('id_jadwal', $idJadwal)
+                ->where('ta', (int) $jadwal->id_tahun)
+                ->first();
+
+            $token = $pengaturan?->$tokenCol;
+
+            if (empty($token)) {
+                // Generate token unik 40 karakter
+                do {
+                    $token = Str::random(40);
+                    $exists = DB::table('tbl_jadwal_ujian')->where($tokenCol, $token)->exists();
+                } while ($exists);
+
+                if ($pengaturan) {
+                    DB::table('tbl_jadwal_ujian')
+                        ->where('id_jadwal', $idJadwal)
+                        ->where('ta', (int) $jadwal->id_tahun)
+                        ->update([
+                            $tokenCol => $token,
+                            'log' => now(),
+                        ]);
+                } else {
+                    DB::table('tbl_jadwal_ujian')->insert([
+                        'id_jadwal' => $idJadwal,
+                        'ta' => (int) $jadwal->id_tahun,
                         $tokenCol => $token,
                         'log' => now(),
                     ]);
-            } else {
-                DB::table('tbl_jadwal_ujian')->insert([
-                    'id_jadwal' => $idJadwal,
-                    'ta' => (int) $jadwal->id_tahun,
-                    $tokenCol => $token,
-                    'log' => now(),
-                ]);
+                }
             }
+
+            $url = url('/pengawas/ujian/' . $jenis . '/' . $token);
+
+            return response()->json([
+                'success' => true,
+                'token' => $token,
+                'url' => $url,
+                'jenis' => strtoupper($jenis),
+                'message' => 'Link Pengawas ' . strtoupper($jenis) . ' siap digunakan.',
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('generateTokenPengawas Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'payload' => $request->all()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghasilkan token: ' . $e->getMessage()
+            ], 500);
         }
-
-        $url = url('/pengawas/ujian/' . $jenis . '/' . $token);
-
-        return response()->json([
-            'success' => true,
-            'token' => $token,
-            'url' => $url,
-            'jenis' => strtoupper($jenis),
-            'message' => 'Link Pengawas ' . strtoupper($jenis) . ' siap digunakan.',
-        ]);
     }
 }

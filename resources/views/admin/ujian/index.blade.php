@@ -342,11 +342,13 @@
                 $.ajax({
                     url: '{{ route("admin.ujian.generate-token") }}',
                     type: 'POST',
-                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') || '{{ csrf_token() }}' },
                     data: {
+                        _token: $('meta[name="csrf-token"]').attr('content') || '{{ csrf_token() }}',
                         id_jadwal: idJadwal,
                         jenis: jenis
                     },
+                    dataType: 'json',
                     success: function (res) {
                         if (res.success) {
                             btn.data('token', res.token);
@@ -356,8 +358,21 @@
                             btn.prop('disabled', false).html(origHtml);
                         }
                     },
-                    error: function () {
-                        alert('Terjadi kesalahan saat menghasilkan link pengawas.');
+                    error: function (xhr) {
+                        let msg = 'Terjadi kesalahan saat menghasilkan link pengawas.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg += '\n\nPenyebab: ' + xhr.responseJSON.message;
+                        } else if (xhr.status === 419) {
+                            msg += '\n\nSesi telah berakhir (CSRF expired). Silakan muat ulang (refresh) halaman ini.';
+                        } else if (xhr.responseText) {
+                            try {
+                                const parsed = JSON.parse(xhr.responseText);
+                                if (parsed.message) msg += '\n\nPenyebab: ' + parsed.message;
+                            } catch (e) {
+                                msg += '\n\nStatus: ' + xhr.status + ' (' + xhr.statusText + ')';
+                            }
+                        }
+                        alert(msg);
                         btn.prop('disabled', false).html(origHtml);
                     }
                 });
