@@ -79,26 +79,24 @@
                                                             @endif
                                                         </td>
                                                         <td>
-                                                            <div class="d-flex flex-column gap-1">
-                                                                <a href="{{ url('master/pengaturan-ujian/detail/' . $row->id) }}" class="btn btn-primary btn-sm py-1" title="Detail Pengaturan Ujian">
+                                                            <div class="d-flex flex-column gap-2">
+                                                                <a href="{{ url('master/pengaturan-ujian/detail/' . $row->id) }}" class="btn btn-primary btn-sm py-1 w-100" title="Detail Pengaturan Ujian">
                                                                     <i class="fa fa-eye me-1"></i> Detail
                                                                 </a>
-                                                                <div class="btn-group btn-group-sm w-100" role="group">
-                                                                    <button type="button" class="btn btn-outline-info btn-xs py-1 btn-copy-link-pengawas"
-                                                                            data-id-jadwal="{{ $row->id }}"
-                                                                            data-jenis="uts"
-                                                                            data-token="{{ $row->token_pengawas_uts ?? '' }}"
-                                                                            title="Salin Link Pengawas UTS">
-                                                                        <i class="fa-solid fa-link me-1"></i>UTS
-                                                                    </button>
-                                                                    <button type="button" class="btn btn-outline-success btn-xs py-1 btn-copy-link-pengawas"
-                                                                            data-id-jadwal="{{ $row->id }}"
-                                                                            data-jenis="uas"
-                                                                            data-token="{{ $row->token_pengawas_uas ?? '' }}"
-                                                                            title="Salin Link Pengawas UAS">
-                                                                        <i class="fa-solid fa-link me-1"></i>UAS
-                                                                    </button>
-                                                                </div>
+                                                                <button type="button" class="btn btn-outline-info btn-sm py-1 w-100 btn-copy-link-pengawas text-nowrap"
+                                                                        data-id-jadwal="{{ $row->id }}"
+                                                                        data-jenis="uts"
+                                                                        data-token="{{ $row->token_pengawas_uts ?? '' }}"
+                                                                        title="Salin Link Pengawas UTS">
+                                                                    <i class="fa-solid fa-link me-1"></i> Link UTS
+                                                                </button>
+                                                                <button type="button" class="btn btn-outline-success btn-sm py-1 w-100 btn-copy-link-pengawas text-nowrap"
+                                                                        data-id-jadwal="{{ $row->id }}"
+                                                                        data-jenis="uas"
+                                                                        data-token="{{ $row->token_pengawas_uas ?? '' }}"
+                                                                        title="Salin Link Pengawas UAS">
+                                                                    <i class="fa-solid fa-link me-1"></i> Link UAS
+                                                                </button>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -152,26 +150,24 @@
                                                             @endif
                                                         </td>
                                                         <td>
-                                                            <div class="d-flex flex-column gap-1">
-                                                                <a href="{{ url('master/pengaturan-ujian/detail/' . $row->id) }}" class="btn btn-primary btn-sm py-1" title="Detail Pengaturan Ujian">
+                                                            <div class="d-flex flex-column gap-2">
+                                                                <a href="{{ url('master/pengaturan-ujian/detail/' . $row->id) }}" class="btn btn-primary btn-sm py-1 w-100" title="Detail Pengaturan Ujian">
                                                                     <i class="fa fa-eye me-1"></i> Detail
                                                                 </a>
-                                                                <div class="btn-group btn-group-sm w-100" role="group">
-                                                                    <button type="button" class="btn btn-outline-info btn-xs py-1 btn-copy-link-pengawas"
-                                                                            data-id-jadwal="{{ $row->id }}"
-                                                                            data-jenis="uts"
-                                                                            data-token="{{ $row->token_pengawas_uts ?? '' }}"
-                                                                            title="Salin Link Pengawas UTS">
-                                                                        <i class="fa-solid fa-link me-1"></i>UTS
-                                                                    </button>
-                                                                    <button type="button" class="btn btn-outline-success btn-xs py-1 btn-copy-link-pengawas"
-                                                                            data-id-jadwal="{{ $row->id }}"
-                                                                            data-jenis="uas"
-                                                                            data-token="{{ $row->token_pengawas_uas ?? '' }}"
-                                                                            title="Salin Link Pengawas UAS">
-                                                                        <i class="fa-solid fa-link me-1"></i>UAS
-                                                                    </button>
-                                                                </div>
+                                                                <button type="button" class="btn btn-outline-info btn-sm py-1 w-100 btn-copy-link-pengawas text-nowrap"
+                                                                        data-id-jadwal="{{ $row->id }}"
+                                                                        data-jenis="uts"
+                                                                        data-token="{{ $row->token_pengawas_uts ?? '' }}"
+                                                                        title="Salin Link Pengawas UTS">
+                                                                    <i class="fa-solid fa-link me-1"></i> Link UTS
+                                                                </button>
+                                                                <button type="button" class="btn btn-outline-success btn-sm py-1 w-100 btn-copy-link-pengawas text-nowrap"
+                                                                        data-id-jadwal="{{ $row->id }}"
+                                                                        data-jenis="uas"
+                                                                        data-token="{{ $row->token_pengawas_uas ?? '' }}"
+                                                                        title="Salin Link Pengawas UAS">
+                                                                    <i class="fa-solid fa-link me-1"></i> Link UAS
+                                                                </button>
                                                             </div>
                                                         </td>
                                                     </tr>
