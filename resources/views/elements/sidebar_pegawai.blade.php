@@ -22,7 +22,36 @@
     [data-sidebar-style="overlay"] .deznav svg path, [data-sidebar-style="overlay"] .deznav g [fill] {
         fill: #ffffff !important;
     }
-    .deznav .has-arrow:after, [data-sidebar-style="overlay"] .deznav .has-arrow:after {
+    /* ── PENANDA MENU PARENT DENGAN SUBMENU (CHEVRON DROPDOWN INDICATOR) ── */
+    .deznav .metismenu .has-arrow, .deznav .has-arrow, [data-sidebar-style="overlay"] .deznav .metismenu .has-arrow {
+        position: relative !important;
+        padding-right: 38px !important;
+    }
+    .deznav .metismenu .has-arrow:after, .deznav .has-arrow:after, [data-sidebar-style="overlay"] .deznav .metismenu .has-arrow:after {
+        content: "" !important;
+        display: inline-block !important;
+        position: absolute !important;
+        right: 18px !important;
+        top: 50% !important;
+        width: 8px !important;
+        height: 8px !important;
+        border-style: solid !important;
+        border-width: 0 2px 2px 0 !important;
+        border-color: #ffffff !important;
+        opacity: 0.85 !important;
+        transform: translateY(-50%) rotate(-45deg) !important;
+        -webkit-transform: translateY(-50%) rotate(-45deg) !important;
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease !important;
+        -webkit-transition: -webkit-transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease !important;
+        pointer-events: none !important;
+    }
+    .deznav .metismenu .has-arrow[aria-expanded="true"]:after,
+    .deznav .metismenu li.mm-active > a.has-arrow:after,
+    [data-sidebar-style="overlay"] .deznav .metismenu .has-arrow[aria-expanded="true"]:after,
+    [data-sidebar-style="overlay"] .deznav .metismenu li.mm-active > a.has-arrow:after {
+        transform: translateY(-50%) rotate(45deg) !important;
+        -webkit-transform: translateY(-50%) rotate(45deg) !important;
+        opacity: 1 !important;
         border-color: #ffffff !important;
     }
     .deznav .metismenu ul, [data-sidebar-style="overlay"] .deznav .metismenu ul, .deznav .metismenu li > ul {
@@ -31,19 +60,23 @@
         border: none !important;
     }
     /* ── HILANGKAN SEMUA ANIMASI GARIS MEMANJANG (HORIZONTAL & VERTIKAL) ── */
-    .deznav a:before, .deznav a:after,
-    .deznav a:hover:before, .deznav a:hover:after,
-    .deznav .metismenu a:before, .deznav .metismenu a:after,
-    .deznav .metismenu a:hover:before, .deznav .metismenu a:hover:after,
-    .deznav .metismenu li a:before, .deznav .metismenu li a:after,
-    .deznav .metismenu li a:hover:before, .deznav .metismenu li a:hover:after,
-    .deznav .metismenu > li > a:before, .deznav .metismenu > li > a:after,
-    .deznav .metismenu > li:hover > a:before, .deznav .metismenu > li:hover > a:after,
-    .deznav .metismenu > li.mm-active > a:before, .deznav .metismenu > li.mm-active > a:after,
-    .deznav .metismenu ul a:before, .deznav .metismenu ul a:after,
-    .deznav .metismenu ul a:hover:before, .deznav .metismenu ul a:hover:after,
-    .deznav .metismenu ul li a:before, .deznav .metismenu ul li a:after,
-    .deznav .metismenu ul li a:hover:before, .deznav .metismenu ul li a:hover:after,
+    .deznav a:before,
+    .deznav a:hover:before,
+    .deznav .metismenu a:before,
+    .deznav .metismenu a:hover:before,
+    .deznav .metismenu li a:before,
+    .deznav .metismenu li a:hover:before,
+    .deznav .metismenu > li > a:before,
+    .deznav .metismenu > li:hover > a:before,
+    .deznav .metismenu > li.mm-active > a:before,
+    .deznav .metismenu ul a:before,
+    .deznav .metismenu ul a:after,
+    .deznav .metismenu ul a:hover:before,
+    .deznav .metismenu ul a:hover:after,
+    .deznav .metismenu ul li a:before,
+    .deznav .metismenu ul li a:after,
+    .deznav .metismenu ul li a:hover:before,
+    .deznav .metismenu ul li a:hover:after,
     [data-sidebar-style="full"] .deznav .metismenu ul a:before,
     [data-sidebar-style="full"] .deznav .metismenu ul a:hover:before,
     [data-sidebar-style="overlay"] .deznav .metismenu ul a:before,

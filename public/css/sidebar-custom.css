@@ -75,14 +75,52 @@
     fill: #ffffff !important;
 }
 
-/* Panah Dropdown / Expander (Arrow) */
-.deznav .has-arrow:after,
+/* ── 2.5 PENANDA MENU PARENT DENGAN SUBMENU (CHEVRON DROPDOWN INDICATOR) ── */
+
+.deznav .metismenu .has-arrow,
+.deznav .has-arrow,
+[data-sidebar-style="overlay"] .deznav .metismenu .has-arrow {
+    position: relative !important;
+    padding-right: 38px !important;
+}
+
+/* Panah Indikator (Chevron) pada Menu Parent */
 .deznav .metismenu .has-arrow:after,
-.deznav .metismenu li.active > .has-arrow:after,
-.deznav .metismenu li.mm-active > .has-arrow:after,
-[data-sidebar-style="overlay"] .deznav .metismenu .has-arrow:after,
-[data-sidebar-style="overlay"] .deznav .metismenu li.active > .has-arrow:after,
-[data-sidebar-style="overlay"] .deznav .metismenu li.mm-active > .has-arrow:after {
+.deznav .has-arrow:after,
+[data-sidebar-style="overlay"] .deznav .metismenu .has-arrow:after {
+    content: "" !important;
+    display: inline-block !important;
+    position: absolute !important;
+    right: 18px !important;
+    top: 50% !important;
+    width: 8px !important;
+    height: 8px !important;
+    border-style: solid !important;
+    border-width: 0 2px 2px 0 !important;
+    border-color: #ffffff !important;
+    opacity: 0.85 !important;
+    transform: translateY(-50%) rotate(-45deg) !important; /* Posisi tertutup: Menghadap ke kanan (>) */
+    -webkit-transform: translateY(-50%) rotate(-45deg) !important;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease !important;
+    -webkit-transition: -webkit-transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease !important;
+    pointer-events: none !important;
+}
+
+/* Saat Parent Terbuka / Expanded (Accordion Uncollapsed) */
+.deznav .metismenu .has-arrow[aria-expanded="true"]:after,
+.deznav .metismenu li.mm-active > a.has-arrow:after,
+[data-sidebar-style="overlay"] .deznav .metismenu .has-arrow[aria-expanded="true"]:after,
+[data-sidebar-style="overlay"] .deznav .metismenu li.mm-active > a.has-arrow:after {
+    transform: translateY(-50%) rotate(45deg) !important; /* Posisi terbuka: Berputar 90 derajat menghadap ke bawah (v) */
+    -webkit-transform: translateY(-50%) rotate(45deg) !important;
+    opacity: 1 !important;
+    border-color: #ffffff !important;
+}
+
+/* Hover state pada icon panah */
+.deznav .metismenu > li:hover > a.has-arrow:after,
+.deznav .metismenu .has-arrow:hover:after {
+    opacity: 1 !important;
     border-color: #ffffff !important;
 }
 
@@ -106,23 +144,14 @@
 /* ── 3. HILANGKAN SEMUA ANIMASI GARIS MEMANJANG (HORIZONTAL & VERTIKAL) ── */
 
 .deznav a:before,
-.deznav a:after,
 .deznav a:hover:before,
-.deznav a:hover:after,
 .deznav .metismenu a:before,
-.deznav .metismenu a:after,
 .deznav .metismenu a:hover:before,
-.deznav .metismenu a:hover:after,
 .deznav .metismenu li a:before,
-.deznav .metismenu li a:after,
 .deznav .metismenu li a:hover:before,
-.deznav .metismenu li a:hover:after,
 .deznav .metismenu > li > a:before,
-.deznav .metismenu > li > a:after,
 .deznav .metismenu > li:hover > a:before,
-.deznav .metismenu > li:hover > a:after,
 .deznav .metismenu > li.mm-active > a:before,
-.deznav .metismenu > li.mm-active > a:after,
 .deznav .metismenu ul a:before,
 .deznav .metismenu ul a:after,
 .deznav .metismenu ul a:hover:before,
