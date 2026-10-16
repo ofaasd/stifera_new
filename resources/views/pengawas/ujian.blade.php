@@ -177,6 +177,11 @@
             z-index: 1020;
             box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
         }
+
+        /* ── Chevron Rotation for Collapse ── */
+        [data-bs-toggle="collapse"]:not(.collapsed) .fa-chevron-down {
+            transform: rotate(180deg);
+        }
     </style>
 </head>
 <body class="py-3 py-md-4">
@@ -319,11 +324,11 @@
                         <p class="text-muted small mb-0 d-none d-sm-block">Tanda tangani satu kali di sini, lalu terapkan ke mahasiswa yang hadir dengan satu klik.</p>
                     </div>
                 </div>
-                <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMasterParaf">
-                    <i class="fa-solid fa-chevron-down me-1"></i> <span class="d-none d-sm-inline">Buka / Tutup</span> Panel
+                <button class="btn btn-sm btn-outline-secondary rounded-pill collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMasterParaf" aria-expanded="false" aria-controls="collapseMasterParaf">
+                    <i class="fa-solid fa-chevron-down me-1" style="transition: transform 0.2s ease;"></i> <span class="d-none d-sm-inline">Buka / Tutup</span> Panel
                 </button>
             </div>
-            <div class="collapse show" id="collapseMasterParaf">
+            <div class="collapse" id="collapseMasterParaf">
                 <div class="card-body bg-light-subtle p-3 p-md-4">
                     <div class="row g-3 g-md-4 align-items-center">
                         <div class="col-lg-5 col-md-6 col-12">
@@ -837,6 +842,9 @@
                 }
             }
             window.addEventListener('resize', resizeMasterCanvas);
+            $('#collapseMasterParaf').on('shown.bs.collapse', function () {
+                setTimeout(resizeMasterCanvas, 150);
+            });
             setTimeout(resizeMasterCanvas, 250);
 
             $('#btn-clear-master').on('click', function () {
