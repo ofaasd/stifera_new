@@ -5,6 +5,8 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class PengaturanUjianController extends Controller
 {
@@ -27,6 +29,9 @@ class PengaturanUjianController extends Controller
         $data['jadwalRpl'] = $tahunRpl
             ? $this->getListJadwalByTahun((int) $tahunRpl->id)
             : collect();
+
+        $data['settingUjian'] = DB::table('tbl_setting_ujian')->first();
+        $data['hasTtdKabak'] = file_exists(public_path('uploads/ttd_kabak.png'));
 
         return view('admin.ujian.index', $data);
     }
@@ -330,6 +335,8 @@ class PengaturanUjianController extends Controller
                 'mjt.rombel',
                 'mjt.tipe_mhs',
                 'mmk.nama_mata_kuliah',
+                'tju.token_pengawas_uts',
+                'tju.token_pengawas_uas',
                 DB::raw("CONCAT(COALESCE(pb.gelar_depan,''), ' ', COALESCE(pb.nama_lengkap,''), ' ', COALESCE(pb.gelar_belakang,'')) as nama_dosen"),
                 DB::raw('CASE WHEN tju.id IS NULL THEN 0 ELSE 1 END as sudah_diatur')
             )
@@ -337,5 +344,103 @@ class PengaturanUjianController extends Controller
             ->orderBy('mjt.kode_mata_kuliah')
             ->orderBy('mjt.rombel')
             ->get();
+    }
+
+    public function uploadTtdKabak(Request $request)
+    {
+        $request->validate([
+            'ttd_cap' => ['nullable', 'file', 'mimes:png', 'max:2048'],
+            'nama_kabak' => ['nullable', 'string', 'max:255'],
+            'nip_kabak' => ['nullable', 'string', 'max:100'],
+        ], [
+            'ttd_cap.mimes' => 'Format file TTD & Cap Kepala BAK harus berupa gambar PNG transparan (.png).',
+            'ttd_cap.max' => 'Ukuran file TTD & Cap Kepala BAK maksimal 2MB.',
+        ]);
+
+        $uploadDir = public_path('uploads');
+        if (!File::isDirectory($uploadDir)) {
+            File::makeDirectory($uploadDir, 0755, true);
+        }
+
+        $relPath = 'uploads/ttd_kabak.png';
+        if ($request->hasFile('ttd_cap')) {
+            $file = $request->file('ttd_cap');
+            $file->move($uploadDir, 'ttd_kabak.png');
+        }
+
+        $setting = DB::table('tbl_setting_ujian')->first();
+        if ($setting) {
+            DB::table('tbl_setting_ujian')
+                ->where('id', $setting->id)
+                ->update([
+                    'nama_kabak' => $request->input('nama_kabak', $setting->nama_kabak),
+                    'nip_kabak' => $request->input('nip_kabak', $setting->nip_kabak),
+                    'ttd_cap_kabak' => $relPath,
+                    'updated_at' => now(),
+                ]);
+        } else {
+            DB::table('tbl_setting_ujian')->insert([
+                'nama_kabak' => $request->input('nama_kabak'),
+                'nip_kabak' => $request->input('nip_kabak'),
+                'ttd_cap_kabak' => $relPath,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return redirect('master/pengaturan-ujian')->with('status', 'Pengaturan TTD & Cap Kepala BAK berhasil disimpan.');
+    }
+
+    public function generateTokenPengawas(Request $request)
+    {
+        $request->validate([
+            'id_jadwal' => ['required', 'integer'],
+            'jenis' => ['required', 'in:uts,uas'],
+        ]);
+
+        $idJadwal = (int) $request->input('id_jadwal');
+        $jenis = strtolower($request->input('jenis'));
+
+        $jadwal = DB::table('master_jadwal_temp')->where('id', $idJadwal)->first();
+        if (!$jadwal) {
+            return response()->json(['success' => false, 'message' => 'Data jadwal tidak ditemukan.'], 404);
+        }
+
+        $pengaturan = DB::table('tbl_jadwal_ujian')
+            ->where('id_jadwal', $idJadwal)
+            ->where('ta', (int) $jadwal->id_tahun)
+            ->first();
+
+        $tokenCol = $jenis === 'uts' ? 'token_pengawas_uts' : 'token_pengawas_uas';
+        $token = $pengaturan?->$tokenCol;
+
+        if (empty($token)) {
+            $token = Str::random(40);
+            if ($pengaturan) {
+                DB::table('tbl_jadwal_ujian')
+                    ->where('id', $pengaturan->id)
+                    ->update([
+                        $tokenCol => $token,
+                        'log' => now(),
+                    ]);
+            } else {
+                DB::table('tbl_jadwal_ujian')->insert([
+                    'id_jadwal' => $idJadwal,
+                    'ta' => (int) $jadwal->id_tahun,
+                    $tokenCol => $token,
+                    'log' => now(),
+                ]);
+            }
+        }
+
+        $url = url('/pengawas/ujian/' . $jenis . '/' . $token);
+
+        return response()->json([
+            'success' => true,
+            'token' => $token,
+            'url' => $url,
+            'jenis' => strtoupper($jenis),
+            'message' => 'Link Pengawas ' . strtoupper($jenis) . ' siap digunakan.',
+        ]);
     }
 }

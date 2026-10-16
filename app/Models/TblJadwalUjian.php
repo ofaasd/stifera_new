@@ -43,7 +43,9 @@ class TblJadwalUjian extends Model
 		'tanggal_uas_p' => 'datetime',
 		'id_jam_uas_p' => 'int',
 		'ta' => 'int',
-		'log' => 'datetime'
+		'log' => 'datetime',
+		'token_pengawas_uts' => 'string',
+		'token_pengawas_uas' => 'string'
 	];
 
 	protected $fillable = [
@@ -57,6 +59,8 @@ class TblJadwalUjian extends Model
 		'tanggal_uas_p',
 		'id_jam_uas_p',
 		'ta',
-		'log'
+		'log',
+		'token_pengawas_uts',
+		'token_pengawas_uas'
 	];
 }

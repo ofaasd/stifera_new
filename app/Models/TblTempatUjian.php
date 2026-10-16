@@ -31,7 +31,9 @@ class TblTempatUjian extends Model
 		'ta' => 'int',
 		'id_jadwal' => 'int',
 		'no_kursi' => 'int',
-		'log' => 'datetime'
+		'log' => 'datetime',
+		'waktu_paraf_uts' => 'datetime',
+		'waktu_paraf_uas' => 'datetime'
 	];
 
 	protected $fillable = [
@@ -40,6 +42,10 @@ class TblTempatUjian extends Model
 		'nim',
 		'no_kursi',
 		'ruang',
-		'log'
+		'log',
+		'paraf_pengawas_uts',
+		'waktu_paraf_uts',
+		'paraf_pengawas_uas',
+		'waktu_paraf_uas'
 	];
 }

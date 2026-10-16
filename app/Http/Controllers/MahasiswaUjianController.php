@@ -21,6 +21,7 @@ class MahasiswaUjianController extends Controller
         $ujianRows = collect();
         $isUtsDiizinkan = false;
         $isUasDiizinkan = false;
+        $isDosenWaliValid = false;
         $mahasiswaProfil = $this->getMahasiswaProfil((int) ($mahasiswa->id ?? 0));
 
         if ($tahunAktif) {
@@ -32,6 +33,12 @@ class MahasiswaUjianController extends Controller
 
             $isUtsDiizinkan = (int) ($izinUjian->uts ?? 0) === 1;
             $isUasDiizinkan = (int) ($izinUjian->uas ?? 0) === 1;
+
+            $isDosenWaliValid = DB::table('master_krs_temp')
+                ->where('nim', $mahasiswa->nim)
+                ->where('id_tahun', (int) $tahunAktif->id)
+                ->where('is_publish', 1)
+                ->exists();
 
             $ujianRows = $this->getJadwalUjianMahasiswa($mahasiswa->nim, (int) $tahunAktif->id);
         }
@@ -45,6 +52,7 @@ class MahasiswaUjianController extends Controller
             'jenisTA' => $this->formatJenisSemester((int) ($tahunAktif->jenis ?? 0)),
             'isUtsDiizinkan' => $isUtsDiizinkan,
             'isUasDiizinkan' => $isUasDiizinkan,
+            'isDosenWaliValid' => $isDosenWaliValid,
             'ujianRows' => $ujianRows,
             'utsRows' => $isUtsDiizinkan ? $this->mapUjianByJenis($ujianRows, 'uts') : collect(),
             'uasRows' => $isUasDiizinkan ? $this->mapUjianByJenis($ujianRows, 'uas') : collect(),
@@ -96,6 +104,16 @@ class MahasiswaUjianController extends Controller
         }
 
         $mahasiswaProfil = $this->getMahasiswaProfil((int) ($mahasiswa->id ?? 0));
+        $settingUjian = DB::table('tbl_setting_ujian')->first();
+        $ttdKabakPath = public_path('uploads/ttd_kabak.png');
+        $hasTtdKabak = file_exists($ttdKabakPath);
+
+        $isDosenWaliValid = DB::table('master_krs_temp')
+            ->where('nim', $mahasiswa->nim)
+            ->where('id_tahun', (int) $tahunAktif->id)
+            ->where('is_publish', 1)
+            ->exists();
+
         $html = view('mahasiswa.ujian_pdf', [
             'mahasiswa' => $mahasiswa,
             'mahasiswaProfil' => $mahasiswaProfil,
@@ -103,6 +121,12 @@ class MahasiswaUjianController extends Controller
             'jenisTA' => $this->formatJenisSemester((int) ($tahunAktif->jenis ?? 0)),
             'ujianRows' => $ujianRows,
             'jenisKartu' => $jenis,
+            'settingUjian' => $settingUjian,
+            'ttdKabakPath' => $ttdKabakPath,
+            'hasTtdKabak' => $hasTtdKabak,
+            'isDosenWaliValid' => $isDosenWaliValid,
+            'isUtsDiizinkan' => $isUtsDiizinkan,
+            'isUasDiizinkan' => $isUasDiizinkan,
         ])->render();
         
         $mpdf = new Mpdf([
@@ -168,7 +192,11 @@ class MahasiswaUjianController extends Controller
                 'jam_uas_t.selesai as selesai_uas_t',
                 'jam_uas_p.nama_sesi as nama_sesi_uas_p',
                 'jam_uas_p.mulai as mulai_uas_p',
-                'jam_uas_p.selesai as selesai_uas_p'
+                'jam_uas_p.selesai as selesai_uas_p',
+                'ttu.paraf_pengawas_uts',
+                'ttu.waktu_paraf_uts',
+                'ttu.paraf_pengawas_uas',
+                'ttu.waktu_paraf_uas'
             )
             ->where('mk.nim', $nim)
             ->where('mk.id_tahun', $idTahun)
@@ -191,6 +219,8 @@ class MahasiswaUjianController extends Controller
                 DB::raw("COALESCE(NULLIF(CONCAT(COALESCE(ps.jenjang,''), ' ', COALESCE(ps.nama_jurusan,'')), ' '), mps.nama_jurusan, '-') as nama_program_studi"),
                 DB::raw("COALESCE(f.nama_fakultas, '-') as nama_fakultas"),
                 DB::raw("CONCAT(COALESCE(pbw.gelar_depan,''), ' ', COALESCE(pbw.nama_lengkap,''), ' ', COALESCE(pbw.gelar_belakang,'')) as dosen_wali"),
+                'pbw.nidn as dosen_wali_nidn',
+                'pbw.paraf as dosen_wali_paraf',
                 DB::raw("COALESCE(pbw.email1, '-') as email_dosen_wali")
             )
             ->where('m.id', $idMahasiswa)
@@ -217,6 +247,8 @@ class MahasiswaUjianController extends Controller
                     'sesi_praktik' => $row->nama_sesi_uts_p,
                     'mulai_praktik' => $row->mulai_uts_p,
                     'selesai_praktik' => $row->selesai_uts_p,
+                    'paraf_pengawas' => $row->paraf_pengawas_uts,
+                    'waktu_paraf' => $row->waktu_paraf_uts,
                 ];
             }
 
@@ -236,6 +268,8 @@ class MahasiswaUjianController extends Controller
                 'sesi_praktik' => $row->nama_sesi_uas_p,
                 'mulai_praktik' => $row->mulai_uas_p,
                 'selesai_praktik' => $row->selesai_uas_p,
+                'paraf_pengawas' => $row->paraf_pengawas_uas,
+                'waktu_paraf' => $row->waktu_paraf_uas,
             ];
         });
     }

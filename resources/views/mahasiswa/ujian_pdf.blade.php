@@ -56,7 +56,7 @@
         }
         .center { text-align: center; }
         .footer {
-            margin-top: 70px;
+            margin-top: 30px;
             width: 100%;
             border-collapse: collapse;
         }
@@ -126,10 +126,14 @@
                             $tgl = !empty($row->tanggal_uts_t) ? \Illuminate\Support\Carbon::parse($row->tanggal_uts_t)->format('d-m-Y') : '-';
                             $mulai = !empty($row->mulai_uts_t) ? \Illuminate\Support\Carbon::parse($row->mulai_uts_t)->format('H:i') : '--:--';
                             $selesai = !empty($row->selesai_uts_t) ? \Illuminate\Support\Carbon::parse($row->selesai_uts_t)->format('H:i') : '--:--';
+                            $paraf = $row->paraf_pengawas_uts ?? $row->paraf_pengawas ?? null;
+                            $waktuParaf = $row->waktu_paraf_uts ?? $row->waktu_paraf ?? null;
                         } else {
                             $tgl = !empty($row->tanggal_uas_t) ? \Illuminate\Support\Carbon::parse($row->tanggal_uas_t)->format('d-m-Y') : '-';
                             $mulai = !empty($row->mulai_uas_t) ? \Illuminate\Support\Carbon::parse($row->mulai_uas_t)->format('H:i') : '--:--';
                             $selesai = !empty($row->selesai_uas_t) ? \Illuminate\Support\Carbon::parse($row->selesai_uas_t)->format('H:i') : '--:--';
+                            $paraf = $row->paraf_pengawas_uas ?? $row->paraf_pengawas ?? null;
+                            $waktuParaf = $row->waktu_paraf_uas ?? $row->waktu_paraf ?? null;
                         }
                         $waktu = ($mulai === '--:--' && $selesai === '--:--') ? '-' : ($mulai . ' - ' . $selesai);
                     @endphp
@@ -142,7 +146,12 @@
                         <td class="center">{{ $row->no_kursi ?? '-' }}</td>
                         <td class="center">{{ $tgl }}</td>
                         <td class="center">{{ $waktu }}</td>
-                        <td></td>
+                        <td class="center" style="vertical-align: middle;">
+                            @if(!empty($paraf))
+                                <img src="{{ $paraf }}" style="max-height: 25px; max-width: 50px; object-fit: contain;"><br>
+                                <span style="font-size: 6px; color: #444;">{{ !empty($waktuParaf) ? \Carbon\Carbon::parse($waktuParaf)->format('d/m/y H:i') : '' }}</span>
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>
@@ -154,16 +163,50 @@
 
         <table class="footer">
             <tr>
-                <td width="50%"><center>Dosen Wali</center></td>
-                <td width="50%" class="center">Semarang, {{ now()->translatedFormat('d M Y') }}</td>
+                <td width="50%" class="center">Dosen Wali</td>
+                <td width="50%" class="center">
+                    Semarang, {{ now()->translatedFormat('d F Y') }}<br>
+                    Kepala Bagian Administrasi Akademik & Keuangan
+                </td>
             </tr>
             <tr>
-                <td style="height: 40px;"></td>
-                <td class="center">Kepala Tata Usaha</td>
+                <td class="center" style="height: 65px; vertical-align: middle;">
+                    @if(!empty($isDosenWaliValid))
+                        @if(!empty($mahasiswaProfil->dosen_wali_paraf))
+                            <img src="{{ $mahasiswaProfil->dosen_wali_paraf }}" style="max-height: 50px; max-width: 130px; object-fit: contain;" alt="Paraf Dosen Wali"><br>
+                            <span style="font-size: 7px; color: #0d6efd; font-weight: bold;">✓ TERVALIDASI DOSEN WALI</span>
+                        @else
+                            <div style="margin: 0 auto; padding: 4px 8px; border: 1px dashed #0d6efd; border-radius: 4px; display: inline-block; text-align: center; color: #0d6efd;">
+                                <span style="font-size: 8px; font-weight: bold; display: block;">✓ TERVALIDASI SISTEM</span>
+                                <span style="font-size: 7px; color: #333;">Dosen Wali Mahasiswa</span>
+                            </div>
+                        @endif
+                    @endif
+                </td>
+                <td class="center" style="height: 65px; vertical-align: middle;">
+                    @php
+                        $isKeuanganValid = $jenisKartu === 'uts' ? ($isUtsDiizinkan ?? false) : ($isUasDiizinkan ?? false);
+                    @endphp
+                    @if($isKeuanganValid && !empty($hasTtdKabak) && file_exists($ttdKabakPath))
+                        <img src="{{ $ttdKabakPath }}" style="max-height: 65px; max-width: 170px; object-fit: contain;" alt="TTD & Cap BAK">
+                    @endif
+                </td>
             </tr>
             <tr>
-                <td><center>{{ trim((string) ($mahasiswaProfil->dosen_wali ?? '-')) }}</center></td>
-                <td class="center">FAKULTAS {{ trim((string) ($mahasiswaProfil->nama_fakultas ?? '-')) }}</td>
+                <td class="center">
+                    <u><strong>{{ trim((string) ($mahasiswaProfil->dosen_wali ?? '-')) }}</strong></u>
+                    @if(!empty($mahasiswaProfil->dosen_wali_nidn))
+                        <div style="font-size: 8px; color: #333;">NIDN: {{ $mahasiswaProfil->dosen_wali_nidn }}</div>
+                    @endif
+                </td>
+                <td class="center">
+                    <u><strong>{{ trim((string) ($settingUjian->nama_kabak ?? 'Kepala BAK')) }}</strong></u>
+                    @if(!empty($settingUjian->nip_kabak))
+                        <div style="font-size: 8px; color: #333;">NIP/NPP: {{ $settingUjian->nip_kabak }}</div>
+                    @else
+                        <div style="font-size: 8px; color: #333;">FAKULTAS {{ trim((string) ($mahasiswaProfil->nama_fakultas ?? '-')) }}</div>
+                    @endif
+                </td>
             </tr>
         </table>
     </div>

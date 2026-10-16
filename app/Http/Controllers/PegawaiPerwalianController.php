@@ -17,7 +17,7 @@ class PegawaiPerwalianController extends Controller
         }
 
         $dosenInfo = DB::table('pegawai_biodata')
-            ->select('nama_lengkap', 'nidn')
+            ->select('nama_lengkap', 'nidn', 'paraf')
             ->where('id_pegawai', (int) $pegawai->id)
             ->first();
 
@@ -173,4 +173,75 @@ class PegawaiPerwalianController extends Controller
             'data' => $krsData,
         ]);
     }
+
+    public function simpanParaf(Request $request)
+    {
+        $pegawai = Auth::guard('pegawai')->user();
+
+        if (!$pegawai) {
+            return response()->json(['result' => 0, 'message' => 'Akses ditolak.'], 403);
+        }
+
+        $parafData = null;
+
+        if ($request->hasFile('paraf_file')) {
+            $request->validate([
+                'paraf_file' => 'required|image|mimes:png,jpg,jpeg|max:2048',
+            ]);
+
+            $file = $request->file('paraf_file');
+            $mime = $file->getMimeType();
+            $base64 = base64_encode(file_get_contents($file->getRealPath()));
+            $parafData = "data:{$mime};base64,{$base64}";
+        } elseif ($request->filled('paraf_base64')) {
+            $raw = (string) $request->input('paraf_base64');
+            if (!preg_match('/^data:image\/(png|jpeg|jpg);base64,[A-Za-z0-9+\/=_]+$/', $raw)) {
+                return response()->json(['result' => 0, 'message' => 'Format gambar paraf tidak valid.'], 422);
+            }
+            $parafData = $raw;
+        } else {
+            return response()->json(['result' => 0, 'message' => 'Silakan gambar paraf pada kanvas atau unggah file gambar paraf.'], 422);
+        }
+
+        $existingBio = DB::table('pegawai_biodata')
+            ->where('id_pegawai', (int) $pegawai->id)
+            ->first();
+
+        if ($existingBio) {
+            DB::table('pegawai_biodata')
+                ->where('id_pegawai', (int) $pegawai->id)
+                ->update(['paraf' => $parafData]);
+        } else {
+            DB::table('pegawai_biodata')->insert([
+                'id_pegawai' => (int) $pegawai->id,
+                'nama_lengkap' => $pegawai->nama ?? 'Dosen Wali',
+                'paraf' => $parafData,
+            ]);
+        }
+
+        return response()->json([
+            'result' => 1,
+            'message' => 'Paraf Dosen Wali berhasil disimpan.',
+            'paraf' => $parafData,
+        ]);
+    }
+
+    public function hapusParaf(Request $request)
+    {
+        $pegawai = Auth::guard('pegawai')->user();
+
+        if (!$pegawai) {
+            return response()->json(['result' => 0, 'message' => 'Akses ditolak.'], 403);
+        }
+
+        DB::table('pegawai_biodata')
+            ->where('id_pegawai', (int) $pegawai->id)
+            ->update(['paraf' => null]);
+
+        return response()->json([
+            'result' => 1,
+            'message' => 'Paraf Dosen Wali berhasil dihapus.',
+        ]);
+    }
 }
+

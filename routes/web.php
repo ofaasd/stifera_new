@@ -179,6 +179,8 @@ Route::middleware('auth:pegawai,admin')->group(function () {
     Route::get('/akademik/perwalian/dosen', [PegawaiPerwalianController::class, 'index'])->name('pegawai.perwalian.index');
     Route::post('/akademik/perwalian/dosen/verifikasi-krs', [PegawaiPerwalianController::class, 'verifikasiKrs'])->name('pegawai.perwalian.verifikasi-krs');
     Route::get('/akademik/perwalian/dosen/get-krs', [PegawaiPerwalianController::class, 'getKrs'])->name('pegawai.perwalian.get-krs');
+    Route::post('/akademik/perwalian/dosen/simpan-paraf', [PegawaiPerwalianController::class, 'simpanParaf'])->name('pegawai.perwalian.simpan-paraf');
+    Route::post('/akademik/perwalian/dosen/hapus-paraf', [PegawaiPerwalianController::class, 'hapusParaf'])->name('pegawai.perwalian.hapus-paraf');
 
     Route::get('/dosen/ujian', [PegawaiNilaiController::class, 'index'])->name('pegawai.nilai.index');
     Route::get('/dosen/ujian/input/{id_jadwal}', [PegawaiNilaiController::class, 'input'])->name('pegawai.nilai.input');
@@ -531,6 +533,8 @@ Route::middleware('auth:admin')->group(function () {
     Route::post('/master/pengaturan-ujian/detail/{id_jadwal}', [PengaturanUjianController::class, 'save']);
     Route::get('/master/pengaturan-ujian/kursi/{id_jadwal}', [PengaturanUjianController::class, 'kursi']);
     Route::post('/master/pengaturan-ujian/kursi/{id_jadwal}', [PengaturanUjianController::class, 'saveKursi']);
+    Route::post('/master/pengaturan-ujian/upload-ttd-kabak', [PengaturanUjianController::class, 'uploadTtdKabak'])->name('admin.ujian.upload-ttd-kabak');
+    Route::post('/master/pengaturan-ujian/generate-token', [PengaturanUjianController::class, 'generateTokenPengawas'])->name('admin.ujian.generate-token');
 
     //Action Presensi
     Route::get('/master/presensi', [PresensiController::class, 'index']);
@@ -720,3 +724,7 @@ Route::middleware('auth:mahasiswa')->group(function () {
     Route::post('/mhs/yudisium/store', [\App\Http\Controllers\mahasiswa\YudisiumMahasiswaController::class, 'store'])->name('mahasiswa.yudisium.store');
     Route::post('/mhs/yudisium/revisi', [\App\Http\Controllers\mahasiswa\YudisiumMahasiswaController::class, 'updateRevisi'])->name('mahasiswa.yudisium.updateRevisi');
 });
+
+// Route Publik Pengawas Ujian (Tanpa Login)
+Route::get('/pengawas/ujian/{jenis}/{token}', [\App\Http\Controllers\PengawasUjianController::class, 'index'])->name('pengawas.ujian.index');
+Route::post('/pengawas/ujian/{jenis}/{token}/paraf', [\App\Http\Controllers\PengawasUjianController::class, 'simpanParaf'])->name('pengawas.ujian.paraf');
