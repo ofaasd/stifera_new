@@ -1,45 +1,101 @@
 <style>
-    /* Memperbaiki bug white-on-white text saat sidebar di toggle berbagai mode */
-    #main-wrapper.menu-toggle .deznav .metismenu li > ul,
-    body.menu-toggle .deznav .metismenu li > ul,
-    .menu-toggle .deznav .metismenu li > ul,
-    [data-sidebar-style="mini"] .deznav .metismenu li > ul,
-    [data-sidebar-style="compact"] .deznav .metismenu li > ul,
-    [data-sidebar-style="icon-hover"] .deznav .metismenu li > ul {
+    /* ── Anti-Cache Inline Styles for Sidebar ── */
+    .deznav, .deznav-scroll, [data-sidebar-style="overlay"] .deznav {
         background-color: #0057bb !important;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
     }
-    
-    #main-wrapper.menu-toggle .deznav .metismenu li:hover > a > .nav-text,
-    body.menu-toggle .deznav .metismenu li:hover > a > .nav-text,
-    .menu-toggle .deznav .metismenu li:hover > a > .nav-text,
-    [data-sidebar-style="mini"] .deznav .metismenu li:hover > a > .nav-text,
-    [data-sidebar-style="compact"] .deznav .metismenu li:hover > a > .nav-text,
-    [data-sidebar-style="icon-hover"] .deznav .metismenu li:hover > a > .nav-text {
-        background-color: #0057bb !important;
-        color: #fff !important;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
+    .deznav a, .deznav span, .deznav .nav-text, .deznav .metismenu a, .deznav .metismenu li a,
+    [data-sidebar-style="overlay"] .deznav a, [data-sidebar-style="overlay"] .deznav .nav-text,
+    [data-sidebar-style="overlay"] .deznav .metismenu > li > a,
+    [data-sidebar-style="overlay"] .deznav .metismenu ul a {
+        color: #ffffff !important;
     }
-    
-    #main-wrapper.menu-toggle .deznav .metismenu li > ul a,
-    body.menu-toggle .deznav .metismenu li > ul a,
-    .menu-toggle .deznav .metismenu li > ul a,
-    [data-sidebar-style="mini"] .deznav .metismenu li > ul a,
-    [data-sidebar-style="compact"] .deznav .metismenu li > ul a,
-    [data-sidebar-style="icon-hover"] .deznav .metismenu li > ul a {
-        color: #fff !important;
+    .deznav i, .deznav .menu-icon, .deznav .menu-icon i,
+    [data-sidebar-style="overlay"] .deznav i, [data-sidebar-style="overlay"] .deznav .menu-icon i {
+        color: #ffffff !important;
     }
-    
-    #main-wrapper.menu-toggle .deznav .metismenu li > ul a:hover,
-    body.menu-toggle .deznav .metismenu li > ul a:hover,
-    .menu-toggle .deznav .metismenu li > ul a:hover,
-    [data-sidebar-style="mini"] .deznav .metismenu li > ul a:hover,
-    [data-sidebar-style="compact"] .deznav .metismenu li > ul a:hover,
-    [data-sidebar-style="icon-hover"] .deznav .metismenu li > ul a:hover {
-        background-color: rgba(255, 255, 255, 0.15) !important;
+    .deznav svg path, .deznav g [fill],
+    [data-sidebar-style="overlay"] .deznav svg path, [data-sidebar-style="overlay"] .deznav g [fill] {
+        fill: #ffffff !important;
+    }
+    .deznav .has-arrow:after, [data-sidebar-style="overlay"] .deznav .has-arrow:after {
+        border-color: #ffffff !important;
+    }
+    .deznav .metismenu ul, [data-sidebar-style="overlay"] .deznav .metismenu ul, .deznav .metismenu li > ul {
+        background-color: rgba(0, 0, 0, 0.22) !important;
+        border-left: none !important;
+        border: none !important;
+    }
+    /* ── HILANGKAN SEMUA ANIMASI GARIS MEMANJANG (HORIZONTAL & VERTIKAL) ── */
+    .deznav a:before, .deznav a:after,
+    .deznav a:hover:before, .deznav a:hover:after,
+    .deznav .metismenu a:before, .deznav .metismenu a:after,
+    .deznav .metismenu a:hover:before, .deznav .metismenu a:hover:after,
+    .deznav .metismenu li a:before, .deznav .metismenu li a:after,
+    .deznav .metismenu li a:hover:before, .deznav .metismenu li a:hover:after,
+    .deznav .metismenu > li > a:before, .deznav .metismenu > li > a:after,
+    .deznav .metismenu > li:hover > a:before, .deznav .metismenu > li:hover > a:after,
+    .deznav .metismenu > li.mm-active > a:before, .deznav .metismenu > li.mm-active > a:after,
+    .deznav .metismenu ul a:before, .deznav .metismenu ul a:after,
+    .deznav .metismenu ul a:hover:before, .deznav .metismenu ul a:hover:after,
+    .deznav .metismenu ul li a:before, .deznav .metismenu ul li a:after,
+    .deznav .metismenu ul li a:hover:before, .deznav .metismenu ul li a:hover:after,
+    [data-sidebar-style="full"] .deznav .metismenu ul a:before,
+    [data-sidebar-style="full"] .deznav .metismenu ul a:hover:before,
+    [data-sidebar-style="overlay"] .deznav .metismenu ul a:before,
+    [data-sidebar-style="overlay"] .deznav .metismenu ul a:hover:before,
+    [data-sidebar-style="mini"] .deznav .metismenu ul a:before,
+    [data-sidebar-style="mini"] .deznav .metismenu ul a:hover:before,
+    [data-sidebar-style="compact"] .deznav .metismenu ul a:before,
+    [data-sidebar-style="compact"] .deznav .metismenu ul a:hover:before {
+        display: none !important;
+        content: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        opacity: 0 !important;
+        transition: none !important;
+        -webkit-transition: none !important;
+        animation: none !important;
+    }
+    .deznav .metismenu ul a,
+    .deznav .metismenu ul a:hover,
+    [data-sidebar-style="full"] .deznav .metismenu ul a,
+    [data-sidebar-style="full"] .deznav .metismenu ul a:hover,
+    [data-sidebar-style="overlay"] .deznav .metismenu ul a,
+    [data-sidebar-style="overlay"] .deznav .metismenu ul a:hover {
+        padding-left: 20px !important;
+        transition: background-color 0.2s ease, color 0.2s ease !important;
+    }
+    @media (max-width: 991.98px) {
+        .deznav, [data-sidebar-style="overlay"] .deznav {
+            position: fixed !important;
+            top: 0 !important;
+            left: -330px !important;
+            width: 290px !important;
+            max-width: 85vw !important;
+            height: 100vh !important;
+            z-index: 99999 !important;
+            background-color: #0057bb !important;
+            box-shadow: 10px 0 35px rgba(0, 0, 0, 0.4) !important;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            display: block !important;
+        }
+        #main-wrapper.menu-toggle .deznav, body.menu-toggle .deznav, .menu-toggle .deznav,
+        [data-sidebar-style="overlay"] #main-wrapper.menu-toggle .deznav {
+            left: 0 !important;
+        }
     }
 </style>
 <div class="deznav">
+    <!-- Mobile Header with Close Button -->
+    <div class="sidebar-mobile-header d-md-none">
+        <div class="d-flex align-items-center gap-2">
+            <img src="{{ asset('images/logo/logo.png') }}" alt="Logo" style="height: 30px; width: auto; object-fit: contain;" onerror="this.src='{{ asset('images/favicon.png') }}'">
+            <span class="brand-text">SIAKAD STIFERA</span>
+        </div>
+        <button type="button" class="sidebar-mobile-close-btn" aria-label="Tutup Menu">
+            <i class="fa fa-times"></i>
+        </button>
+    </div>
 			<div class="deznav-scroll grid-menu">
 				<ul class="metismenu" id="menu">
 				@foreach($menus as $menu)

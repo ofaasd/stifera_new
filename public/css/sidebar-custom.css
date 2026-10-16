@@ -1,78 +1,390 @@
-/* Custom Sidebar Styling - Applied to all pages */
+/* ==========================================================================
+   SIAKAD STIFERA - Custom Sidebar Styling (Desktop, Tablet & Mobile/HP)
+   ========================================================================== */
 
 :root {
-	--sidebar-bg: #0057bb;
+    --sidebar-bg: #0057bb !important;
+    --sidebar-active-bg: rgba(255, 255, 255, 0.22);
+    --sidebar-hover-bg: rgba(255, 255, 255, 0.12);
+    --sidebar-submenu-bg: rgba(0, 0, 0, 0.22);
 }
 
-/* Ubah warna teks menu sidebar menjadi putih */
-.deznav .metismenu > li > a {
-	color: #ffffff;
+/* ── 1. BACKGROUND SIDEBAR SELALU BIRU STIFERA (#0057bb) ── */
+.deznav,
+.deznav-scroll,
+[data-sidebar-style="overlay"] .deznav,
+[data-sidebar-style="mini"] .deznav,
+[data-sidebar-style="compact"] .deznav,
+[data-sidebar-style="full"] .deznav,
+#main-wrapper .deznav {
+    background-color: #0057bb !important;
 }
 
-/* Ubah warna icon menu sidebar menjadi putih */
-.deznav .metismenu > li > a i {
-	color: #ffffff;
+/* ── 2. GLOBAL & MOBILE TEXT COLOR: SELALU PUTIH BERSIH ── */
+
+/* Semua teks dan label di sidebar */
+.deznav a,
+.deznav a:link,
+.deznav a:visited,
+.deznav a span,
+.deznav .nav-text,
+.deznav .metismenu a,
+.deznav .metismenu li a,
+.deznav .metismenu > li > a,
+.deznav .metismenu ul a,
+.deznav .metismenu ul li a,
+[data-sidebar-style="overlay"] .deznav a,
+[data-sidebar-style="overlay"] .deznav .nav-text,
+[data-sidebar-style="overlay"] .deznav .metismenu > li > a,
+[data-sidebar-style="overlay"] .deznav .metismenu ul a,
+[data-sidebar-style="overlay"] .deznav .metismenu ul li a,
+#main-wrapper.menu-toggle .deznav a,
+#main-wrapper.menu-toggle .deznav .nav-text,
+#main-wrapper.menu-toggle .deznav .metismenu li > ul a {
+    color: #ffffff !important;
 }
 
-/* Ubah warna SVG icon menu sidebar menjadi putih */
-.deznav .metismenu > li > a g [fill] {
-	fill: #ffffff;
+/* Menu Utama (Level 1) */
+.deznav .metismenu > li > a,
+[data-sidebar-style="overlay"] .deznav .metismenu > li > a {
+    color: #ffffff !important;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
-/* Ubah warna icon pada hover */
+/* Icons (Level 1 & Submenu) */
+.deznav i,
+.deznav .menu-icon,
+.deznav .menu-icon i,
+.deznav .metismenu i,
+.deznav .metismenu > li > a i,
+.deznav .metismenu > li > a .menu-icon i,
+[data-sidebar-style="overlay"] .deznav i,
+[data-sidebar-style="overlay"] .deznav .menu-icon i,
+[data-sidebar-style="overlay"] .deznav .metismenu > li > a i {
+    color: #ffffff !important;
+}
+
+/* SVG icons */
+.deznav svg path,
+.deznav g [fill],
+.deznav .metismenu > li > a g [fill],
+.deznav .metismenu > li > a svg path,
+[data-sidebar-style="overlay"] .deznav svg path,
+[data-sidebar-style="overlay"] .deznav g [fill] {
+    fill: #ffffff !important;
+}
+
+/* Panah Dropdown / Expander (Arrow) */
+.deznav .has-arrow:after,
+.deznav .metismenu .has-arrow:after,
+.deznav .metismenu li.active > .has-arrow:after,
+.deznav .metismenu li.mm-active > .has-arrow:after,
+[data-sidebar-style="overlay"] .deznav .metismenu .has-arrow:after,
+[data-sidebar-style="overlay"] .deznav .metismenu li.active > .has-arrow:after,
+[data-sidebar-style="overlay"] .deznav .metismenu li.mm-active > .has-arrow:after {
+    border-color: #ffffff !important;
+}
+
+/* Hover State Menu Utama */
+.deznav .metismenu > li > a:hover,
 .deznav .metismenu > li:hover > a,
-.deznav .metismenu > li:focus > a {
-	color: #ffffff;
+[data-sidebar-style="overlay"] .deznav .metismenu > li > a:hover,
+[data-sidebar-style="overlay"] .deznav .metismenu > li:hover > a {
+    color: #ffffff !important;
+    background-color: var(--sidebar-hover-bg) !important;
 }
 
-.deznav .metismenu > li:hover > a g [fill],
-.deznav .metismenu > li:focus > a g [fill] {
-	fill: #ffffff;
+/* Active State Menu Utama */
+.deznav .metismenu > li.mm-active > a,
+[data-sidebar-style="overlay"] .deznav .metismenu > li.mm-active > a {
+    color: #ffffff !important;
+    background-color: var(--sidebar-active-bg) !important;
+    font-weight: 600 !important;
 }
 
-/* Ubah warna text active menu */
-.deznav .metismenu > li.mm-active > a {
-	color: #ffffff;
+/* ── 3. HILANGKAN SEMUA ANIMASI GARIS MEMANJANG (HORIZONTAL & VERTIKAL) ── */
+
+.deznav a:before,
+.deznav a:after,
+.deznav a:hover:before,
+.deznav a:hover:after,
+.deznav .metismenu a:before,
+.deznav .metismenu a:after,
+.deznav .metismenu a:hover:before,
+.deznav .metismenu a:hover:after,
+.deznav .metismenu li a:before,
+.deznav .metismenu li a:after,
+.deznav .metismenu li a:hover:before,
+.deznav .metismenu li a:hover:after,
+.deznav .metismenu > li > a:before,
+.deznav .metismenu > li > a:after,
+.deznav .metismenu > li:hover > a:before,
+.deznav .metismenu > li:hover > a:after,
+.deznav .metismenu > li.mm-active > a:before,
+.deznav .metismenu > li.mm-active > a:after,
+.deznav .metismenu ul a:before,
+.deznav .metismenu ul a:after,
+.deznav .metismenu ul a:hover:before,
+.deznav .metismenu ul a:hover:after,
+.deznav .metismenu ul li a:before,
+.deznav .metismenu ul li a:after,
+.deznav .metismenu ul li a:hover:before,
+.deznav .metismenu ul li a:hover:after,
+[data-sidebar-style="full"] .deznav .metismenu ul a:before,
+[data-sidebar-style="full"] .deznav .metismenu ul a:hover:before,
+[data-sidebar-style="overlay"] .deznav .metismenu ul a:before,
+[data-sidebar-style="overlay"] .deznav .metismenu ul a:hover:before,
+[data-sidebar-style="mini"] .deznav .metismenu ul a:before,
+[data-sidebar-style="mini"] .deznav .metismenu ul a:hover:before,
+[data-sidebar-style="compact"] .deznav .metismenu ul a:before,
+[data-sidebar-style="compact"] .deznav .metismenu ul a:hover:before {
+    display: none !important;
+    content: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    transition: none !important;
+    -webkit-transition: none !important;
+    animation: none !important;
 }
 
-.deznav .metismenu > li.mm-active > a i {
-	color: #ffffff;
+/* ── 4. SUBMENU (LEVEL 2 & LEVEL 3) STYLING YANG BERSIH & STABIL ── */
+
+.deznav .metismenu ul,
+[data-sidebar-style="overlay"] .deznav .metismenu ul,
+#main-wrapper.menu-toggle .deznav .metismenu li > ul,
+.deznav .metismenu li > ul {
+    background-color: var(--sidebar-submenu-bg) !important;
+    border-radius: 8px;
+    margin: 4px 10px !important;
+    padding: 6px 0 !important;
+    border-left: none !important;
+    border: none !important;
 }
 
-.deznav .metismenu > li.mm-active > a .menu-icon svg path {
-	fill: #ffffff;
+.deznav .metismenu ul a,
+.deznav .metismenu ul li a,
+[data-sidebar-style="overlay"] .deznav .metismenu ul a,
+[data-sidebar-style="overlay"] .deznav .metismenu ul li a,
+#main-wrapper.menu-toggle .deznav .metismenu li > ul a {
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-size: 0.86rem !important;
+    padding: 9px 16px 9px 20px !important;
+    transition: background-color 0.2s ease, color 0.2s ease !important;
+    display: block;
 }
 
-.deznav .metismenu > li.mm-active > a g [fill] {
-	fill: #ffffff;
+.deznav .metismenu ul a:hover,
+.deznav .metismenu ul li a:hover,
+[data-sidebar-style="overlay"] .deznav .metismenu ul a:hover,
+[data-sidebar-style="overlay"] .deznav .metismenu ul li a:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.16) !important;
+    border-radius: 6px;
+    padding-left: 20px !important; /* Tidak bergeser */
 }
 
-/* Ubah warna teks submenu menjadi putih */
-.deznav .metismenu > li ul > li > a {
-	color: #ffffff;
+.deznav .metismenu ul li.mm-active > a,
+[data-sidebar-style="overlay"] .deznav .metismenu ul li.mm-active > a {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.28) !important;
+    font-weight: 600 !important;
+    border-radius: 6px;
+    padding-left: 20px !important;
 }
 
-/* Ubah warna submenu pada hover */
-.deznav .metismenu > li ul > li > a:hover {
-	color: #ffffff;
+/* ── 5. MOBILE (HP) & TABLET USER-FRIENDLY DRAWER (< 992px) ── */
+
+@media (max-width: 991.98px) {
+    /* Tampilan Drawer Melayang di HP */
+    .deznav,
+    [data-sidebar-style="overlay"] .deznav {
+        position: fixed !important;
+        top: 0 !important;
+        left: -330px !important;
+        width: 290px !important;
+        max-width: 85vw !important;
+        height: 100vh !important;
+        z-index: 99999 !important;
+        background-color: #0057bb !important;
+        box-shadow: 10px 0 35px rgba(0, 0, 0, 0.4) !important;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        overflow: hidden !important;
+        border-right: none !important;
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    /* Saat menu aktif/terbuka di HP */
+    #main-wrapper.menu-toggle .deznav,
+    body.menu-toggle .deznav,
+    .menu-toggle .deznav,
+    [data-sidebar-style="overlay"] #main-wrapper.menu-toggle .deznav,
+    [data-sidebar-style="overlay"].menu-toggle .deznav {
+        left: 0 !important;
+    }
+
+    /* Scroll container di HP */
+    .deznav .deznav-scroll {
+        height: 100% !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-top: 64px !important;
+        padding-bottom: 40px !important;
+        background-color: #0057bb !important;
+    }
+
+    /* Area Sentuh Nyaman (Touch Target Friendly) di HP */
+    .deznav .metismenu > li > a,
+    [data-sidebar-style="overlay"] .deznav .metismenu > li > a {
+        padding: 13px 16px !important;
+        font-size: 0.92rem !important;
+        min-height: 48px !important;
+        display: flex !important;
+        align-items: center !important;
+        border-radius: 8px !important;
+        margin: 3px 8px !important;
+        color: #ffffff !important;
+    }
+
+    .deznav .metismenu > li > a .menu-icon,
+    [data-sidebar-style="overlay"] .deznav .metismenu > li > a .menu-icon {
+        width: 32px !important;
+        min-width: 32px !important;
+        font-size: 1.15rem !important;
+        margin-right: 10px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: #ffffff !important;
+    }
+
+    /* Submenu di HP */
+    .deznav .metismenu ul a,
+    [data-sidebar-style="overlay"] .deznav .metismenu ul a {
+        padding: 12px 16px 12px 20px !important;
+        font-size: 0.88rem !important;
+        min-height: 44px !important;
+        display: flex !important;
+        align-items: center !important;
+        color: #ffffff !important;
+    }
+
+    /* Header Mobile di Bagian Atas Drawer */
+    .sidebar-mobile-header {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: rgba(0, 0, 0, 0.25);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        z-index: 1055;
+    }
+
+    .sidebar-mobile-header .brand-text {
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+    }
+
+    .sidebar-mobile-close-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: #ffffff;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .sidebar-mobile-close-btn:hover,
+    .sidebar-mobile-close-btn:active {
+        background: rgba(255, 255, 255, 0.35);
+        transform: scale(1.05);
+    }
+
+    /* Tombol Hamburger di Header Mobile Lebih Jelas & Mudah Ditekan */
+    .nav-control {
+        width: 38px !important;
+        height: 38px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background-color: #ffffff !important;
+        border: 1px solid rgba(0, 87, 187, 0.3) !important;
+        border-radius: 8px !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        z-index: 9999 !important;
+    }
+    .hamburger {
+        top: 0 !important;
+        left: 0 !important;
+        width: auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .hamburger svg {
+        position: static !important;
+        display: block !important;
+    }
+    .hamburger svg path {
+        fill: #0057bb !important;
+    }
 }
 
-/* Ubah warna submenu active */
-.deznav .metismenu > li ul > li.mm-active > a {
-	color: #ffffff;
+@media (min-width: 992px) {
+    .sidebar-mobile-header {
+        display: none !important;
+    }
 }
 
-/* Ubah warna icon submenu */
-.deznav .metismenu > li ul > li > a i {
-	color: #ffffff;
+/* ── 6. BACKDROP OVERLAY DI HP (SENTUH DI LUAR UNTUK TUTUP) ── */
+
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    z-index: 99990 !important;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-/* Ubah warna SVG icon submenu */
-.deznav .metismenu > li ul > li > a g [fill] {
-	fill: #ffffff;
+.sidebar-backdrop.show {
+    display: block !important;
+    opacity: 1 !important;
 }
 
-/* Ubah warna path SVG submenu active */
-.deznav .metismenu > li ul > li.mm-active > a svg path {
-	fill: #ffffff;
+/* ── 7. SCROLLBAR HALUS & MINIMALIS ── */
+
+.deznav .deznav-scroll::-webkit-scrollbar {
+    width: 5px;
+}
+.deznav .deznav-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+.deznav .deznav-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}
+.deznav .deznav-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
 }
