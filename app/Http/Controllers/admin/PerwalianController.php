@@ -31,6 +31,23 @@ class PerwalianController extends Controller
             ->orderBy('m.nim')
             ->get();
 
+        $data['dosenList'] = DB::table('pegawai_biodata as pb')
+            ->select(
+                DB::raw('COALESCE(pb.id_pegawai, pb.id) as id_pegawai'),
+                'pb.id',
+                'pb.nama_lengkap',
+                'pb.gelar_depan',
+                'pb.gelar_belakang',
+                'pb.nidn'
+            )
+            ->whereNotNull('pb.nama_lengkap')
+            ->where('pb.nama_lengkap', '<>', '')
+            ->get()
+            ->sortBy(function ($d) {
+                $name = trim(($d->gelar_depan ?? '') . ' ' . ($d->nama_lengkap ?? '') . ' ' . ($d->gelar_belakang ?? ''));
+                return strtolower(preg_replace('/\s+/', ' ', $name));
+            })->values();
+
         return view('admin.perwalian.index', $data);
     }
 
@@ -80,13 +97,19 @@ class PerwalianController extends Controller
 
     public function updateDosenWali(Request $request)
     {
+        $idDsnWali = $request->input('id_dsn_wali');
+        if ($idDsnWali === '0' || $idDsnWali === 0 || $idDsnWali === '') {
+            $idDsnWali = null;
+        }
+
         $request->merge([
             'id_mahasiswa' => $request->input('id_mahasiswa', $request->input('id')),
+            'id_dsn_wali' => $idDsnWali,
         ]);
 
         $request->validate([
             'id_mahasiswa' => 'required|integer|exists:mahasiswa,id',
-            'id_dsn_wali' => 'nullable|integer|exists:pegawai_biodata,id_pegawai',
+            'id_dsn_wali' => 'nullable|integer',
         ]);
 
         $mahasiswa = Mahasiswa::findOrFail($request->id_mahasiswa);

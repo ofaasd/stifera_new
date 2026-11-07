@@ -1,5 +1,56 @@
 @extends('layouts.default', ['CurrentPage' => $CurrentPage])
 
+@section('local-css')
+<style>
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #ced4da;
+        min-height: 38px;
+        height: 38px !important;
+        display: flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+    }
+    .select2-container--default.select2-container--focus .select2-selection--single {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 24px;
+        padding-left: 0;
+        padding-right: 0;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+    }
+    .select2-container {
+        width: 100% !important;
+    }
+    .select2-dropdown {
+        z-index: 999999 !important;
+    }
+    .select2-search--dropdown {
+        padding: 6px !important;
+    }
+    .select2-search--dropdown .select2-search__field {
+        padding: 6px 10px !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 4px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    #table-perwalian td, #table-perwalian th {
+        vertical-align: middle;
+    }
+    .perwalian-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="content-body">
     <div class="container">
@@ -34,8 +85,8 @@
                                     <i class="fa-solid fa-rotate-right me-1"></i> Refresh
                                 </button>
                             </div>
-                            <div class="table-responsive">
-                                <table id="table-perwalian" class="table table-striped table-bordered table-responsive-sm w-100" style="table-layout: fixed;">
+                            <div class="perwalian-table-wrapper">
+                                <table id="table-perwalian" class="table table-striped table-bordered w-100" style="table-layout: fixed;">
                                     <thead>
                                         <tr>
                                             <th style="width: 5%;">No</th>
@@ -53,13 +104,17 @@
                                                 <td>{{ $mhs->nama ?? '-' }}</td>
                                                 <td>{{ $mhs->nama_jurusan ?? '-' }}</td>
                                                 <td>
-                                                    <select class="form-select select2-dosen-wali" data-id-mahasiswa="{{ $mhs->id }}" data-row-id="{{ $mhs->id }}" style="width: 100%;">
+                                                    <select class="form-control select2-dosen" data-id-mahasiswa="{{ $mhs->id }}" style="width: 100%;">
                                                         <option value="">-- Pilih Dosen Wali --</option>
-                                                        @if(!empty($mhs->id_dsn_wali))
-                                                            <option value="{{ $mhs->id_dsn_wali }}" selected>
-                                                                {{ $mhs->dosen_wali_nama ?? 'Dosen Wali' }}{{ !empty($mhs->dosen_wali_nidn) ? ' (' . $mhs->dosen_wali_nidn . ')' : '' }}
-                                                            </option>
-                                                        @endif
+                                                        @foreach($dosenList as $dosen)
+                                                            @php
+                                                                $namaLengkapDosen = trim(($dosen->gelar_depan ?? '') . ' ' . $dosen->nama_lengkap . ' ' . ($dosen->gelar_belakang ?? ''));
+                                                                if (!empty($dosen->nidn)) {
+                                                                    $namaLengkapDosen .= ' (' . $dosen->nidn . ')';
+                                                                }
+                                                            @endphp
+                                                            <option value="{{ $dosen->id_pegawai }}" {{ ((string)$mhs->id_dsn_wali === (string)$dosen->id_pegawai || (string)$mhs->id_dsn_wali === (string)($dosen->id ?? '')) ? 'selected' : '' }}>{{ $namaLengkapDosen }}</option>
+                                                        @endforeach
                                                     </select>
                                                 </td>
                                             </tr>
@@ -81,207 +136,132 @@
 @endsection
 
 @section('local-js')
-<style>
-    .select2-container--default .select2-selection--single {
-        border: 1px solid #ced4da;
-        min-height: 38px;
-        padding: 0.375rem 0.35rem;
-        display: flex;
-        align-items: center;
-    }
-    .select2-container--default.select2-container--focus .select2-selection--single {
-        border-color: #80bdff;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 1.5;
-        padding-left: 0;
-    }
-    .select2-container--default .select2-selection--single .select2-selection__arrow {
-        height: 36px;
-    }
-    .select2-container {
-        width: 100% !important;
-        max-width: 100%;
-    }
-    .select2-container--default .select2-selection--single {
-        height: 38px !important;
-        padding: 0.375rem 2rem 0.375rem 0.35rem;
-    }
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-        white-space: nowrap !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        line-height: 24px;
-        padding-left: 0;
-        padding-right: 0;
-    }
-    .select2-dropdown {
-        min-width: 300px !important;
-    }
-    
-    #table-perwalian td {
-        vertical-align: middle;
-    }
-    #table-perwalian th {
-        vertical-align: middle; 
-    }
-</style>
-
 <script>
     $(document).ready(function () {
-        function resolveMahasiswaId($select) {
-            var idFromAttr = $select.attr('data-id-mahasiswa');
-            if (idFromAttr) {
-                return idFromAttr;
-            }
-
-            var $row = $select.closest('tr');
-            var idFromRow = $row.attr('data-id-mahasiswa');
-            if (idFromRow) {
-                return idFromRow;
-            }
-
-            // Ketika DataTables responsive menaruh elemen ke child row,
-            // parent row biasanya berada tepat sebelum child row.
-            if ($row.hasClass('child')) {
-                var idFromParentRow = $row.prev('.parent').attr('data-id-mahasiswa');
-                if (idFromParentRow) {
-                    return idFromParentRow;
-                }
-            }
-
-            return '';
+        // Hapus bootstrap-select jika sempat terpasang otomatis oleh template
+        if ($.fn.selectpicker) {
+            $('#table-perwalian select').selectpicker('destroy');
         }
 
-        function initSelect2(scope) {
-            const $scope = scope || $(document);
+        // Custom matcher Select2: case-insensitive, mendukung multi-kata (misal cari nama depan/belakang)
+        function matchDosen(params, data) {
+            if (!params.term || $.trim(params.term) === '') {
+                return data;
+            }
+            if (typeof data.text === 'undefined') {
+                return null;
+            }
 
-            $scope.find('.select2-dosen-wali').each(function () {
-                const $select = $(this);
+            var term = $.trim(params.term).toLowerCase();
+            var text = $.trim(data.text).toLowerCase();
 
-                if ($select.hasClass('select2-hidden-accessible')) {
-                    $select.select2('destroy');
+            // Pisahkan kata pencarian (misal "budi santoso")
+            var terms = term.split(/\s+/);
+            for (var i = 0; i < terms.length; i++) {
+                if (terms[i] && text.indexOf(terms[i]) === -1) {
+                    return null;
                 }
+            }
 
-                $select.select2({
-                    placeholder: 'Cari dosen...',
-                    allowClear: true,
-                    width: '100%',
-                    dropdownParent: $('body'),
-                    ajax: {
-                        url: '{{ url("akademik/perwalian/cari-dosen") }}',
-                        dataType: 'json',
-                        delay: 250,
-                        data: function (params) {
-                            return {
-                                q: params.term || ''
-                            };
-                        },
-                        processResults: function (data) {
-                            return data;
-                        },
-                        cache: true
-                    },
-                    minimumInputLength: 1,
-                    language: {
-                        inputTooShort: function () {
-                            return 'Ketik minimal 1 huruf untuk mencari dosen';
-                        },
-                        noResults: function () {
-                            return 'Dosen tidak ditemukan';
-                        },
-                        searching: function () {
-                            return 'Mencari...';
-                        }
+            return data;
+        }
+
+        function initSelect2() {
+            if ($.fn.select2) {
+                $('#table-perwalian .select2-dosen').each(function () {
+                    var $select = $(this);
+                    if (!$select.hasClass('select2-hidden-accessible')) {
+                        $select.select2({
+                            placeholder: "-- Pilih Dosen Wali --",
+                            allowClear: true,
+                            width: '100%',
+                            matcher: matchDosen
+                        });
                     }
                 });
+            }
+        }
+
+        // Auto-focus ke input search saat dropdown Select2 dibuka
+        $(document).on('select2:open', function () {
+            window.setTimeout(function () {
+                var searchInput = document.querySelector('.select2-container--open .select2-search__field');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }, 10);
+        });
+
+        var table = null;
+        if ($.fn.DataTable) {
+            table = $('#table-perwalian').DataTable({
+                responsive: true,
+                pageLength: 25,
+                language: {
+                    paginate: {
+                        next: '>',
+                        previous: '<'
+                    }
+                }
+            });
+
+            table.on('draw', function () {
+                initSelect2();
             });
         }
 
-        const table = $('#table-perwalian').DataTable({
-            responsive: true,
-            pageLength: 25,
-            language: {
-                paginate: {
-                    next: '>'fa-solid fa-angle-right"></i>',
-                    previous: '<'fa-solid fa-angle-left"></i>'
-                }
-            }
-        });
-
-        initSelect2($('#table-perwalian'));
-
-        table.on('draw', function () {
-            initSelect2($('#table-perwalian'));
-        });
+        initSelect2();
 
         $('#btn-refresh-perwalian').on('click', function () {
             window.location.reload();
         });
 
-        $(document).on('change', '.select2-dosen-wali', function() {
+        $(document).on('change', '.select2-dosen', function () {
             var $select = $(this);
-            var idMahasiswa = resolveMahasiswaId($select);
+            var idMahasiswa = $select.attr('data-id-mahasiswa') || $select.closest('tr').attr('data-id-mahasiswa');
             var idDosenWali = $select.val();
-            var selectedData = $select.select2('data');
-            var selectedText = (selectedData && selectedData.length > 0) ? (selectedData[0].text || '') : '';
 
             if (!idMahasiswa) {
-                console.error('ID mahasiswa tidak ditemukan pada elemen select.', this);
-                alert('Gagal membaca data mahasiswa. Silakan refresh halaman.');
+                console.error('ID mahasiswa tidak ditemukan.', this);
                 return;
             }
-
-            $select.prop('disabled', true);
 
             $.ajax({
                 url: '{{ url("akademik/perwalian/update-dosen-wali") }}',
                 type: 'POST',
                 dataType: 'json',
                 headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') || '{{ csrf_token() }}'
                 },
                 data: {
+                    _token: $('meta[name="csrf-token"]').attr('content') || '{{ csrf_token() }}',
                     id_mahasiswa: idMahasiswa,
-                    id_dsn_wali: idDosenWali
+                    id_dsn_wali: idDosenWali ? idDosenWali : null
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
-                        if (idDosenWali && selectedText) {
-                            var $existing = $select.find("option[value='" + idDosenWali + "']");
-                            if ($existing.length === 0) {
-                                var newOption = new Option(selectedText, idDosenWali, true, true);
-                                $select.append(newOption);
-                            } else {
-                                $existing.text(selectedText).prop('selected', true);
-                            }
-                            $select.val(idDosenWali);
-                        } else if (!idDosenWali) {
-                            $select.val('');
-                        }
-
-                        var alertHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
-                            response.message +
+                        $('.perwalian-alert').remove();
+                        var alertHtml = '<div class="alert alert-success alert-dismissible fade show perwalian-alert" role="alert">' +
+                            (response.message || 'Dosen wali berhasil diperbarui.') +
                             '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
                             '</div>';
-                        
-                        $('.container').prepend(alertHtml);
-                        
-                        setTimeout(function() {
-                            $('.alert:first').fadeOut('slow', function() {
+
+                        $('.filter.cm-content-box').before(alertHtml);
+
+                        setTimeout(function () {
+                            $('.perwalian-alert').fadeOut('slow', function () {
                                 $(this).remove();
                             });
                         }, 3000);
                     }
                 },
-                error: function(xhr) {
-                    console.error('Error:', xhr);
-                    alert('Gagal mengubah dosen wali. Silakan coba lagi.');
-                },
-                complete: function() {
-                    $select.prop('disabled', false);
-                    $select.removeAttr('disabled');
+                error: function (xhr) {
+                    console.error('Error update dosen wali:', xhr);
+                    var errMsg = 'Gagal mengubah dosen wali. Silakan coba lagi.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errMsg += '\n' + xhr.responseJSON.message;
+                    }
+                    alert(errMsg);
                 }
             });
         });
