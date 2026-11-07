@@ -113,7 +113,7 @@
                                                                     $namaLengkapDosen .= ' (' . $dosen->nidn . ')';
                                                                 }
                                                             @endphp
-                                                            <option value="{{ $dosen->id_pegawai }}" {{ ((string)$mhs->id_dsn_wali === (string)$dosen->id_pegawai || (string)$mhs->id_dsn_wali === (string)($dosen->id ?? '')) ? 'selected' : '' }}>{{ $namaLengkapDosen }}</option>
+                                                            <option value="{{ $dosen->id_pegawai }}" {{ (string)$mhs->id_dsn_wali === (string)$dosen->id_pegawai ? 'selected' : '' }}>{{ $namaLengkapDosen }}</option>
                                                         @endforeach
                                                     </select>
                                                 </td>

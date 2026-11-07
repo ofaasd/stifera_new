@@ -33,16 +33,18 @@ class PerwalianController extends Controller
 
         $data['dosenList'] = DB::table('pegawai_biodata as pb')
             ->select(
-                DB::raw('COALESCE(pb.id_pegawai, pb.id) as id_pegawai'),
-                'pb.id',
+                'pb.id_pegawai',
                 'pb.nama_lengkap',
                 'pb.gelar_depan',
                 'pb.gelar_belakang',
                 'pb.nidn'
             )
+            ->whereNotNull('pb.id_pegawai')
+            ->where('pb.id_pegawai', '>', 0)
             ->whereNotNull('pb.nama_lengkap')
             ->where('pb.nama_lengkap', '<>', '')
             ->get()
+            ->unique('id_pegawai')
             ->sortBy(function ($d) {
                 $name = trim(($d->gelar_depan ?? '') . ' ' . ($d->nama_lengkap ?? '') . ' ' . ($d->gelar_belakang ?? ''));
                 return strtolower(preg_replace('/\s+/', ' ', $name));
@@ -109,7 +111,7 @@ class PerwalianController extends Controller
 
         $request->validate([
             'id_mahasiswa' => 'required|integer|exists:mahasiswa,id',
-            'id_dsn_wali' => 'nullable|integer',
+            'id_dsn_wali' => 'nullable|integer|exists:pegawai_biodata,id_pegawai',
         ]);
 
         $mahasiswa = Mahasiswa::findOrFail($request->id_mahasiswa);
