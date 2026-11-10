@@ -210,6 +210,16 @@
                 </div>
 
                 <div class="d-flex flex-row flex-md-column justify-content-between align-items-md-end w-100 w-md-auto pt-2 pt-md-0 border-top border-md-0 border-white border-opacity-10">
+                    {{-- Tombol Download PDF Berita Acara --}}
+                    <form id="form-download-pdf-berita-acara" action="{{ route('pengawas.ujian.export-pdf', ['jenis' => $jenis, 'token' => $token]) }}" method="POST" target="_blank" class="mb-2">
+                        @csrf
+                        <input type="hidden" name="catatan" id="pdf-input-catatan" value="{{ $catatanPengawas ?? '' }}">
+                        <input type="hidden" name="nama_pengawas" id="pdf-input-nama-pengawas" value="{{ $namaPengawas ?? '' }}">
+                        <input type="hidden" name="master_paraf" id="pdf-input-master-paraf" value="{{ $masterParaf ?? '' }}">
+                        <button type="submit" id="btn-download-pdf-header" class="btn btn-danger btn-sm rounded-pill shadow-sm text-white px-3 fw-semibold">
+                            <i class="fa-solid fa-file-pdf me-1"></i> Download Berita Acara & Presensi (PDF)
+                        </button>
+                    </form>
                     <span class="badge bg-info-subtle text-info fs-6 px-3 py-2 border border-info rounded-pill shadow-sm">
                         <i class="fa-solid fa-door-open me-1"></i> Ruang: <strong>{{ $jadwal->ruang ?? '-' }}</strong>
                     </span>
@@ -369,6 +379,43 @@
                                             </button>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Form Berita Acara Ujian --}}
+                    <div class="row g-3 mt-1">
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-white shadow-sm">
+                                <h6 class="fw-bold mb-3 text-dark">
+                                    <i class="fa-solid fa-file-lines me-1 text-danger"></i>Berita Acara Ujian
+                                    <small class="text-muted fw-normal">(akan muncul di PDF)</small>
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-4 col-12">
+                                        <label class="form-label small fw-semibold text-muted text-uppercase mb-1">
+                                            <i class="fa-solid fa-user-pen me-1"></i>Nama Pengawas Ujian
+                                        </label>
+                                        <input type="text" id="master-nama-pengawas"
+                                            class="form-control form-control-sm"
+                                            placeholder="Nama lengkap pengawas..."
+                                            value="{{ $namaPengawas ?? '' }}">
+                                    </div>
+                                    <div class="col-md-8 col-12">
+                                        <label class="form-label small fw-semibold text-muted text-uppercase mb-1">
+                                            <i class="fa-solid fa-note-sticky me-1"></i>Catatan Berita Acara Ujian
+                                        </label>
+                                        <textarea id="master-catatan-berita-acara"
+                                            class="form-control form-control-sm"
+                                            rows="3"
+                                            placeholder="Isi catatan/kejadian selama ujian berlangsung...">{{ $catatanPengawas ?? '' }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end mt-2">
+                                    <button type="button" id="btn-save-berita-acara" class="btn btn-primary btn-sm rounded-pill shadow-sm">
+                                        <i class="fa-solid fa-floppy-disk me-1"></i> Simpan Catatan Berita Acara
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -893,6 +940,76 @@
                     updateMasterUI();
                     showToast('Master paraf telah dihapus.');
                 }
+            });
+
+            // ── Berita Acara Ujian (Catatan + Nama Pengawas) ──────────────────────
+            const simpanBeritaAcaraUrl = '{{ route("pengawas.ujian.simpan-berita-acara", ["jenis" => $jenis, "token" => $token]) }}';
+            const storageKeyCatatan = 'catatan_berita_acara_' + '{{ $token }}';
+            const storageKeyNama    = 'nama_pengawas_' + '{{ $token }}';
+
+            // Inisialisasi nilai: DB lebih diutamakan, fallback ke localStorage
+            const dbCatatan = @json($catatanPengawas ?? null);
+            const dbNama    = @json($namaPengawas ?? null);
+
+            if (dbCatatan !== null && dbCatatan !== '') {
+                $('#master-catatan-berita-acara').val(dbCatatan);
+            } else {
+                const lsCatatan = localStorage.getItem(storageKeyCatatan);
+                if (lsCatatan) $('#master-catatan-berita-acara').val(lsCatatan);
+            }
+
+            if (dbNama !== null && dbNama !== '') {
+                $('#master-nama-pengawas').val(dbNama);
+            } else {
+                const lsNama = localStorage.getItem(storageKeyNama);
+                if (lsNama) $('#master-nama-pengawas').val(lsNama);
+            }
+
+            // Auto-simpan ke localStorage saat diketik
+            $('#master-catatan-berita-acara').on('input', function () {
+                localStorage.setItem(storageKeyCatatan, $(this).val());
+            });
+            $('#master-nama-pengawas').on('input', function () {
+                localStorage.setItem(storageKeyNama, $(this).val());
+            });
+
+            // Simpan ke DB via AJAX
+            $('#btn-save-berita-acara').on('click', function () {
+                const btn = $(this);
+                const catatan = $('#master-catatan-berita-acara').val().trim();
+                const namaPengawas = $('#master-nama-pengawas').val().trim();
+
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...');
+
+                $.ajax({
+                    url: simpanBeritaAcaraUrl,
+                    type: 'POST',
+                    headers: { 'X-CSRF-TOKEN': csrfToken },
+                    data: { catatan: catatan, nama_pengawas: namaPengawas },
+                    dataType: 'json',
+                    success: function (res) {
+                        btn.prop('disabled', false).html('<i class="fa-solid fa-floppy-disk me-1"></i> Simpan Catatan Berita Acara');
+                        if (res.success) {
+                            localStorage.setItem(storageKeyCatatan, catatan);
+                            localStorage.setItem(storageKeyNama, namaPengawas);
+                            showToast('<i class="fa-solid fa-circle-check me-1"></i> Catatan berita acara berhasil disimpan!');
+                        } else {
+                            showToast('<i class="fa-solid fa-triangle-exclamation me-1"></i> ' + (res.message || 'Gagal menyimpan.'), true);
+                        }
+                    },
+                    error: function (xhr) {
+                        btn.prop('disabled', false).html('<i class="fa-solid fa-floppy-disk me-1"></i> Simpan Catatan Berita Acara');
+                        const msg = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Terjadi kesalahan server.';
+                        showToast('<i class="fa-solid fa-triangle-exclamation me-1"></i> ' + msg, true);
+                    }
+                });
+            });
+
+            // Sinkronisasi hidden input PDF form sebelum submit
+            $('#form-download-pdf-berita-acara').on('submit', function () {
+                $('#pdf-input-catatan').val($('#master-catatan-berita-acara').val());
+                $('#pdf-input-nama-pengawas').val($('#master-nama-pengawas').val());
+                $('#pdf-input-master-paraf').val(activeMasterParaf || localStorage.getItem(masterStorageKey) || '');
             });
 
             // ── AJAX Function to Save Paraf ───────────────────────────────────────

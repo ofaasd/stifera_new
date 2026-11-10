@@ -61,6 +61,12 @@ class TblJadwalUjian extends Model
 		'ta',
 		'log',
 		'token_pengawas_uts',
-		'token_pengawas_uas'
+		'token_pengawas_uas',
+		'catatan_pengawas_uts',
+		'catatan_pengawas_uas',
+		'nama_pengawas_uts',
+		'nama_pengawas_uas',
+		'master_paraf_uts',
+		'master_paraf_uas'
 	];
 }

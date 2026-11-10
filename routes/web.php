@@ -728,3 +728,5 @@ Route::middleware('auth:mahasiswa')->group(function () {
 // Route Publik Pengawas Ujian (Tanpa Login)
 Route::get('/pengawas/ujian/{jenis}/{token}', [\App\Http\Controllers\PengawasUjianController::class, 'index'])->name('pengawas.ujian.index');
 Route::post('/pengawas/ujian/{jenis}/{token}/paraf', [\App\Http\Controllers\PengawasUjianController::class, 'simpanParaf'])->name('pengawas.ujian.paraf');
+Route::post('/pengawas/ujian/{jenis}/{token}/simpan-berita-acara', [\App\Http\Controllers\PengawasUjianController::class, 'simpanBeritaAcara'])->name('pengawas.ujian.simpan-berita-acara');
+Route::match(['GET', 'POST'], '/pengawas/ujian/{jenis}/{token}/export-pdf', [\App\Http\Controllers\PengawasUjianController::class, 'exportPdf'])->name('pengawas.ujian.export-pdf');
