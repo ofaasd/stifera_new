@@ -159,7 +159,20 @@ class SuratIzin2Controller extends Controller
             'izin_mgr_sdm' => 'required|in:0,1',
             'izin_ka_jenjang' => 'required|in:0,1',
             'dilihat' => 'required|in:0,1',
-            'file_surat' => ($isCreate ? 'required' : 'nullable') . '|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:4096',
+            'file_surat' => [
+                $isCreate ? 'required' : 'nullable',
+                'file',
+                'max:10240',
+                function ($attribute, $value, $fail) {
+                    if ($value instanceof \Illuminate\Http\UploadedFile) {
+                        $ext = strtolower($value->getClientOriginalExtension());
+                        $allowed = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'];
+                        if (!in_array($ext, $allowed, true)) {
+                            $fail('Format file harus berupa PDF, JPG, JPEG, PNG, DOC, atau DOCX.');
+                        }
+                    }
+                }
+            ],
         ];
 
         return $request->validate($rules);

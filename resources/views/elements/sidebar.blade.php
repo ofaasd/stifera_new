@@ -98,6 +98,72 @@
         padding-left: 20px !important;
         transition: background-color 0.2s ease, color 0.2s ease !important;
     }
+    /* ── Desktop Half-Screen (1:1) & Mini Floating Submenu / Tooltip ── */
+    [data-sidebar-style="mini"][data-layout="vertical"] .deznav .metismenu li > ul,
+    [data-sidebar-style="mini"][data-layout="vertical"] .deznav .metismenu > li:hover > ul,
+    [data-sidebar-style="mini"] .deznav .metismenu li > ul,
+    #main-wrapper.menu-toggle .deznav .metismenu li > ul,
+    [data-sidebar-style="full"][data-layout="vertical"] .menu-toggle .deznav .metismenu li > ul {
+        background-color: #0057bb !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
+        border-radius: 8px !important;
+        padding: 8px 6px !important;
+        margin: 0 !important;
+        z-index: 9999 !important;
+    }
+    [data-sidebar-style="mini"] .deznav .metismenu li > ul a,
+    [data-sidebar-style="mini"][data-layout="vertical"] .deznav .metismenu > li:hover > ul a,
+    #main-wrapper.menu-toggle .deznav .metismenu li > ul a,
+    [data-sidebar-style="full"][data-layout="vertical"] .menu-toggle .deznav .metismenu li > ul a {
+        color: #ffffff !important;
+        background-color: transparent !important;
+        padding: 8px 14px !important;
+        margin: 2px 0 !important;
+        border-radius: 6px !important;
+        font-size: 0.88rem !important;
+        font-weight: 500 !important;
+        display: block !important;
+        transition: background-color 0.2s ease, color 0.2s ease !important;
+    }
+    [data-sidebar-style="mini"] .deznav .metismenu li > ul a:hover,
+    [data-sidebar-style="mini"][data-layout="vertical"] .deznav .metismenu > li:hover > ul a:hover,
+    #main-wrapper.menu-toggle .deznav .metismenu li > ul a:hover,
+    [data-sidebar-style="full"][data-layout="vertical"] .menu-toggle .deznav .metismenu li > ul a:hover {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        color: #ffffff !important;
+    }
+    [data-sidebar-style="mini"] .deznav .metismenu li > ul li.mm-active > a,
+    #main-wrapper.menu-toggle .deznav .metismenu li > ul li.mm-active > a {
+        background-color: rgba(255, 255, 255, 0.3) !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
+    }
+    @media (min-width: 992px) {
+        [data-sidebar-style="mini"] .deznav .metismenu > li:hover > a:not(.has-arrow) .nav-text,
+        [data-sidebar-style="full"] #main-wrapper.menu-toggle .deznav .metismenu > li:hover > a:not(.has-arrow) .nav-text {
+            display: inline-block !important;
+            position: absolute !important;
+            left: 5.2rem !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            background-color: #0057bb !important;
+            color: #ffffff !important;
+            padding: 8px 16px !important;
+            border-radius: 6px !important;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            white-space: nowrap !important;
+            z-index: 1050 !important;
+            font-size: 0.88rem !important;
+            font-weight: 500 !important;
+            pointer-events: none !important;
+        }
+        [data-sidebar-style="mini"] .deznav .metismenu > li:hover > a,
+        #main-wrapper.menu-toggle .deznav .metismenu > li:hover > a {
+            background-color: rgba(255, 255, 255, 0.15) !important;
+        }
+    }
     @media (max-width: 991.98px) {
         .deznav, [data-sidebar-style="overlay"] .deznav {
             position: fixed !important;
@@ -115,6 +181,28 @@
         #main-wrapper.menu-toggle .deznav, body.menu-toggle .deznav, .menu-toggle .deznav,
         [data-sidebar-style="overlay"] #main-wrapper.menu-toggle .deznav {
             left: 0 !important;
+        }
+        [data-sidebar-style="mini"] .deznav .nav-text,
+        [data-sidebar-style="mini"] .deznav .menu-title,
+        [data-sidebar-style="mini"] .deznav .header-profile .header-info {
+            display: inline-block !important;
+        }
+        [data-sidebar-style="mini"] .deznav .metismenu > li > a {
+            text-align: left !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+        }
+        [data-sidebar-style="mini"] .deznav .metismenu > li > a.has-arrow:after {
+            display: inline-block !important;
+        }
+        [data-sidebar-style="mini"] .deznav .metismenu li > ul {
+            position: static !important;
+            width: auto !important;
+            box-shadow: none !important;
+            border: none !important;
+            background-color: rgba(0, 0, 0, 0.22) !important;
+            margin: 4px 10px !important;
         }
     }
 </style>

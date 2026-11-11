@@ -18,7 +18,7 @@ class PegawaiSuratIzinController extends Controller
         }
 
         $from = $request->input('tanggal_awal', now()->subMonths(3)->toDateString());
-        $to = $request->input('tanggal_akhir', now()->toDateString());
+        $to = $request->input('tanggal_akhir', now()->addMonths(1)->toDateString());
 
         if (strtotime($to) < strtotime($from)) {
             $tmp = $from;
@@ -201,17 +201,99 @@ class PegawaiSuratIzinController extends Controller
         return back()->with('status', 'Status validasi berhasil diubah.');
     }
 
+    public function uploadFile(Request $request, string $id)
+    {
+        $pegawai = Auth::guard('pegawai')->user();
+        if (!$pegawai) {
+            abort(403);
+        }
+
+        $surat = SuratIzin::where('id', (int) $id)
+            ->where('id_dosen', (int) $pegawai->id)
+            ->first();
+
+        if (!$surat) {
+            return redirect('pegawai/SuratIzin/index2')->with('error', 'Data surat izin tidak ditemukan.');
+        }
+
+        $request->validate([
+            'file_surat' => [
+                'required',
+                'file',
+                'max:10240',
+                function ($attribute, $value, $fail) {
+                    if ($value instanceof \Illuminate\Http\UploadedFile) {
+                        $ext = strtolower($value->getClientOriginalExtension());
+                        $allowed = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'];
+                        if (!in_array($ext, $allowed, true)) {
+                            $fail('Format file harus berupa PDF, JPG, JPEG, PNG, DOC, atau DOCX.');
+                        }
+                    }
+                }
+            ],
+        ], [
+            'file_surat.required' => 'File surat izin wajib diunggah.',
+            'file_surat.file' => 'File yang diunggah tidak valid.',
+            'file_surat.max' => 'Ukuran file surat izin maksimal 10 MB.',
+        ]);
+
+        $fileName = $this->storeFile($request);
+
+        if (!empty($surat->file_surat)) {
+            $oldPath = public_path('assets/surat_izin/' . $surat->file_surat);
+            if (File::exists($oldPath)) {
+                File::delete($oldPath);
+            }
+        }
+
+        $surat->update([
+            'file_surat' => $fileName,
+            'izin_mgr_sdm' => 0,
+            'izin_ka_jenjang' => 0,
+            'dilihat' => 0,
+        ]);
+
+        return redirect('pegawai/SuratIzin/index2')->with('status', 'File surat izin berhasil diunggah.');
+    }
+
     private function validateRequest(Request $request, bool $isCreate): array
     {
-        return $request->validate([
+        $rules = [
             'tgl_surat' => 'required|date',
             'perihal' => 'required|string|max:120',
             'keterangan' => 'required|string',
             'tanggal_mulai' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
             'id_kategori' => 'nullable|integer|exists:ref_kategori_surat,id',
-            'file_surat' => ($isCreate ? 'required' : 'nullable') . '|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:4096',
-        ]);
+            'file_surat' => [
+                $isCreate ? 'required' : 'nullable',
+                'file',
+                'max:10240',
+                function ($attribute, $value, $fail) {
+                    if ($value instanceof \Illuminate\Http\UploadedFile) {
+                        $ext = strtolower($value->getClientOriginalExtension());
+                        $allowed = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'];
+                        if (!in_array($ext, $allowed, true)) {
+                            $fail('Format file harus berupa PDF, JPG, JPEG, PNG, DOC, atau DOCX.');
+                        }
+                    }
+                }
+            ],
+        ];
+
+        $messages = [
+            'tgl_surat.required' => 'Tanggal surat wajib diisi.',
+            'perihal.required' => 'Perihal wajib diisi.',
+            'keterangan.required' => 'Keterangan wajib diisi.',
+            'tanggal_mulai.required' => 'Tanggal mulai wajib diisi.',
+            'tanggal_selesai.required' => 'Tanggal selesai wajib diisi.',
+            'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai.',
+            'file_surat.required' => 'File surat izin wajib diunggah.',
+            'file_surat.file' => 'File yang diunggah tidak valid.',
+            'file_surat.max' => 'Ukuran file surat izin maksimal 10 MB.',
+        ];
+
+        return $request->validate($rules, $messages);
     }
 
     private function calculateDays(string $startDate, string $endDate): int

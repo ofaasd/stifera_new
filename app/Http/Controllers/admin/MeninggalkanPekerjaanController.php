@@ -154,13 +154,28 @@ class MeninggalkanPekerjaanController extends Controller
             'izin_ka_jenjang' => 'required|in:0,1',
             'izin_mgr_sdm' => 'required|in:0,1',
             'id_kategori' => 'nullable|integer|exists:ref_kategori_surat,id',
-            'lampiran' => ($isCreate ? 'required' : 'nullable') . '|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:4096',
+            'lampiran' => [
+                $isCreate ? 'required' : 'nullable',
+                'file',
+                'max:10240',
+                function ($attribute, $value, $fail) {
+                    if ($value instanceof \Illuminate\Http\UploadedFile) {
+                        $ext = strtolower($value->getClientOriginalExtension());
+                        $allowed = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'];
+                        if (!in_array($ext, $allowed, true)) {
+                            $fail('Format file lampiran harus berupa PDF, JPG, JPEG, PNG, DOC, atau DOCX.');
+                        }
+                    }
+                }
+            ],
         ]);
 
-        if (strtotime($validated['waktu_selesai']) <= strtotime($validated['waktu_mulai'])) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'waktu_selesai' => 'Waktu selesai harus lebih besar dari waktu mulai.',
-            ]);
+        if ($validated['tanggal'] === $validated['tanggal_selesai']) {
+            if (strtotime($validated['waktu_selesai']) <= strtotime($validated['waktu_mulai'])) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'waktu_selesai' => 'Untuk tanggal yang sama, waktu selesai harus lebih besar dari waktu mulai.',
+                ]);
+            }
         }
 
         return $validated;

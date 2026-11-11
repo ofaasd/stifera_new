@@ -18,7 +18,7 @@ class PegawaiMeninggalkanPekerjaanController extends Controller
         }
 
         $from = $request->input('tanggal_awal', now()->subMonths(3)->toDateString());
-        $to = $request->input('tanggal_akhir', now()->toDateString());
+        $to = $request->input('tanggal_akhir', now()->addMonths(1)->toDateString());
 
         if (strtotime($to) < strtotime($from)) {
             $tmp = $from;
@@ -198,22 +198,105 @@ class PegawaiMeninggalkanPekerjaanController extends Controller
         return back()->with('status', 'Status validasi berhasil diubah.');
     }
 
+    public function uploadFile(Request $request, string $id)
+    {
+        $pegawai = Auth::guard('pegawai')->user();
+        if (!$pegawai) {
+            abort(403);
+        }
+
+        $izin = IzinMeninggalkanPekerjaan::where('id', (int) $id)
+            ->where('id_dosen', (int) $pegawai->id)
+            ->first();
+
+        if (!$izin) {
+            return redirect('pegawai/MeninggalkanPekerjaan')->with('error', 'Data izin meninggalkan pekerjaan tidak ditemukan.');
+        }
+
+        $request->validate([
+            'lampiran' => [
+                'required',
+                'file',
+                'max:10240',
+                function ($attribute, $value, $fail) {
+                    if ($value instanceof \Illuminate\Http\UploadedFile) {
+                        $ext = strtolower($value->getClientOriginalExtension());
+                        $allowed = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'];
+                        if (!in_array($ext, $allowed, true)) {
+                            $fail('Format file lampiran harus berupa PDF, JPG, JPEG, PNG, DOC, atau DOCX.');
+                        }
+                    }
+                }
+            ],
+        ], [
+            'lampiran.required' => 'File lampiran wajib diunggah.',
+            'lampiran.file' => 'File yang diunggah tidak valid.',
+            'lampiran.max' => 'Ukuran file lampiran maksimal 10 MB.',
+        ]);
+
+        $fileName = $this->storeAttachment($request);
+
+        if (!empty($izin->lampiran)) {
+            $oldPath = public_path('assets/izin_meninggalkan_pekerjaan/' . $izin->lampiran);
+            if (File::exists($oldPath)) {
+                File::delete($oldPath);
+            }
+        }
+
+        $izin->update([
+            'lampiran' => $fileName,
+            'izin_ka_jenjang' => 0,
+            'izin_mgr_sdm' => 0,
+        ]);
+
+        return redirect('pegawai/MeninggalkanPekerjaan')->with('status', 'Lampiran izin meninggalkan pekerjaan berhasil diunggah.');
+    }
+
     private function validateRequest(Request $request, bool $isCreate): array
     {
-        $validated = $request->validate([
+        $rules = [
             'tanggal' => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal',
             'waktu_mulai' => 'required|date_format:H:i',
             'waktu_selesai' => 'required|date_format:H:i',
             'keperluan' => 'required|string',
             'id_kategori' => 'nullable|integer|exists:ref_kategori_surat,id',
-            'lampiran' => ($isCreate ? 'required' : 'nullable') . '|file|mimes:pdf,jpg,jpeg,png,doc,docx|max:4096',
-        ]);
+            'lampiran' => [
+                $isCreate ? 'required' : 'nullable',
+                'file',
+                'max:10240',
+                function ($attribute, $value, $fail) {
+                    if ($value instanceof \Illuminate\Http\UploadedFile) {
+                        $ext = strtolower($value->getClientOriginalExtension());
+                        $allowed = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'];
+                        if (!in_array($ext, $allowed, true)) {
+                            $fail('Format file lampiran harus berupa PDF, JPG, JPEG, PNG, DOC, atau DOCX.');
+                        }
+                    }
+                }
+            ],
+        ];
 
-        if (strtotime($validated['waktu_selesai']) <= strtotime($validated['waktu_mulai'])) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'waktu_selesai' => 'Waktu selesai harus lebih besar dari waktu mulai.',
-            ]);
+        $messages = [
+            'tanggal.required' => 'Tanggal mulai wajib diisi.',
+            'tanggal_selesai.required' => 'Tanggal selesai wajib diisi.',
+            'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai.',
+            'waktu_mulai.required' => 'Waktu mulai wajib diisi.',
+            'waktu_selesai.required' => 'Waktu selesai wajib diisi.',
+            'keperluan.required' => 'Keperluan wajib diisi.',
+            'lampiran.required' => 'File lampiran wajib diunggah.',
+            'lampiran.file' => 'File yang diunggah tidak valid.',
+            'lampiran.max' => 'Ukuran file lampiran maksimal 10 MB.',
+        ];
+
+        $validated = $request->validate($rules, $messages);
+
+        if ($validated['tanggal'] === $validated['tanggal_selesai']) {
+            if (strtotime($validated['waktu_selesai']) <= strtotime($validated['waktu_mulai'])) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'waktu_selesai' => 'Untuk tanggal yang sama, waktu selesai harus lebih besar dari waktu mulai.',
+                ]);
+            }
         }
 
         return $validated;

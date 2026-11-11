@@ -17,7 +17,7 @@
                             </div>
                         </div>
                         <div class="cm-content-body form excerpt">
-                            @if($errors->any())
+                            @if(isset($errors) && $errors->any())
                                 <div class="alert alert-danger mx-3 mt-3">
                                     <ul class="mb-0">
                                         @foreach($errors->all() as $error)

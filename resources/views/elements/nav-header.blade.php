@@ -4,7 +4,7 @@
 	}
 </style>
 <div class="nav-header" style="background-color: #0057bb;">
-			<a href="{{ url(auth()->user()->role === 'admin' ? 'admin/dashboard' : 'dashboard') }}" class="brand-logo d-flex align-items-center flex-nowrap">
+			<a href="{{ url(auth()->user()?->role === 'admin' ? 'admin/dashboard' : (Auth::guard('pegawai')->check() ? 'pegawai/home' : (Auth::guard('mahasiswa')->check() ? 'mahasiswa/home' : 'dashboard'))) }}" class="brand-logo d-flex align-items-center flex-nowrap">
 				<img class="logo-abbr" src="{{ asset(config('dz.site_level.logo')) }}" alt="Logo" style="width: 38px; height: 38px; object-fit: contain;">
 				<div class="brand-title ms-2 text-white fw-bold" style="font-size: 15px; letter-spacing: 0.5px; opacity: 0.95; white-space: nowrap;">
 					SIAKAD STIFERA
